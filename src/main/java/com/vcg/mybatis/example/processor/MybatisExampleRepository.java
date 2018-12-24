@@ -13,7 +13,7 @@ public interface MybatisExampleRepository<Domain, ID, Example> {
 
     List<Domain> selectByExample(Example query);
 
-    Cursor selectByExampleWithCursor(Example query);
+    Cursor<Domain> selectByExampleWithCursor(Example query);
 
     int insert(Domain t);
 
@@ -36,5 +36,7 @@ public interface MybatisExampleRepository<Domain, ID, Example> {
     int deleteByPrimaryKey(ID id);
 
     int deleteByPrimaryKeys(List<ID> ids);
+
+    int deleteByExample(Example query);
 
 }

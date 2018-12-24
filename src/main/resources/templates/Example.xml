@@ -147,6 +147,17 @@
   </delete>
   {{/metadata.primaryMetadata}}
 
+
+  {{#metadata.primaryMetadata}}
+  <delete id="deleteByPrimaryKeys" parameterType="{{metadata.primaryMetadata.javaType}}">
+    delete from {{metadata.tableName}}
+    where {{metadata.primaryMetadata.columnName}} in
+    <foreach close=")" collection="list" item="id" open="(" separator=",">
+      #{id}
+    </foreach>
+  </delete>
+  {{/metadata.primaryMetadata}}
+
   <delete id="deleteByExample" parameterType="{{metadata.exampleClazzName}}">
     delete from {{metadata.tableName}}
     <if test="_parameter != null">
