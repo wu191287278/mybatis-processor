@@ -151,7 +151,7 @@
     </if>
   </delete>
 
-  <insert id="insert" keyProperty="id" parameterType="{{metadata.domainClazzName}}" useGeneratedKeys="true">
+  <insert id="insert" parameterType="{{metadata.domainClazzName}}" {{#metadata.primaryMetadata}} {{#metadata.primaryMetadata.useGeneratedKeys}} keyProperty="{{metadata.primaryMetadata.fieldName}}" useGeneratedKeys="{{metadata.primaryMetadata.useGeneratedKeys}}" {{/metadata.primaryMetadata.useGeneratedKeys}} {{/metadata.primaryMetadata}}>
     insert into {{metadata.tableName}} ({{metadata.columns}})
     values (
     <trim  suffixOverrides=",">
@@ -162,7 +162,7 @@
     )
   </insert>
 
-  <insert id="insertSelective" parameterType="{{metadata.domainClazzName}}" {{#metadata.primaryMetadata}} keyProperty="{{metadata.primaryMetadata.fieldName}}" {{#metadata.primaryMetadata.useGeneratedKeys}} useGeneratedKeys="{{metadata.primaryMetadata.useGeneratedKeys}}" {{/metadata.primaryMetadata.useGeneratedKeys}} {{/metadata.primaryMetadata}}>
+  <insert id="insertSelective" parameterType="{{metadata.domainClazzName}}" {{#metadata.primaryMetadata}} {{#metadata.primaryMetadata.useGeneratedKeys}} keyProperty="{{metadata.primaryMetadata.fieldName}}" useGeneratedKeys="{{metadata.primaryMetadata.useGeneratedKeys}}" {{/metadata.primaryMetadata.useGeneratedKeys}} {{/metadata.primaryMetadata}}>
     insert into {{metadata.tableName}}
     <trim prefix="(" suffix=")" suffixOverrides=",">
       {{#metadata.columnMetadataList}}
@@ -174,7 +174,7 @@
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       {{#metadata.columnMetadataList}}
       <if test="{{fieldName}} != null">
-        {{columnName}} = #{ {{fieldName}}{{#jdbcType}},jdbcType={{jdbcType}} {{/jdbcType}} } ,
+        #{ {{fieldName}}{{#jdbcType}},jdbcType={{jdbcType}} {{/jdbcType}} } ,
       </if>
       {{/metadata.columnMetadataList}}
     </trim>
