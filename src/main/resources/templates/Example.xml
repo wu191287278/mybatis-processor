@@ -6,12 +6,9 @@
     {{#metadata.primaryMetadata}}
     <id column="{{columnName}}" {{#jdbcType}} jdbcType="{{jdbcType}}" {{/jdbcType}} property="{{fieldName}}" />
     {{/metadata.primaryMetadata}}
-
 {{#metadata.columnMetadataList}}
-    {{#primary}}
-    {{/primary}}
     {{^primary}}
-      <result column="{{columnName}}" {{#jdbcType}} jdbcType="{{jdbcType}}" {{/jdbcType}} property="{{fieldName}}" />
+    <result column="{{columnName}}" {{#jdbcType}} jdbcType="{{jdbcType}}" {{/jdbcType}} property="{{fieldName}}" />
     {{/primary}}
 {{/metadata.columnMetadataList}}
   </resultMap>
@@ -262,7 +259,7 @@
 
   {{/metadata.primaryMetadata}}
 
-  <insert id="insertBatch" parameterType="java.util.List">
+  <insert id="insertBatch" parameterType="java.util.List"  {{#metadata.primaryMetadata}} {{#metadata.primaryMetadata.useGeneratedKeys}} keyProperty="{{metadata.primaryMetadata.fieldName}}" useGeneratedKeys="{{metadata.primaryMetadata.useGeneratedKeys}}" {{/metadata.primaryMetadata.useGeneratedKeys}} {{/metadata.primaryMetadata}}>
     insert into {{metadata.tableName}}(
     <include refid="Base_Column_List" />
     )
