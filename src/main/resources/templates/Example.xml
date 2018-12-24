@@ -267,7 +267,7 @@
     <foreach collection="list" index="index" item="item" separator=",">
       <trim prefix="(" suffix=")" suffixOverrides=",">
         {{#metadata.columnMetadataList}}
-          #{ item.{{columnName}} {{#jdbcType}},jdbcType={{jdbcType}} {{/jdbcType}} },
+          #{ item.{{fieldName}} {{#jdbcType}},jdbcType={{jdbcType}} {{/jdbcType}} },
         {{/metadata.columnMetadataList}}
       </trim>
     </foreach>
