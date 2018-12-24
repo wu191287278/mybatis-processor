@@ -3,9 +3,12 @@
 <mapper namespace="{{metadata.repositoryClazzName}}">
 
   <resultMap id="BaseResultMap" type="{{metadata.domainClazzName}}">
+    {{#metadata.primaryMetadata}}
+    <id column="{{columnName}}" {{#jdbcType}} jdbcType="{{jdbcType}}" {{/jdbcType}} property="{{fieldName}}" />
+    {{/metadata.primaryMetadata}}
+
 {{#metadata.columnMetadataList}}
     {{#primary}}
-      <id column="{{columnName}}" {{#jdbcType}} jdbcType="{{jdbcType}}" {{/jdbcType}} property="{{fieldName}}" />
     {{/primary}}
     {{^primary}}
       <result column="{{columnName}}" {{#jdbcType}} jdbcType="{{jdbcType}}" {{/jdbcType}} property="{{fieldName}}" />
