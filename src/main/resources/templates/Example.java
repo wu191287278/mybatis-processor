@@ -10,6 +10,10 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
 
     private static final long serialVersionUID = 314035125506252121L;
 
+    public static final String DESC = " DESC";
+
+    public static final String ASC = " ASC";
+
 {{#metadata.columnMetadataList}}
     public static final String {{fieldName}} = "{{columnName}}";
 
@@ -182,72 +186,72 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
         }
 {{#metadata.columnMetadataList}}
         public Criteria and{{firstUpFiledName}}IsNull() {
-            addCriterion("{{fieldName}} is null");
+            addCriterion("{{columnName}} is null");
             return (Criteria) this;
         }
 
         public Criteria and{{firstUpFiledName}}IsNotNull() {
-            addCriterion("{{fieldName}} is not null");
+            addCriterion("{{columnName}} is not null");
             return (Criteria) this;
         }
 
         public Criteria and{{firstUpFiledName}}EqualTo({{javaType}} value) {
-            addCriterion("{{fieldName}} =", value, "{{fieldName}}");
+            addCriterion("{{columnName}} =", value, "{{fieldName}}");
             return (Criteria) this;
         }
 
         public Criteria and{{firstUpFiledName}}NotEqualTo({{javaType}} value) {
-            addCriterion("{{fieldName}} <>", value, "{{fieldName}}");
+            addCriterion("{{columnName}} <>", value, "{{fieldName}}");
             return (Criteria) this;
         }
 
         public Criteria and{{firstUpFiledName}}In(List<{{javaType}}> values) {
-            addCriterion("{{fieldName}} in", values, "{{fieldName}}");
+            addCriterion("{{columnName}} in", values, "{{fieldName}}");
             return (Criteria) this;
         }
 
         public Criteria and{{firstUpFiledName}}NotIn(List<{{javaType}}> values) {
-            addCriterion("{{fieldName}} not in", values, "{{fieldName}}");
+            addCriterion("{{columnName}} not in", values, "{{fieldName}}");
             return (Criteria) this;
         }
 
         public Criteria and{{firstUpFiledName}}Between({{javaType}} value1, {{javaType}} value2) {
-            addCriterion("{{fieldName}} between", value1, value2, "{{fieldName}}");
+            addCriterion("{{columnName}} between", value1, value2, "{{fieldName}}");
             return (Criteria) this;
         }
 
         public Criteria and{{firstUpFiledName}}NotBetween({{javaType}} value1, {{javaType}} value2) {
-            addCriterion("{{fieldName}} not between", value1, value2, "{{fieldName}}");
+            addCriterion("{{columnName}} not between", value1, value2, "{{fieldName}}");
             return (Criteria) this;
         }
 
         public Criteria and{{firstUpFiledName}}GreaterThan({{javaType}} value) {
-            addCriterion("{{fieldName}} >", value, "{{fieldName}}");
+            addCriterion("{{columnName}} >", value, "{{fieldName}}");
             return (Criteria) this;
         }
 
         public Criteria and{{firstUpFiledName}}GreaterThanOrEqualTo({{javaType}} value) {
-            addCriterion("{{fieldName}} >=", value, "{{fieldName}}");
+            addCriterion("{{columnName}} >=", value, "{{fieldName}}");
             return (Criteria) this;
         }
 
         public Criteria and{{firstUpFiledName}}LessThan({{javaType}} value) {
-            addCriterion("{{fieldName}} <", value, "{{fieldName}}");
+            addCriterion("{{columnName}} <", value, "{{fieldName}}");
             return (Criteria) this;
         }
 
         public Criteria and{{firstUpFiledName}}LessThanOrEqualTo({{javaType}} value) {
-            addCriterion("{{fieldName}} <=", value, "{{fieldName}}");
+            addCriterion("{{columnName}} <=", value, "{{fieldName}}");
             return (Criteria) this;
         }
 
         public Criteria and{{firstUpFiledName}}Like({{javaType}} value) {
-            addCriterion("{{fieldName}} like", value, "{{fieldName}}");
+            addCriterion("{{columnName}} like", value, "{{fieldName}}");
             return (Criteria) this;
         }
 
         public Criteria and{{firstUpFiledName}}NotLike({{javaType}} value) {
-            addCriterion("{{fieldName}} not like", value, "{{fieldName}}");
+            addCriterion("{{columnName}} not like", value, "{{fieldName}}");
             return (Criteria) this;
         }
 {{/metadata.columnMetadataList}}

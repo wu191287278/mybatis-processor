@@ -107,7 +107,7 @@ public class MybatisDomainProcessor extends AbstractProcessor {
             }
 
             if (column != null && !"".equals(column.columnDefinition())) {
-                String jdbcType = JDBC_TYPE_MAPPING.get(column.columnDefinition());
+                String jdbcType = JDBC_TYPE_MAPPING.get(column.columnDefinition().replaceAll("\\s+"," ").toUpperCase());
                 columnMetadata.setJdbcType(jdbcType != null ? jdbcType : column.columnDefinition());
             }
 
@@ -134,7 +134,17 @@ public class MybatisDomainProcessor extends AbstractProcessor {
 
     static {
         JDBC_TYPE_MAPPING.put("INT", "INTEGER");
+        JDBC_TYPE_MAPPING.put("INT UNSIGNED", "INTEGER");
+        JDBC_TYPE_MAPPING.put("SMALLINT UNSIGNED", "SMALLINT");
+        JDBC_TYPE_MAPPING.put("BIGINT UNSIGNED", "BIGINT");
+        JDBC_TYPE_MAPPING.put("DOUBLE UNSIGNED", "DOUBLE");
+        JDBC_TYPE_MAPPING.put("FLOAT UNSIGNED", "DOUBLE");
+        JDBC_TYPE_MAPPING.put("DECIMAL UNSIGNED", "DOUBLE");
+        JDBC_TYPE_MAPPING.put("TINY UNSIGNED", "TINY");
         JDBC_TYPE_MAPPING.put("TEXT", "LONGVARCHAR");
+        JDBC_TYPE_MAPPING.put("TINYTEXT", "VARCHAR");
+        JDBC_TYPE_MAPPING.put("MEDIUMTEXT", "LONGVARCHAR");
+        JDBC_TYPE_MAPPING.put("LONGTEXT", "LONGVARCHAR");
         JDBC_TYPE_MAPPING.put("DATETIME", "DATE");
     }
 
