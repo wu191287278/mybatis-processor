@@ -135,6 +135,7 @@ public class MybatisDomainProcessor extends AbstractProcessor {
     static {
         JDBC_TYPE_MAPPING.put("INT", "INTEGER");
         JDBC_TYPE_MAPPING.put("TEXT", "LONGVARCHAR");
+        JDBC_TYPE_MAPPING.put("DATETIME", "DATE");
     }
 
 
