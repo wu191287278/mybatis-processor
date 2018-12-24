@@ -11,9 +11,9 @@ public interface MybatisExampleRepository<Domain, ID, Example> {
 
     List<Domain> selectByPrimaryKeys(List<ID> ids);
 
-    List<Domain> selectByExample(Example example);
+    List<Domain> selectByExample(Example query);
 
-    Cursor selectByExampleWithCursor(Example example);
+    Cursor selectByExampleWithCursor(Example query);
 
     int insert(Domain t);
 
