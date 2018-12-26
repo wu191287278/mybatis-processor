@@ -39,13 +39,24 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
         return this;
     }
 
-    public {{metadata.exampleClazzSimpleName}} withColumns(String... column) {
-        this.limit = limit;
-        return this;
+    public {{metadata.exampleClazzSimpleName}} withColumns(String... columns) {
+        return withColumns(Arrays.asList(columns));
     }
 
     public {{metadata.exampleClazzSimpleName}} withColumns(List<String> columns) {
         this.columns = columns;
+        return this;
+    }
+
+    public {{metadata.exampleClazzSimpleName}} withIgnoreColumns(String... columns) {
+        return withIgnoreColumns(Arrays.asList(columns));
+    }
+
+    public {{metadata.exampleClazzSimpleName}} withIgnoreColumns(List<String> columns) {
+        if(this.columns==null||this.columns.isEmpty()){
+            this.columns = allColumns();
+        }
+        this.columns.removeAll(columns);
         return this;
     }
 
@@ -54,20 +65,19 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
         return this;
     }
 
-    public {{metadata.exampleClazzSimpleName}} withCriteria(Criteria c) {
-        getOredCriteria().add(c);
+    public {{metadata.exampleClazzSimpleName}} withCriteria(Criteria criteria) {
+        getOredCriteria().add(criteria);
         return this;
     }
 
-    public {{metadata.exampleClazzSimpleName}} withOrCriteria(Criteria c) {
-        getOredCriteria().add(c);
+    public {{metadata.exampleClazzSimpleName}} withOrCriteria(Criteria criteria) {
+        getOredCriteria().add(criteria);
         return this;
     }
 
     public static {{metadata.exampleClazzSimpleName}}.Criteria newCriteria() {
         return new Criteria();
     }
-
 
     public {{metadata.exampleClazzSimpleName}} withDistinct(boolean distinct) {
         setDistinct(distinct);
@@ -82,7 +92,59 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
         return withLimit(Arrays.asList((page - 1) * size, size));
     }
 
+    public {{metadata.exampleClazzSimpleName}} limit(Integer... limit) {
+        return withLimit(limit);
+    }
+
+    public {{metadata.exampleClazzSimpleName}} limit(List<Integer> limit) {
+        return withLimit(limit);
+    }
+
+    public {{metadata.exampleClazzSimpleName}} columns(String... columns) {
+        return withColumns(columns);
+    }
+
+    public {{metadata.exampleClazzSimpleName}} columns(List<String> columns) {
+        return withColumns(columns);
+    }
+
+    public {{metadata.exampleClazzSimpleName}} ignoreColumns(String... columns) {
+        return withIgnoreColumns(columns);
+    }
+
+    public {{metadata.exampleClazzSimpleName}} ignoreColumns(List<String> columns) {
+        return withIgnoreColumns(columns);
+    }
+
+    public {{metadata.exampleClazzSimpleName}} orderByClause(String orderByClause) {
+        return withOrderByClause(orderByClause);
+    }
+
+    public {{metadata.exampleClazzSimpleName}} criteria(Criteria criteria) {
+        return withCriteria(criteria);
+    }
+
+    public {{metadata.exampleClazzSimpleName}} orCriteria(Criteria criteria) {
+        return withOrCriteria(criteria);
+    }
+
+    public {{metadata.exampleClazzSimpleName}} distinct(boolean distinct) {
+        return withDistinct(distinct);
+    }
+
+    public {{metadata.exampleClazzSimpleName}} page(Integer page, Integer size) {
+        return withPage(page, size);
+    }
+
     public List<String> getColumns() {
+        return columns;
+    }
+
+    public List<String> allColumns(){
+        List<String> columns = new ArrayList<String>();
+        {{#metadata.columnMetadataList}}
+        columns.add("{{columnName}}");
+        {{/metadata.columnMetadataList}}
         return columns;
     }
 

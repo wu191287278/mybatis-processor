@@ -1,37 +1,32 @@
 package com.vcg.mybatis.example.processor;
 
 import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.cursor.Cursor;
 
 import java.util.List;
 
-public interface MybatisExampleRepository<Domain, ID, Example> {
+public interface MybatisExampleRepository<T, ID, Example> {
 
-    Domain selectByPrimaryKey(ID id);
+    T selectByPrimaryKey(ID id);
 
-    List<Domain> selectByPrimaryKeys(List<ID> ids);
+    List<T> selectByPrimaryKeys(List<ID> ids);
 
-    List<Domain> selectByExample(Example query);
+    List<T> selectByExample(Example query);
 
-    Cursor<Domain> selectByExampleWithCursor(Example query);
+    int insert(T t);
 
-    int insert(Domain t);
+    int insertSelective(T t);
 
-    int insertSelective(Domain t);
-
-    void insertBatch(List<Domain> ts);
+    void insertBatch(List<T> ts);
 
     long countByExample(Example query);
 
-    int updateByPrimaryKeySelective(Domain t);
+    int updateByPrimaryKeySelective(T t);
 
-    int updateByPrimaryKey(Domain t);
+    int updateByPrimaryKey(T t);
 
-    int updateByExampleSelective(@Param("record") Domain t, @Param("example") Example query);
+    int updateByExampleSelective(@Param("record") T t, @Param("example") Example query);
 
-    int updateByExample(@Param("record") Domain t, @Param("example") Example query);
-
-    void updateBatch(List<Domain> ts);
+    int updateByExample(@Param("record") T t, @Param("example") Example query);
 
     int deleteByPrimaryKey(ID id);
 
