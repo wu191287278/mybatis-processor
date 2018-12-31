@@ -92,6 +92,16 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
         return withLimit(Arrays.asList((page - 1) * size, size));
     }
 
+    public {{metadata.exampleClazzSimpleName}} withAsc(String... columns){
+        orderByClause(String.join(",",columns) + ASC);
+        return this;
+    }
+
+    public {{metadata.exampleClazzSimpleName}} withDesc(String... columns){
+        orderByClause(String.join(",",columns) + DESC);
+        return this;
+    }
+
     public {{metadata.exampleClazzSimpleName}} limit(Integer... limit) {
         return withLimit(limit);
     }
@@ -134,6 +144,16 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
 
     public {{metadata.exampleClazzSimpleName}} page(Integer page, Integer size) {
         return withPage(page, size);
+    }
+
+    public {{metadata.exampleClazzSimpleName}} asc(String... columns){
+        orderByClause(String.join(",",columns) + ASC);
+        return this;
+    }
+
+    public {{metadata.exampleClazzSimpleName}} desc(String... columns){
+        orderByClause(String.join(",",columns) + DESC);
+        return this;
     }
 
     public List<String> getColumns() {

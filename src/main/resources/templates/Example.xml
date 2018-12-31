@@ -227,7 +227,6 @@
 
 
   {{#metadata.primaryMetadata}}
-
   <update id="updateByPrimaryKey" parameterType="{{metadata.domainClazzName}}">
     update {{metadata.tableName}}
     set
@@ -239,11 +238,9 @@
     where
      {{columnName}} = #{ {{fieldName}},jdbcType=INTEGER}
   </update>
-
   {{/metadata.primaryMetadata}}
 
   {{#metadata.primaryMetadata}}
-
   <update id="updateByPrimaryKeySelective" parameterType="{{metadata.domainClazzName}}">
     update {{metadata.tableName}}
     <set>
@@ -256,7 +253,6 @@
     where
      {{columnName}} = #{ {{fieldName}},jdbcType=INTEGER}
   </update>
-
   {{/metadata.primaryMetadata}}
 
   <insert id="insertBatch" parameterType="java.util.List"  {{#metadata.primaryMetadata}} {{#metadata.primaryMetadata.useGeneratedKeys}} keyProperty="{{metadata.primaryMetadata.fieldName}}" useGeneratedKeys="{{metadata.primaryMetadata.useGeneratedKeys}}" {{/metadata.primaryMetadata.useGeneratedKeys}} {{/metadata.primaryMetadata}}>
@@ -283,6 +279,76 @@
     <foreach close=")" collection="list" item="id" open="(" separator=",">
       #{id}
     </foreach>
+  </select>
+  {{/metadata.primaryMetadata}}
+
+  {{#metadata.primaryMetadata}}
+  <select id="getOne" parameterType="{{metadata.primaryMetadata.javaType}}" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from {{metadata.tableName}}
+    where {{metadata.primaryMetadata.columnName}} = #{ {{metadata.primaryMetadata.fieldName}}{{#metadata.primaryMetadata.jdbcType}},jdbcType={{metadata.primaryMetadata.jdbcType}}{{/metadata.primaryMetadata.jdbcType}} }
+  </select>
+  {{/metadata.primaryMetadata}}
+
+  {{#metadata.primaryMetadata}}
+    <select id="getById" parameterType="{{metadata.primaryMetadata.javaType}}" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from {{metadata.tableName}}
+    where {{metadata.primaryMetadata.columnName}} = #{ {{metadata.primaryMetadata.fieldName}}{{#metadata.primaryMetadata.jdbcType}},jdbcType={{metadata.primaryMetadata.jdbcType}}{{/metadata.primaryMetadata.jdbcType}} }
+    </select>
+  {{/metadata.primaryMetadata}}
+
+ {{#metadata.primaryMetadata}}
+  <select id="findAll" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from {{metadata.tableName}}
+  </select>
+  {{/metadata.primaryMetadata}}
+
+ {{#metadata.primaryMetadata}}
+  <select id="findAllById" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from {{metadata.tableName}}
+    where {{metadata.primaryMetadata.columnName}}  in
+
+    <foreach close=")" collection="list" item="id" open="(" separator=",">
+      #{id}
+    </foreach>
+  </select>
+  {{/metadata.primaryMetadata}}
+
+  {{#metadata.primaryMetadata}}
+  <delete id="deleteById" parameterType="{{metadata.primaryMetadata.javaType}}">
+    delete from {{metadata.tableName}}
+    where {{metadata.primaryMetadata.columnName}} = #{ {{metadata.primaryMetadata.fieldName}}{{#metadata.primaryMetadata.jdbcType}},jdbcType={{metadata.primaryMetadata.jdbcType}}{{/metadata.primaryMetadata.jdbcType}} }
+  </delete>
+  {{/metadata.primaryMetadata}}
+
+  {{#metadata.primaryMetadata}}
+  <delete id="delete" parameterType="{{metadata.domainClazzName}}">
+    delete from {{metadata.tableName}}
+    where {{metadata.primaryMetadata.columnName}} = #{ {{metadata.primaryMetadata.fieldName}}{{#metadata.primaryMetadata.jdbcType}},jdbcType={{metadata.primaryMetadata.jdbcType}}{{/metadata.primaryMetadata.jdbcType}} }
+  </delete>
+  {{/metadata.primaryMetadata}}
+
+  {{#metadata.primaryMetadata}}
+  <delete id="deleteAll" parameterType="{{metadata.primaryMetadata.javaType}}">
+    delete from {{metadata.tableName}}
+    where {{metadata.primaryMetadata.columnName}} in
+    <foreach close=")" collection="list" item="id" open="(" separator=",">
+      #{id}
+    </foreach>
+  </delete>
+  {{/metadata.primaryMetadata}}
+
+  {{#metadata.primaryMetadata}}
+  <select id="existsById" parameterType="{{metadata.primaryMetadata.javaType}}" resultType="boolean">
+    select count(*)>0 from {{metadata.tableName}}
+    where {{metadata.primaryMetadata.columnName}} = #{ {{metadata.primaryMetadata.fieldName}}{{#metadata.primaryMetadata.jdbcType}},jdbcType={{metadata.primaryMetadata.jdbcType}}{{/metadata.primaryMetadata.jdbcType}} }
   </select>
   {{/metadata.primaryMetadata}}
 </mapper>
