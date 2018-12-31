@@ -12,9 +12,9 @@ public interface MybatisExampleRepository<T, ID, Example> {
 
     List<T> selectByExample(Example query);
 
-    int insert(T t);
+    void insert(T t);
 
-    int insertSelective(T t);
+    void insertSelective(T t);
 
     void insertBatch(List<T> ts);
 
