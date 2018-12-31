@@ -9,7 +9,7 @@ public class BaseService<T, ID, Example> {
 
     private MybatisExampleRepository<T, ID, Example> repository;
 
-    public BaseService(MybatisExampleRepository<T, ID, Example> repository) {
+    public BaseService(MybatisExampleRepository repository) {
         this.repository = repository;
     }
 
