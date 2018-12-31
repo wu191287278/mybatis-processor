@@ -36,6 +36,29 @@ public interface MybatisExampleRepository<T, ID, Example> {
 
     int deleteByExample(Example query);
 
+    T getOne(ID id);
+
+    T getById(ID id);
+
+    boolean existsById(ID id);
+
+    Iterable<T> findAll();
+
+    Iterable<T> findAllById(Iterable<ID> ids);
+
+    long count();
+
+    void deleteById(ID id);
+
+    void delete(T entity);
+
+    void deleteAll(Iterable<? extends T> entities);
+
+    default Optional<T> findById(ID id) {
+        T t = selectByPrimaryKey(id);
+        return t != null ? Optional.of(t) : Optional.empty();
+    }
+
     default <S extends T> S save(S entity) {
         insertSelective(entity);
         return entity;
@@ -53,28 +76,4 @@ public interface MybatisExampleRepository<T, ID, Example> {
         }
         return entities;
     }
-
-    T getOne(ID id);
-
-    T getById(ID id);
-
-    default Optional<T> findById(ID id) {
-        T t = selectByPrimaryKey(id);
-        return t != null ? Optional.of(t) : Optional.empty();
-    }
-
-    boolean existsById(ID id);
-
-    Iterable<T> findAll();
-
-    Iterable<T> findAllById(Iterable<ID> ids);
-
-    long count();
-
-    void deleteById(ID id);
-
-    void delete(T entity);
-
-    void deleteAll(Iterable<? extends T> entities);
-
 }
