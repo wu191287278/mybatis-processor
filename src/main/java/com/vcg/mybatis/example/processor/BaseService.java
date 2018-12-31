@@ -1,7 +1,6 @@
 package com.vcg.mybatis.example.processor;
 
 
-import java.util.Collections;
 import java.util.List;
 
 
@@ -18,9 +17,6 @@ public class BaseService<T, ID, Example> {
     }
 
     public List<T> selectByPrimaryKeys(List<ID> ids) {
-        if (ids.size() == 1) {
-            return Collections.singletonList(repository.selectByPrimaryKey(ids.get(0)));
-        }
         return repository.selectByPrimaryKeys(ids);
     }
 
@@ -58,7 +54,6 @@ public class BaseService<T, ID, Example> {
 
     public long countByExample(Example example) {
         return this.repository.countByExample(example);
-
     }
 
     public int deleteByPrimaryKey(ID id) {
