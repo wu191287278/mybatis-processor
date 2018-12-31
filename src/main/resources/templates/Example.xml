@@ -350,4 +350,10 @@
     where {{metadata.primaryMetadata.columnName}} = #{ {{metadata.primaryMetadata.fieldName}}{{#metadata.primaryMetadata.jdbcType}},jdbcType={{metadata.primaryMetadata.jdbcType}}{{/metadata.primaryMetadata.jdbcType}} }
   </select>
   {{/metadata.primaryMetadata}}
+
+  {{#metadata.primaryMetadata}}
+  <select id="count" parameterType="{{metadata.primaryMetadata.javaType}}" resultType="boolean">
+    select count(*) from {{metadata.tableName}}
+  </select>
+  {{/metadata.primaryMetadata}}
 </mapper>

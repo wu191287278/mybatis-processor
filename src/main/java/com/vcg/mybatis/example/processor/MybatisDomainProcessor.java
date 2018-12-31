@@ -9,7 +9,10 @@ import javax.annotation.processing.Filer;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.*;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.PackageElement;
+import javax.lang.model.element.TypeElement;
 import javax.persistence.*;
 import javax.tools.Diagnostic;
 import javax.tools.FileObject;
@@ -90,10 +93,6 @@ public class MybatisDomainProcessor extends AbstractProcessor {
                 continue;
             }
 
-            for (AnnotationMirror annotationMirror : member.asType().getAnnotationMirrors()) {
-                String s = annotationMirror.getAnnotationType().toString();
-                processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, s);
-            }
             String name = member.toString();
             Id id = member.getAnnotation(Id.class);
             Column column = member.getAnnotation(Column.class);
