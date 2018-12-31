@@ -4,12 +4,12 @@ import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 
-import javax.annotation.processing.*;
+import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.Filer;
+import javax.annotation.processing.RoundEnvironment;
+import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.PackageElement;
-import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.*;
 import javax.persistence.*;
 import javax.tools.Diagnostic;
 import javax.tools.FileObject;
@@ -24,7 +24,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @SupportedAnnotationTypes("com.vcg.mybatis.example.processor.Example")
-@SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class MybatisDomainProcessor extends AbstractProcessor {
 
     @Override
@@ -90,14 +89,18 @@ public class MybatisDomainProcessor extends AbstractProcessor {
             if (isStatic || !member.getKind().isField() || member.getAnnotation(Transient.class) != null) {
                 continue;
             }
-            String type = member.asType().toString();
+
+            for (AnnotationMirror annotationMirror : member.asType().getAnnotationMirrors()) {
+                String s = annotationMirror.getAnnotationType().toString();
+                processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, s);
+            }
             String name = member.toString();
             Id id = member.getAnnotation(Id.class);
             Column column = member.getAnnotation(Column.class);
             GeneratedValue generatedValue = member.getAnnotation(GeneratedValue.class);
-            ColumnMetadata columnMetadata = new ColumnMetadata()
-                    .setFieldName(name)
-                    .setJavaType(type)
+            ColumnMetadata columnMetadata = new ColumnMetadata();
+            member.asType().accept(new DomainTypeVisitor(), columnMetadata);
+            columnMetadata.setFieldName(name)
                     .setUseGeneratedKeys(generatedValue != null)
                     .setPrimary(id != null);
 
@@ -107,7 +110,7 @@ public class MybatisDomainProcessor extends AbstractProcessor {
             }
 
             if (column != null && !"".equals(column.columnDefinition())) {
-                String jdbcType = JDBC_TYPE_MAPPING.get(column.columnDefinition().replaceAll("\\s+"," ").toUpperCase());
+                String jdbcType = JDBC_TYPE_MAPPING.get(column.columnDefinition().replaceAll("\\s+", " ").toUpperCase());
                 columnMetadata.setJdbcType(jdbcType != null ? jdbcType : column.columnDefinition());
             }
 
@@ -149,4 +152,8 @@ public class MybatisDomainProcessor extends AbstractProcessor {
     }
 
 
+    @Override
+    public SourceVersion getSupportedSourceVersion() {
+        return SourceVersion.latestSupported();
+    }
 }
