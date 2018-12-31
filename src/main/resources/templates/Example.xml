@@ -292,12 +292,12 @@
   {{/metadata.primaryMetadata}}
 
   {{#metadata.primaryMetadata}}
-    <select id="getById" parameterType="{{metadata.primaryMetadata.javaType}}" resultMap="BaseResultMap">
+  <select id="getById" parameterType="{{metadata.primaryMetadata.javaType}}" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />
     from {{metadata.tableName}}
     where {{metadata.primaryMetadata.columnName}} = #{ {{metadata.primaryMetadata.fieldName}}{{#metadata.primaryMetadata.jdbcType}},jdbcType={{metadata.primaryMetadata.jdbcType}}{{/metadata.primaryMetadata.jdbcType}} }
-    </select>
+  </select>
   {{/metadata.primaryMetadata}}
 
  {{#metadata.primaryMetadata}}
@@ -314,7 +314,6 @@
     <include refid="Base_Column_List" />
     from {{metadata.tableName}}
     where {{metadata.primaryMetadata.columnName}}  in
-
     <foreach close=")" collection="list" item="id" open="(" separator=",">
       #{id}
     </foreach>
