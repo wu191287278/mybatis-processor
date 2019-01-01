@@ -352,7 +352,7 @@
   {{/metadata.primaryMetadata}}
 
   {{#metadata.primaryMetadata}}
-  <select id="count" parameterType="{{metadata.primaryMetadata.javaType}}" resultType="boolean">
+  <select id="count" resultType="boolean">
     select count(*) from {{metadata.tableName}}
   </select>
   {{/metadata.primaryMetadata}}

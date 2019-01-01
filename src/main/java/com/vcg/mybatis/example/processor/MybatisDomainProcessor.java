@@ -40,6 +40,7 @@ public class MybatisDomainProcessor extends AbstractProcessor {
             for (Element element : elements) {
                 PackageElement packageOf = processingEnv.getElementUtils().getPackageOf(element);
                 Example example = element.getAnnotation(Example.class);
+
                 TableMetadata tableMetadata = read(element);
                 String domainClazzName = tableMetadata.getDomainClazzName();
                 String exampleName = (domainClazzName + "Example");
@@ -61,7 +62,8 @@ public class MybatisDomainProcessor extends AbstractProcessor {
                 }
 
 
-                FileObject resource = filer.createResource(StandardLocation.CLASS_OUTPUT, packageOf.toString(), (tableMetadata.getDomainClazzSimpleName() + "ExampleMapper.xml"));
+                FileObject resource = filer.createResource(StandardLocation.CLASS_OUTPUT, packageOf.toString(),
+                        (tableMetadata.getDomainClazzSimpleName() + "ExampleMapper.xml"));
                 InputStream xmlInputStream = classLoader.getResourceAsStream("templates/Example.xml");
                 try (InputStreamReader in = new InputStreamReader(xmlInputStream);
                      Writer writer = resource.openWriter()) {
