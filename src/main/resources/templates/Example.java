@@ -10,9 +10,9 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
 
     private static final long serialVersionUID = 314035125506252121L;
 
-    public static final String DESC = " DESC";
+    private static final String DESC = " DESC";
 
-    public static final String ASC = " ASC";
+    private static final String ASC = " ASC";
 
 {{#metadata.columnMetadataList}}
     public static final String {{fieldName}} = "{{columnName}}";
