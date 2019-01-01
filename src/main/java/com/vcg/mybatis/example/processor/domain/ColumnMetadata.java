@@ -1,4 +1,4 @@
-package com.vcg.mybatis.example.processor;
+package com.vcg.mybatis.example.processor.domain;
 
 public class ColumnMetadata {
 

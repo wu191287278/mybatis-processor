@@ -3,6 +3,9 @@ package com.vcg.mybatis.example.processor;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
+import com.vcg.mybatis.example.processor.domain.ColumnMetadata;
+import com.vcg.mybatis.example.processor.domain.TableMetadata;
+import com.vcg.mybatis.example.processor.visitor.DomainTypeVisitor;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
@@ -21,6 +24,7 @@ import javax.tools.StandardLocation;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -28,6 +32,8 @@ import java.util.stream.Collectors;
 
 @SupportedAnnotationTypes("com.vcg.mybatis.example.processor.Example")
 public class MybatisDomainProcessor extends AbstractProcessor {
+
+    private final DomainTypeVisitor domainTypeVisitor = new DomainTypeVisitor();
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
@@ -56,7 +62,7 @@ public class MybatisDomainProcessor extends AbstractProcessor {
                 ClassLoader classLoader = MybatisDomainProcessor.class.getClassLoader();
 
                 InputStream exampleInputStream = classLoader.getResourceAsStream("templates/Example.java");
-                try (InputStreamReader in = new InputStreamReader(exampleInputStream); Writer writer = javaFileObject.openWriter()) {
+                try (InputStreamReader in = new InputStreamReader(exampleInputStream, StandardCharsets.UTF_8); Writer writer = javaFileObject.openWriter()) {
                     Mustache mustache = mf.compile(in, exampleName);
                     mustache.execute(writer, scopes);
                 }
@@ -65,7 +71,7 @@ public class MybatisDomainProcessor extends AbstractProcessor {
                 FileObject resource = filer.createResource(StandardLocation.CLASS_OUTPUT, packageOf.toString(),
                         (tableMetadata.getDomainClazzSimpleName() + "ExampleMapper.xml"));
                 InputStream xmlInputStream = classLoader.getResourceAsStream("templates/Example.xml");
-                try (InputStreamReader in = new InputStreamReader(xmlInputStream);
+                try (InputStreamReader in = new InputStreamReader(xmlInputStream, StandardCharsets.UTF_8);
                      Writer writer = resource.openWriter()) {
                     Mustache mustache = mf.compile(in, tableMetadata.getDomainClazzName() + ".xml");
                     mustache.execute(writer, scopes);
@@ -100,7 +106,7 @@ public class MybatisDomainProcessor extends AbstractProcessor {
             Column column = member.getAnnotation(Column.class);
             GeneratedValue generatedValue = member.getAnnotation(GeneratedValue.class);
             ColumnMetadata columnMetadata = new ColumnMetadata();
-            member.asType().accept(new DomainTypeVisitor(), columnMetadata);
+            member.asType().accept(domainTypeVisitor, columnMetadata);
             columnMetadata.setFieldName(name)
                     .setUseGeneratedKeys(generatedValue != null)
                     .setPrimary(id != null);

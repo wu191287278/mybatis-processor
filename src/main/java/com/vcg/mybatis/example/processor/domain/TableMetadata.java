@@ -1,4 +1,4 @@
-package com.vcg.mybatis.example.processor;
+package com.vcg.mybatis.example.processor.domain;
 
 import java.util.ArrayList;
 import java.util.List;

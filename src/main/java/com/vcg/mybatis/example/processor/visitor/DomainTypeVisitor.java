@@ -1,4 +1,6 @@
-package com.vcg.mybatis.example.processor;
+package com.vcg.mybatis.example.processor.visitor;
+
+import com.vcg.mybatis.example.processor.domain.ColumnMetadata;
 
 import javax.lang.model.type.*;
 
