@@ -6,7 +6,7 @@ public class ColumnMetadata {
 
     private String columnName;
 
-    private String firstUpFiledName;
+    private String firstUpFieldName;
 
     private String jdbcType;
 
@@ -16,6 +16,10 @@ public class ColumnMetadata {
 
     private boolean useGeneratedKeys;
 
+    private boolean stringType = false;
+
+    private boolean partitionKey = false;
+
     public String getFieldName() {
         return fieldName;
     }
@@ -24,9 +28,9 @@ public class ColumnMetadata {
         this.fieldName = fieldName;
         if (fieldName != null) {
             if (fieldName.length() == 1) {
-                this.firstUpFiledName = fieldName.toUpperCase();
+                this.firstUpFieldName = fieldName.toUpperCase();
             } else {
-                this.firstUpFiledName = fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+                this.firstUpFieldName = fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
             }
         }
         return this;
@@ -56,6 +60,7 @@ public class ColumnMetadata {
 
     public ColumnMetadata setJavaType(String javaType) {
         this.javaType = javaType;
+        this.stringType = "java.lang.String".equals(javaType);
         return this;
     }
 
@@ -77,12 +82,30 @@ public class ColumnMetadata {
         return this;
     }
 
-    public String getFirstUpFiledName() {
-        return firstUpFiledName;
+    public String getFirstUpFieldName() {
+        return firstUpFieldName;
     }
 
-    public ColumnMetadata setFirstUpFiledName(String firstUpFiledName) {
-        this.firstUpFiledName = firstUpFiledName;
+    public ColumnMetadata setFirstUpFieldName(String firstUpFieldName) {
+        this.firstUpFieldName = firstUpFieldName;
+        return this;
+    }
+
+
+    public boolean isStringType() {
+        return stringType;
+    }
+
+    public void setStringType(boolean stringType) {
+        this.stringType = stringType;
+    }
+
+    public boolean isPartitionKey() {
+        return partitionKey;
+    }
+
+    public ColumnMetadata setPartitionKey(boolean partitionKey) {
+        this.partitionKey = partitionKey;
         return this;
     }
 
@@ -91,11 +114,13 @@ public class ColumnMetadata {
         return "ColumnMetadata{" +
                 "fieldName='" + fieldName + '\'' +
                 ", columnName='" + columnName + '\'' +
-                ", firstUpFiledName='" + firstUpFiledName + '\'' +
+                ", firstUpFieldName='" + firstUpFieldName + '\'' +
                 ", jdbcType='" + jdbcType + '\'' +
                 ", javaType='" + javaType + '\'' +
                 ", primary=" + primary +
                 ", useGeneratedKeys=" + useGeneratedKeys +
+                ", stringType=" + stringType +
+                ", partitionKey=" + partitionKey +
                 '}';
     }
 }

@@ -13,7 +13,7 @@ public class TableMetadata {
 
     private String exampleClazzName;
 
-    private String repositorySimpleName;
+    private String repositoryClazzSimpleName;
 
     private String domainClazzSimpleName;
 
@@ -28,6 +28,10 @@ public class TableMetadata {
     private String columns;
 
     private String packageName;
+
+    private ColumnMetadata partitionKey;
+
+    private Integer shard;
 
     public String getTableName() {
         return tableName;
@@ -46,7 +50,7 @@ public class TableMetadata {
         this.repositoryClazzName = repositoryClazzName;
         if (repositoryClazzName != null) {
             String[] split = repositoryClazzName.split("[.]");
-            this.repositorySimpleName = split[split.length - 1];
+            this.repositoryClazzSimpleName = split[split.length - 1];
         }
         return this;
     }
@@ -104,12 +108,12 @@ public class TableMetadata {
         return this;
     }
 
-    public String getRepositorySimpleName() {
-        return repositorySimpleName;
+    public String getRepositoryClazzSimpleName() {
+        return repositoryClazzSimpleName;
     }
 
-    public TableMetadata setRepositorySimpleName(String repositorySimpleName) {
-        this.repositorySimpleName = repositorySimpleName;
+    public TableMetadata setRepositoryClazzSimpleName(String repositoryClazzSimpleName) {
+        this.repositoryClazzSimpleName = repositoryClazzSimpleName;
         return this;
     }
 
@@ -149,21 +153,22 @@ public class TableMetadata {
         return this;
     }
 
-    @Override
-    public String toString() {
-        return "TableMetadata{" +
-                "tableName='" + tableName + '\'' +
-                ", repositoryClazzName='" + repositoryClazzName + '\'' +
-                ", domainClazzName='" + domainClazzName + '\'' +
-                ", exampleClazzName='" + exampleClazzName + '\'' +
-                ", repositorySimpleName='" + repositorySimpleName + '\'' +
-                ", domainClazzSimpleName='" + domainClazzSimpleName + '\'' +
-                ", exampleClazzSimpleName='" + exampleClazzSimpleName + '\'' +
-                ", dynamicField=" + dynamicField +
-                ", primaryMetadata=" + primaryMetadata +
-                ", columnMetadataList=" + columnMetadataList +
-                ", columns='" + columns + '\'' +
-                ", packageName='" + packageName + '\'' +
-                '}';
+    public TableMetadata setShard(Integer shard) {
+        this.shard = shard;
+        return this;
+    }
+
+    public Integer getShard() {
+        return shard;
+    }
+
+
+    public ColumnMetadata getPartitionKey() {
+        return partitionKey;
+    }
+
+    public TableMetadata setPartitionKey(ColumnMetadata partitionKey) {
+        this.partitionKey = partitionKey;
+        return this;
     }
 }

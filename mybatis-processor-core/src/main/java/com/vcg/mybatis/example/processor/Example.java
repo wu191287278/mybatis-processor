@@ -9,9 +9,17 @@ public @interface Example {
 
     /**
      * mybatis 接口类名
-     *
-     * @return
      */
     String namespace();
+
+    /**
+     * 分区键
+     */
+    String partitionKey() default "";
+
+    /**
+     * 分片数量
+     */
+    int shard() default 0;
 
 }

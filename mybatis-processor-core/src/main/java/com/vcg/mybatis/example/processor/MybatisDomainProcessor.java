@@ -35,6 +35,7 @@ public class MybatisDomainProcessor extends AbstractProcessor {
 
     private final DomainTypeVisitor domainTypeVisitor = new DomainTypeVisitor();
 
+
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         try {
@@ -45,15 +46,9 @@ public class MybatisDomainProcessor extends AbstractProcessor {
 
             for (Element element : elements) {
                 PackageElement packageOf = processingEnv.getElementUtils().getPackageOf(element);
-                Example example = element.getAnnotation(Example.class);
 
                 TableMetadata tableMetadata = read(element);
-                String domainClazzName = tableMetadata.getDomainClazzName();
-                String exampleName = (domainClazzName + "Example");
-
-                tableMetadata.setRepositoryClazzName(example.namespace())
-                        .setExampleClazzName(exampleName)
-                        .setPackageName(packageOf.toString());
+                String exampleName = tableMetadata.getExampleClazzName();
 
                 JavaFileObject javaFileObject = filer.createSourceFile(exampleName);
                 HashMap<String, Object> scopes = new HashMap<>();
@@ -86,18 +81,38 @@ public class MybatisDomainProcessor extends AbstractProcessor {
 
 
     public TableMetadata read(Element element) {
+        Example example = element.getAnnotation(Example.class);
+        Table table = element.getAnnotation(Table.class);
+        PackageElement packageOf = processingEnv.getElementUtils().getPackageOf(element);
 
         String clazzName = element.toString();
 
-        Table table = element.getAnnotation(Table.class);
+        String exampleName = (clazzName + "Example");
+
+
+        String partitionKey = example.partitionKey().equals("") ? null : example.partitionKey();
 
         TableMetadata tableMetadata = new TableMetadata()
-                .setDomainClazzName(clazzName);
-        tableMetadata.setTableName(table != null ? table.name() : String.join("_", CamelUtils.split(tableMetadata.getDomainClazzSimpleName(), true)));
+                .setDomainClazzName(clazzName)
+                .setExampleClazzName(exampleName)
+                .setPackageName(packageOf.toString())
+                .setShard(0 == example.shard() ? null : example.shard());
+
+//        String repositoryName = exampleName + "." + tableMetadata.getExampleClazzSimpleName() + "Repository";
+
+
+        tableMetadata.setRepositoryClazzName(example.namespace())
+                .setTableName(table != null ? table.name() : String.join("_",
+                CamelUtils.split(tableMetadata.getDomainClazzSimpleName(), true)));
 
         for (Element member : element.getEnclosedElements()) {
             boolean isStatic = member.getModifiers().stream().anyMatch(c -> Modifier.STATIC == c || Modifier.FINAL == c);
-            if (isStatic || !member.getKind().isField() || member.getAnnotation(Transient.class) != null) {
+            if (isStatic || !member.getKind().isField() ||
+                    member.getAnnotation(Transient.class) != null ||
+                    member.getAnnotation(ManyToMany.class) != null ||
+                    member.getAnnotation(OneToMany.class) != null ||
+                    member.getAnnotation(ManyToOne.class) != null
+            ) {
                 continue;
             }
 
@@ -128,6 +143,16 @@ public class MybatisDomainProcessor extends AbstractProcessor {
             if (id != null) {
                 tableMetadata.setPrimaryMetadata(columnMetadata);
             }
+
+            if (partitionKey != null &&
+                    (columnMetadata.getColumnName().equals(partitionKey) ||
+                            columnMetadata.getFieldName().equals(partitionKey))) {
+                columnMetadata.setPartitionKey(true);
+                tableMetadata.setPartitionKey(columnMetadata)
+                        .setShard(example.shard());
+
+            }
+
             tableMetadata.getColumnMetadataList().add(columnMetadata);
 
         }

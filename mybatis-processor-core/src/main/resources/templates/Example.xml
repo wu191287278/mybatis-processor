@@ -75,6 +75,19 @@
     {{metadata.columns}}
   </sql>
 
+  <sql id="TABLE_NAME">
+    {{metadata.tableName}}
+  </sql>
+
+  <sql id="Table_Name_Dy">
+    <if test="table==null">
+      <include refid="TABLE_NAME" />
+    </if>
+    <if test="table!=null">
+        ${table}
+    </if>
+  </sql>
+
   <sql id="Base_Column_List_Dy">
     <if test="columns==null">
       <include refid="Base_Column_List" />
@@ -92,7 +105,8 @@
       distinct
     </if>
     <include refid="Base_Column_List_Dy" />
-    from {{metadata.tableName}}
+    from
+    <include refid="Table_Name_Dy" />
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
@@ -107,13 +121,13 @@
     </if>
   </select>
 
-  <select id="selectByExampleWithCursor" parameterType="{{metadata.exampleClazzName}}" resultMap="BaseResultMap">
+  <select id="selectByExampleWithMap" parameterType="{{metadata.exampleClazzName}}" resultType="java.util.LinkedHashMap">
     select
     <if test="distinct">
       distinct
     </if>
     <include refid="Base_Column_List_Dy" />
-    from {{metadata.tableName}}
+    from <include refid="Table_Name_Dy"></include>
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
@@ -156,7 +170,7 @@
   {{/metadata.primaryMetadata}}
 
   <delete id="deleteByExample" parameterType="{{metadata.exampleClazzName}}">
-    delete from {{metadata.tableName}}
+    delete from <include refid="Table_Name_Dy"></include>
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
@@ -171,6 +185,17 @@
       {{/metadata.columnMetadataList}}
     </trim>
     )
+  </insert>
+
+  <insert id="shardInsert" {{#metadata.primaryMetadata}} {{#metadata.primaryMetadata.useGeneratedKeys}} keyProperty="{{metadata.primaryMetadata.fieldName}}" useGeneratedKeys="{{metadata.primaryMetadata.useGeneratedKeys}}" {{/metadata.primaryMetadata.useGeneratedKeys}} {{/metadata.primaryMetadata}}>
+    insert into <include refid="Table_Name_Dy"></include> ({{metadata.columns}})
+    values (
+      <trim  suffixOverrides=",">
+      {{#metadata.columnMetadataList}}
+      #{ record.{{fieldName}}{{#jdbcType}},jdbcType={{jdbcType}} {{/jdbcType}} } ,
+      {{/metadata.columnMetadataList}}
+      </trim>
+      )
   </insert>
 
   <insert id="insertSelective" parameterType="{{metadata.domainClazzName}}" {{#metadata.primaryMetadata}} {{#metadata.primaryMetadata.useGeneratedKeys}} keyProperty="{{metadata.primaryMetadata.fieldName}}" useGeneratedKeys="{{metadata.primaryMetadata.useGeneratedKeys}}" {{/metadata.primaryMetadata.useGeneratedKeys}} {{/metadata.primaryMetadata}}>
@@ -191,15 +216,34 @@
     </trim>
   </insert>
 
-  <select id="countByExample" parameterType="{{metadata.exampleClazzName}}" resultType="java.lang.Long">
-    select count(*) from {{metadata.tableName}}
+  <insert id="shardInsertSelective" parameterType="{{metadata.domainClazzName}}" {{#metadata.primaryMetadata}} {{#metadata.primaryMetadata.useGeneratedKeys}} keyProperty="{{metadata.primaryMetadata.fieldName}}" useGeneratedKeys="{{metadata.primaryMetadata.useGeneratedKeys}}" {{/metadata.primaryMetadata.useGeneratedKeys}} {{/metadata.primaryMetadata}}>
+     insert into <include refid="Table_Name_Dy"></include>
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+    {{#metadata.columnMetadataList}}
+      <if test="{{fieldName}} != null">
+        {{columnName}},
+      </if>
+    {{/metadata.columnMetadataList}}
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+    {{#metadata.columnMetadataList}}
+      <if test="{{fieldName}} != null">
+        #{ record.{{fieldName}}{{#jdbcType}},jdbcType={{jdbcType}} {{/jdbcType}} } ,
+      </if>
+    {{/metadata.columnMetadataList}}
+    </trim>
+  </insert>
+
+  <select id="countByExample" parameterType="{{metadata.exampleClazzName}}" resultType="long">
+    select count(*) from <include refid="Table_Name_Dy"></include>
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
   </select>
 
+
   <update id="updateByExampleSelective" parameterType="map">
-    update {{metadata.tableName}}
+    update <include refid="Table_Name_Dy"></include>
     <set>
     {{#metadata.columnMetadataList}}
     <if test="record.{{fieldName}} != null">
@@ -213,7 +257,7 @@
   </update>
 
   <update id="updateByExample" parameterType="map">
-    update {{metadata.tableName}}
+    update <include refid="Table_Name_Dy"></include>
     set
     <trim  suffixOverrides=",">
     {{#metadata.columnMetadataList}}
@@ -283,77 +327,22 @@
   {{/metadata.primaryMetadata}}
 
   {{#metadata.primaryMetadata}}
-  <select id="getOne" parameterType="{{metadata.primaryMetadata.javaType}}" resultMap="BaseResultMap">
-    select
-    <include refid="Base_Column_List" />
-    from {{metadata.tableName}}
-    where {{metadata.primaryMetadata.columnName}} = #{ {{metadata.primaryMetadata.fieldName}}{{#metadata.primaryMetadata.jdbcType}},jdbcType={{metadata.primaryMetadata.jdbcType}}{{/metadata.primaryMetadata.jdbcType}} }
-  </select>
-  {{/metadata.primaryMetadata}}
-
-  {{#metadata.primaryMetadata}}
-  <select id="getById" parameterType="{{metadata.primaryMetadata.javaType}}" resultMap="BaseResultMap">
-    select
-    <include refid="Base_Column_List" />
-    from {{metadata.tableName}}
-    where {{metadata.primaryMetadata.columnName}} = #{ {{metadata.primaryMetadata.fieldName}}{{#metadata.primaryMetadata.jdbcType}},jdbcType={{metadata.primaryMetadata.jdbcType}}{{/metadata.primaryMetadata.jdbcType}} }
-  </select>
-  {{/metadata.primaryMetadata}}
-
- {{#metadata.primaryMetadata}}
-  <select id="findAll" resultMap="BaseResultMap">
-    select
-    <include refid="Base_Column_List" />
-    from {{metadata.tableName}}
-  </select>
-  {{/metadata.primaryMetadata}}
-
- {{#metadata.primaryMetadata}}
-  <select id="findAllById" resultMap="BaseResultMap">
-    select
-    <include refid="Base_Column_List" />
-    from {{metadata.tableName}}
-    where {{metadata.primaryMetadata.columnName}}  in
-    <foreach close=")" collection="list" item="id" open="(" separator=",">
-      #{id}
-    </foreach>
-  </select>
-  {{/metadata.primaryMetadata}}
-
-  {{#metadata.primaryMetadata}}
-  <delete id="deleteById" parameterType="{{metadata.primaryMetadata.javaType}}">
-    delete from {{metadata.tableName}}
-    where {{metadata.primaryMetadata.columnName}} = #{ {{metadata.primaryMetadata.fieldName}}{{#metadata.primaryMetadata.jdbcType}},jdbcType={{metadata.primaryMetadata.jdbcType}}{{/metadata.primaryMetadata.jdbcType}} }
-  </delete>
-  {{/metadata.primaryMetadata}}
-
-  {{#metadata.primaryMetadata}}
-  <delete id="delete" parameterType="{{metadata.domainClazzName}}">
-    delete from {{metadata.tableName}}
-    where {{metadata.primaryMetadata.columnName}} = #{ {{metadata.primaryMetadata.fieldName}}{{#metadata.primaryMetadata.jdbcType}},jdbcType={{metadata.primaryMetadata.jdbcType}}{{/metadata.primaryMetadata.jdbcType}} }
-  </delete>
-  {{/metadata.primaryMetadata}}
-
-  {{#metadata.primaryMetadata}}
-  <delete id="deleteAll" parameterType="{{metadata.primaryMetadata.javaType}}">
-    delete from {{metadata.tableName}}
-    where {{metadata.primaryMetadata.columnName}} in
-    <foreach close=")" collection="list" item="id" open="(" separator=",">
-      #{id}
-    </foreach>
-  </delete>
-  {{/metadata.primaryMetadata}}
-
-  {{#metadata.primaryMetadata}}
   <select id="existsById" parameterType="{{metadata.primaryMetadata.javaType}}" resultType="boolean">
     select count(*)>0 from {{metadata.tableName}}
     where {{metadata.primaryMetadata.columnName}} = #{ {{metadata.primaryMetadata.fieldName}}{{#metadata.primaryMetadata.jdbcType}},jdbcType={{metadata.primaryMetadata.jdbcType}}{{/metadata.primaryMetadata.jdbcType}} }
   </select>
   {{/metadata.primaryMetadata}}
 
-  {{#metadata.primaryMetadata}}
+
+  <select id="existByExample" parameterType="{{metadata.exampleClazzName}}" resultType="Boolean">
+    select 1 from <include refid="Table_Name_Dy"></include>
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    limit 1
+  </select>
+
   <select id="count" resultType="long">
     select count(*) from {{metadata.tableName}}
   </select>
-  {{/metadata.primaryMetadata}}
 </mapper>

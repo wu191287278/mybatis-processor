@@ -3,7 +3,7 @@ package com.vcg.mybatis.example.processor;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 
 public interface MybatisExampleRepository<T, ID, Example> {
 
@@ -13,9 +13,15 @@ public interface MybatisExampleRepository<T, ID, Example> {
 
     List<T> selectByExample(Example query);
 
+    List<Map<String, Object>> selectByExampleWithMap(Example query);
+
     void insert(T t);
 
     void insertSelective(T t);
+
+    void shardInsert(@Param("table") String table, @Param("record") T t);
+
+    void shardInsertSelective(@Param("table") String table, @Param("record") T t);
 
     void insertBatch(List<T> ts);
 
@@ -35,36 +41,8 @@ public interface MybatisExampleRepository<T, ID, Example> {
 
     int deleteByExample(Example query);
 
-    T getOne(ID id);
+    boolean existById(ID id);
 
-    T getById(ID id);
+    Boolean existByExample(Example query);
 
-    boolean existsById(ID id);
-
-    long count();
-
-    void deleteById(ID id);
-
-    void delete(T entity);
-
-    void deleteAll(List<? extends T> entities);
-
-    List<T> findAll();
-
-    List<T> findAllById(List<ID> ids);
-
-    default Optional<T> findById(ID id) {
-        T t = selectByPrimaryKey(id);
-        return t != null ? Optional.of(t) : Optional.empty();
-    }
-
-    default T save(T entity) {
-        insertSelective(entity);
-        return entity;
-    }
-
-    default List<T> saveAll(List<T> entities) {
-        insertBatch(entities);
-        return entities;
-    }
 }

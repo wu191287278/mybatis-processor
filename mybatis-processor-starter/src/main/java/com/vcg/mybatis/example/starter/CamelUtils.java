@@ -1,4 +1,4 @@
-package com.vcg.mybatis.example.processor;
+package com.vcg.mybatis.example.starter;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,6 +24,10 @@ public class CamelUtils {
         }
 
         return Collections.unmodifiableList(result);
+    }
+
+    public static String toSnake(String source) {
+        return String.join("_", split(source, true));
     }
 
 }
