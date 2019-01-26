@@ -36,7 +36,7 @@ public class JpaMapperFactoryBean<T> extends MapperFactoryBean<T> {
     @Override
     protected void checkDaoConfig() {
         super.checkDaoConfig();
-        if (MybatisCurdRepository.class.isAssignableFrom(getMapperInterface())) {
+        if (MybatisCrudRepository.class.isAssignableFrom(getMapperInterface())) {
             parseInterface();
         }
     }
