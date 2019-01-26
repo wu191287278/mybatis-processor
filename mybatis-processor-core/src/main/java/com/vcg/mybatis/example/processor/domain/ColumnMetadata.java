@@ -104,23 +104,7 @@ public class ColumnMetadata {
         return partitionKey;
     }
 
-    public ColumnMetadata setPartitionKey(boolean partitionKey) {
+    public void setPartitionKey(boolean partitionKey) {
         this.partitionKey = partitionKey;
-        return this;
-    }
-
-    @Override
-    public String toString() {
-        return "ColumnMetadata{" +
-                "fieldName='" + fieldName + '\'' +
-                ", columnName='" + columnName + '\'' +
-                ", firstUpFieldName='" + firstUpFieldName + '\'' +
-                ", jdbcType='" + jdbcType + '\'' +
-                ", javaType='" + javaType + '\'' +
-                ", primary=" + primary +
-                ", useGeneratedKeys=" + useGeneratedKeys +
-                ", stringType=" + stringType +
-                ", partitionKey=" + partitionKey +
-                '}';
     }
 }

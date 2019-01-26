@@ -7,9 +7,6 @@ import java.lang.annotation.*;
 @Target(ElementType.TYPE)
 public @interface Example {
 
-    /**
-     * mybatis 接口类名
-     */
     String namespace();
 
     /**

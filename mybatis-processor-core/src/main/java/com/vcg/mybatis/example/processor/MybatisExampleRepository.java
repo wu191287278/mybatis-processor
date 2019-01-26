@@ -19,11 +19,13 @@ public interface MybatisExampleRepository<T, ID, Example> {
 
     void insertSelective(T t);
 
-    void shardInsert(@Param("table") String table, @Param("record") T t);
-
-    void shardInsertSelective(@Param("table") String table, @Param("record") T t);
-
     void insertBatch(List<T> ts);
+
+    void insertByExample(Example query);
+
+    void insertSelectiveByExample(Example query);
+
+    void insertBatchByExample(Example query);
 
     long countByExample(Example query);
 

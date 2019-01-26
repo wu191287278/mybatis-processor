@@ -1,5 +1,5 @@
-# mybatis-example-processor
-mybatis-example-processor 该工具是用于在编译阶段自动生成mybatis 的Example.java
+# mybatis-processor
+mybatis-processor 该工具是用于在编译阶段自动生成mybatis 的Example.java
 和Mapper.xml文件
 
 ### 使用方式
@@ -7,7 +7,7 @@ mybatis-example-processor 该工具是用于在编译阶段自动生成mybatis �
 依赖:
 
  <dependency>
-      <artifactId>mybatis-example-processor</artifactId>
+      <artifactId>mybatis-processor-core</artifactId>
       <groupId>com.vcg</groupId>
       <version>0.0.1-SNAPSHOT</version>
 </dependency>
@@ -27,7 +27,7 @@ maven 编译插件:
                 <version>${lombok.version}</version>
             </path>
             <path>
-                <artifactId>mybatis-example-processor</artifactId>
+                <artifactId>mybatis-processor-core</artifactId>
                 <groupId>com.vcg</groupId>
                 <version>0.0.1-SNAPSHOT</version>
             </path>

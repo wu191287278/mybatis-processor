@@ -22,7 +22,11 @@ public class PageInfo<T> implements Serializable {
         this.size = size;
         this.total = total;
         this.data = data;
-        this.pages = total == 0 ? 0 : (total / size) + (total % size) > 0 ? 1 : 0;
+        if (total == 0) {
+            this.pages = 0;
+        } else {
+            this.pages = (int) ((total / size) + ((total % size) > 0 ? 1 : 0));
+        }
     }
 
     public int getPage() {
@@ -65,4 +69,14 @@ public class PageInfo<T> implements Serializable {
         this.data = data;
     }
 
+    @Override
+    public String toString() {
+        return "PageInfo{" +
+                "page=" + page +
+                ", size=" + size +
+                ", total=" + total +
+                ", pages=" + pages +
+                ", data=" + data +
+                '}';
+    }
 }

@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -74,7 +75,7 @@ public class MybatisDomainProcessor extends AbstractProcessor {
 
             }
         } catch (Exception e) {
-            processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING, e.toString());
+            processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING, Arrays.toString(e.getStackTrace()));
         }
         return true;
     }
@@ -89,7 +90,6 @@ public class MybatisDomainProcessor extends AbstractProcessor {
 
         String exampleName = (clazzName + "Example");
 
-
         String partitionKey = example.partitionKey().equals("") ? null : example.partitionKey();
 
         TableMetadata tableMetadata = new TableMetadata()
@@ -98,12 +98,12 @@ public class MybatisDomainProcessor extends AbstractProcessor {
                 .setPackageName(packageOf.toString())
                 .setShard(0 == example.shard() ? null : example.shard());
 
-//        String repositoryName = exampleName + "." + tableMetadata.getExampleClazzSimpleName() + "Repository";
+        String repositoryName = !example.namespace().equals("") ? example.namespace() :
+                exampleName + "." + tableMetadata.getExampleClazzSimpleName() + "Repository";
 
-
-        tableMetadata.setRepositoryClazzName(example.namespace())
+        tableMetadata.setRepositoryClazzName(repositoryName)
                 .setTableName(table != null ? table.name() : String.join("_",
-                CamelUtils.split(tableMetadata.getDomainClazzSimpleName(), true)));
+                        CamelUtils.split(tableMetadata.getDomainClazzSimpleName(), true)));
 
         for (Element member : element.getEnclosedElements()) {
             boolean isStatic = member.getModifiers().stream().anyMatch(c -> Modifier.STATIC == c || Modifier.FINAL == c);
@@ -144,9 +144,7 @@ public class MybatisDomainProcessor extends AbstractProcessor {
                 tableMetadata.setPrimaryMetadata(columnMetadata);
             }
 
-            if (partitionKey != null &&
-                    (columnMetadata.getColumnName().equals(partitionKey) ||
-                            columnMetadata.getFieldName().equals(partitionKey))) {
+            if (partitionKey != null && (columnMetadata.getColumnName().equals(partitionKey) || columnMetadata.getFieldName().equals(partitionKey))) {
                 columnMetadata.setPartitionKey(true);
                 tableMetadata.setPartitionKey(columnMetadata)
                         .setShard(example.shard());

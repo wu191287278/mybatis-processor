@@ -33,6 +33,8 @@ public class TableMetadata {
 
     private Integer shard;
 
+    private List<String> shardTables;
+
     public String getTableName() {
         return tableName;
     }
@@ -155,6 +157,13 @@ public class TableMetadata {
 
     public TableMetadata setShard(Integer shard) {
         this.shard = shard;
+        if (shard != null) {
+            this.shardTables = new ArrayList<>();
+            for (int i = 0; i < shard; i++) {
+                this.shardTables.add(this.tableName + "_" + i);
+            }
+        }
+
         return this;
     }
 
@@ -169,6 +178,15 @@ public class TableMetadata {
 
     public TableMetadata setPartitionKey(ColumnMetadata partitionKey) {
         this.partitionKey = partitionKey;
+        return this;
+    }
+
+    public List<String> getShardTables() {
+        return shardTables;
+    }
+
+    public TableMetadata setShardTables(List<String> shardTables) {
+        this.shardTables = shardTables;
         return this;
     }
 }
