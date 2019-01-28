@@ -112,6 +112,14 @@ public class MybatisQueryCreator extends AbstractQueryCreator<String, StringBuil
             return Prefix + " not in (<foreach  collection=\"" + propertyName + "\" item=\"item\" separator=\",\">#{item}</foreach>) ";
         }
 
+        if ("EXISTS".equals(type.name())) {
+            return Prefix + " exists (<foreach  collection=\"" + propertyName + "\" item=\"item\" separator=\",\">#{item}</foreach>) ";
+        }
+
+        if ("NOT_EXISTS".equals(type.name())) {
+            return Prefix + " not exists (<foreach  collection=\"" + propertyName + "\" item=\"item\" separator=\",\">#{item}</foreach>) ";
+        }
+
         if ("GREATER_THAN".equals(type.name()) || "AFTER".equals(type.name())) {
             return Prefix + " &gt; #{" + propertyName + "} ";
         }
