@@ -1,5 +1,6 @@
 package com.vcg.mybatis.example.starter;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mapping.PropertyPath;
 import org.springframework.data.repository.query.parser.AbstractQueryCreator;
@@ -75,6 +76,16 @@ public class MybatisQueryCreator extends AbstractQueryCreator<String, StringBuil
                         .append(" ");
             }
         }
+
+        for (int i = 0; i < method.getParameterTypes().length; i++) {
+            if (Pageable.class == method.getParameterTypes()[i]) {
+                String param = "param" + (i + 1);
+                criteria.append("<foreach open=\"order by\"  collection=\""+param+".sort\" item=\"item\" separator=\",\">${item.property} ${item.direction}</foreach> ")
+                        .append(" limit ${(" + param + ".pageNumber-1)*" + param + ".pageSize}, ${" + param + ".pageSize}");
+                break;
+            }
+        }
+
 
         String sql = FIND_SQL;
         String resultType = "resultMap=\"BaseResultMap\"";
@@ -165,11 +176,11 @@ public class MybatisQueryCreator extends AbstractQueryCreator<String, StringBuil
         }
 
         if ("LIKE".equals(type.name()) || "CONTAINS".equals(type.name())) {
-            return Prefix + " like '%#{" + propertyName + "}%'";
+            return Prefix + " like '#{" + propertyName + "}'";
         }
 
         if ("NOT_LIKE".equals(type.name()) || "NOT_CONTAINS".equals(type.name())) {
-            return Prefix + " not like '%#{" + propertyName + "}%'";
+            return Prefix + " not like '#{" + propertyName + "}'";
         }
 
         if ("BETWEEN".equals(type.name())) {
@@ -177,7 +188,7 @@ public class MybatisQueryCreator extends AbstractQueryCreator<String, StringBuil
         }
 
         if ("REGEX".equals(type.name())) {
-            return Prefix + " REGEXP '#{" + propertyName + "}'";
+            return Prefix + " regexp '#{" + propertyName + "}'";
         }
 
 
