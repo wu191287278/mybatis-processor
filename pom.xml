@@ -16,6 +16,18 @@
         <module>mybatis-processor-starter</module>
     </modules>
 
+    <distributionManagement>
+        <snapshotRepository>
+            <id>maven-snapshots</id>
+            <name>maven-snapshots</name>
+            <url>http://maven.500px.me/repository/maven-snapshots/</url>
+        </snapshotRepository>
+        <repository>
+            <id>maven-releases</id>
+            <name>maven-releases</name>
+            <url>http://maven.500px.me/repository/maven-releases/</url>
+        </repository>
+    </distributionManagement>
 
 
 </project>

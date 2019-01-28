@@ -2,6 +2,10 @@ package com.vcg.mybatis.example.starter;
 
 import com.vcg.mybatis.example.processor.CamelUtils;
 import com.vcg.mybatis.example.processor.MybatisExampleRepository;
+import org.apache.ibatis.annotations.Delete;
+import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 import org.apache.ibatis.builder.xml.XMLMapperBuilder;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.session.Configuration;
@@ -36,6 +40,9 @@ public class JpaMapperFactoryBean<T> extends MapperFactoryBean<T> {
     @Override
     protected void checkDaoConfig() {
         super.checkDaoConfig();
+        if (MybatisCrudRepository.class == getMapperInterface() || MybatisExampleRepository.class == getMapperInterface()) {
+            return;
+        }
         if (MybatisCrudRepository.class.isAssignableFrom(getMapperInterface())) {
             parseInterface();
         }
@@ -53,6 +60,14 @@ public class JpaMapperFactoryBean<T> extends MapperFactoryBean<T> {
         }
         for (Method method : getMapperInterface().getMethods()) {
             if (ignoreMethods.contains(method.getName())) continue;
+            Select select = method.getAnnotation(Select.class);
+            Delete delete = method.getAnnotation(Delete.class);
+            Update update = method.getAnnotation(Update.class);
+            Insert insert = method.getAnnotation(Insert.class);
+            if (select != null || delete != null || update != null || insert != null) continue;
+
+            Collection<String> mappedStatementNames = configuration.getMappedStatementNames();
+            if (mappedStatementNames.contains(this.getMapperInterface().getName() + "." + method.getName())) continue;
 
             if (MybatisQueryCreator.match(method.getName())) {
                 PartTree tree = new PartTree(method.getName(), domainClass);
@@ -73,7 +88,7 @@ public class JpaMapperFactoryBean<T> extends MapperFactoryBean<T> {
                 );
                 xmlMapperBuilder.parse();
             } catch (IOException e) {
-                e.printStackTrace();
+                throw new RuntimeException(e.getMessage(), e);
             }
         }
 

@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 
 public class MybatisQueryCreator extends AbstractQueryCreator<String, StringBuilder> {
 
-    private static final Pattern FIND_PATTERN = Pattern.compile("^(findBy|getBy)");
+    private static final Pattern FIND_PATTERN = Pattern.compile("^(findBy|getBy|queryBy)");
 
     private static final Pattern COUNT_PATTERN = Pattern.compile("^(countBy)");
 
@@ -23,7 +23,7 @@ public class MybatisQueryCreator extends AbstractQueryCreator<String, StringBuil
 
     private static final String COUNT_SQL = "select count(*) from <include refid=\"TABLE_NAME\" /> ";
 
-    private static final String EXIST_SQl = "select count(*)>0 from <include refid=\"TABLE_NAME\" /> ";
+    private static final String EXIST_SQl = "select if(sum(1),1,0) from <include refid=\"TABLE_NAME\" /> ";
 
     private static final String MAPPER_XML = "<select id=\"%s\" %s>%s</select>";
 
@@ -84,8 +84,9 @@ public class MybatisQueryCreator extends AbstractQueryCreator<String, StringBuil
         }
 
         if (EXIST_PATTERN.matcher(this.method.getName()).find()) {
-            sql = EXIST_SQl;
             resultType = "resultType=\"boolean\"";
+            sql = (EXIST_SQl + " where " + criteria.toString() + " limit 1");
+            return String.format(MAPPER_XML, this.method.getName(), resultType, sql);
         }
 
         sql = (sql + " where " + criteria.toString());
@@ -93,10 +94,13 @@ public class MybatisQueryCreator extends AbstractQueryCreator<String, StringBuil
         return String.format(MAPPER_XML, this.method.getName(), resultType, sql);
     }
 
+    private int numberOfArguments = 0;
+
     private String getCondition(Part part) {
         PropertyPath property = part.getProperty();
-        String propertyName = property.getSegment();
-        String columnName = this.columnMap.get(propertyName);
+        String segment = property.getSegment();
+        String propertyName = "param" + (++numberOfArguments);
+        String columnName = this.columnMap.get(segment);
         Part.Type type = part.getType();
         String Prefix = " " + columnName;
 
@@ -108,7 +112,7 @@ public class MybatisQueryCreator extends AbstractQueryCreator<String, StringBuil
             return Prefix + " not in (<foreach  collection=\"" + propertyName + "\" item=\"item\" separator=\",\">#{item}</foreach>) ";
         }
 
-        if ("GREATER_THAN".equals(type.name())) {
+        if ("GREATER_THAN".equals(type.name()) || "AFTER".equals(type.name())) {
             return Prefix + " &gt; #{" + propertyName + "} ";
         }
 
@@ -116,7 +120,7 @@ public class MybatisQueryCreator extends AbstractQueryCreator<String, StringBuil
             return Prefix + " &gt;= #{" + propertyName + "} ";
         }
 
-        if ("LESS_THAN".equals(type.name())) {
+        if ("LESS_THAN".equals(type.name()) || "BEFORE".equals(type.name())) {
             return Prefix + "  &lt; #{" + propertyName + "} ";
         }
 
@@ -125,18 +129,22 @@ public class MybatisQueryCreator extends AbstractQueryCreator<String, StringBuil
         }
 
         if ("IS_NULL".equals(type.name())) {
+            numberOfArguments--;
             return Prefix + "  is null";
         }
 
         if ("IS_NOT_NULL".equals(type.name())) {
+            numberOfArguments--;
             return Prefix + " is not null";
         }
 
         if ("TRUE".equals(type.name())) {
+            numberOfArguments--;
             return Prefix + " = true";
         }
 
         if ("FALSE".equals(type.name())) {
+            numberOfArguments--;
             return Prefix + " = false";
         }
 
@@ -148,12 +156,20 @@ public class MybatisQueryCreator extends AbstractQueryCreator<String, StringBuil
             return Prefix + " like '#{" + propertyName + "}%'";
         }
 
-        if ("LIKE".equals(type.name())) {
+        if ("LIKE".equals(type.name()) || "CONTAINS".equals(type.name())) {
             return Prefix + " like '%#{" + propertyName + "}%'";
         }
 
-        if ("NOT_LIKE".equals(type.name())) {
+        if ("NOT_LIKE".equals(type.name()) || "NOT_CONTAINS".equals(type.name())) {
             return Prefix + " not like '%#{" + propertyName + "}%'";
+        }
+
+        if ("BETWEEN".equals(type.name())) {
+            return Prefix + " between #{" + propertyName + "} and " + " #{param" + (++numberOfArguments) + "}";
+        }
+
+        if ("REGEX".equals(type.name())) {
+            return Prefix + " REGEXP '#{" + propertyName + "}'";
         }
 
 

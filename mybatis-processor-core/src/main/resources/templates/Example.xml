@@ -361,7 +361,7 @@
 
 
   <select id="existByExample" parameterType="{{metadata.exampleClazzName}}" resultType="Boolean">
-    select 1 from <include refid="Table_Name_Dy"></include>
+    select if(sum(1),1,0) from <include refid="Table_Name_Dy"></include>
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
