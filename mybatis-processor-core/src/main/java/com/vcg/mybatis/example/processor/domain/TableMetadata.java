@@ -35,6 +35,11 @@ public class TableMetadata {
 
     private List<String> shardTables;
 
+    private List<JoinMetadata> oneToOne = new ArrayList<>();
+
+    private List<JoinMetadata> oneToMany = new ArrayList<>();
+
+
     public String getTableName() {
         return tableName;
     }
@@ -188,5 +193,21 @@ public class TableMetadata {
     public TableMetadata setShardTables(List<String> shardTables) {
         this.shardTables = shardTables;
         return this;
+    }
+
+    public List<JoinMetadata> getOneToOne() {
+        return oneToOne;
+    }
+
+    public void setOneToOne(List<JoinMetadata> oneToOne) {
+        this.oneToOne = oneToOne;
+    }
+
+    public List<JoinMetadata> getOneToMany() {
+        return oneToMany;
+    }
+
+    public void setOneToMany(List<JoinMetadata> oneToMany) {
+        this.oneToMany = oneToMany;
     }
 }

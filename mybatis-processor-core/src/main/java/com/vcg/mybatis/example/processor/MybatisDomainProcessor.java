@@ -4,6 +4,7 @@ import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 import com.vcg.mybatis.example.processor.domain.ColumnMetadata;
+import com.vcg.mybatis.example.processor.domain.JoinMetadata;
 import com.vcg.mybatis.example.processor.domain.TableMetadata;
 import com.vcg.mybatis.example.processor.visitor.DomainTypeVisitor;
 
@@ -107,16 +108,42 @@ public class MybatisDomainProcessor extends AbstractProcessor {
 
         for (Element member : element.getEnclosedElements()) {
             boolean isStatic = member.getModifiers().stream().anyMatch(c -> Modifier.STATIC == c || Modifier.FINAL == c);
-            if (isStatic || !member.getKind().isField() ||
+            if (isStatic ||
+                    !member.getKind().isField() ||
                     member.getAnnotation(Transient.class) != null ||
-                    member.getAnnotation(ManyToMany.class) != null ||
-                    member.getAnnotation(OneToMany.class) != null ||
-                    member.getAnnotation(ManyToOne.class) != null
+                    member.getAnnotation(ManyToOne.class) != null ||
+                    member.getAnnotation(ManyToMany.class) != null
+
             ) {
                 continue;
             }
 
             String name = member.toString();
+            OneToOne oneToOne = member.getAnnotation(OneToOne.class);
+            OneToMany oneToMany = member.getAnnotation(OneToMany.class);
+            JoinColumn joinColumn = member.getAnnotation(JoinColumn.class);
+
+            if (joinColumn != null) {
+                if (!"".equals(joinColumn.name())) {
+                    JoinMetadata joinMetadata = new JoinMetadata()
+                            .setColumnName(joinColumn.name())
+                            .setFieldName(name);
+                    if (oneToOne != null) {
+                        joinMetadata.setMappedBy(oneToOne.mappedBy())
+                                .setFieldName(oneToOne.fetch().name().toLowerCase());
+                        tableMetadata.getOneToOne().add(joinMetadata);
+                    }
+
+                    if (oneToMany != null) {
+                        joinMetadata.setMappedBy(oneToMany.mappedBy())
+                                .setFieldName(oneToMany.fetch().name().toLowerCase());
+                        tableMetadata.getOneToMany().add(joinMetadata);
+                    }
+                }
+                continue;
+            }
+
+
             Id id = member.getAnnotation(Id.class);
             Column column = member.getAnnotation(Column.class);
             GeneratedValue generatedValue = member.getAnnotation(GeneratedValue.class);

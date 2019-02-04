@@ -11,6 +11,12 @@
     <result column="{{columnName}}" {{#jdbcType}} jdbcType="{{jdbcType}}" {{/jdbcType}} property="{{fieldName}}" />
     {{/primary}}
 {{/metadata.columnMetadataList}}
+{{#metadata.oneToOne}}
+    <association column="{{columnName}}" property="{{fieldName}}" fetchType="{{fetchType}}" select="{{mappedBy}}"/>
+{{/metadata.oneToOne}}
+{{#metadata.oneToMany}}
+    <collection  column="{{columnName}}" property="{{fieldName}}" fetchType="{{fetchType}}" select="{{mappedBy}}"/>
+{{/metadata.oneToMany}}
   </resultMap>
   <sql id="Example_Where_Clause">
     <where>
