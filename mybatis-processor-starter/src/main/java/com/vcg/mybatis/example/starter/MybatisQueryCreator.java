@@ -24,7 +24,7 @@ public class MybatisQueryCreator extends AbstractQueryCreator<String, StringBuil
 
     private static final String COUNT_SQL = "select count(*) from <include refid=\"TABLE_NAME\" /> ";
 
-    private static final String EXIST_SQl = "select if(sum(1),1,0) from <include refid=\"TABLE_NAME\" /> ";
+    private static final String EXIST_SQl = "select count(*)>0 from <include refid=\"TABLE_NAME\" /> ";
 
     private static final String MAPPER_XML = "<select id=\"%s\" %s>%s</select>";
 
@@ -96,7 +96,7 @@ public class MybatisQueryCreator extends AbstractQueryCreator<String, StringBuil
 
         if (EXIST_PATTERN.matcher(this.method.getName()).find()) {
             resultType = "resultType=\"boolean\"";
-            sql = (EXIST_SQl + " where " + criteria.toString() + " limit 1");
+            sql = (EXIST_SQl + " where " + criteria.toString());
             return String.format(MAPPER_XML, this.method.getName(), resultType, sql);
         }
 
