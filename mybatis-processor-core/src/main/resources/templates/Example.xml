@@ -361,11 +361,13 @@
 
 
   <select id="existByExample" parameterType="{{metadata.exampleClazzName}}" resultType="Boolean">
-    select if(sum(1),1,0) from <include refid="Table_Name_Dy"></include>
-    <if test="_parameter != null">
-      <include refid="Example_Where_Clause" />
-    </if>
-    limit 1
+  select IFNULL( select 1 from
+    <include refid="Table_Name_Dy"></include>
+      <if test="_parameter != null">
+        <include refid="Example_Where_Clause"/>
+      </if>
+      limit 1
+      )
   </select>
 
   <select id="count" resultType="long">

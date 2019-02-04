@@ -24,7 +24,7 @@ public class MybatisQueryCreator extends AbstractQueryCreator<String, StringBuil
 
     private static final String COUNT_SQL = "select count(*) from <include refid=\"TABLE_NAME\" /> ";
 
-    private static final String EXIST_SQl = "select count(*)>0 from <include refid=\"TABLE_NAME\" /> ";
+    private static final String EXIST_SQl = "select ifnull(select 1 from <include refid=\"TABLE_NAME\" />,0) ";
 
     private static final String MAPPER_XML = "<select id=\"%s\" %s>%s</select>";
 
