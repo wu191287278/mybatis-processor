@@ -111,17 +111,18 @@ public class MybatisDomainProcessor extends AbstractProcessor {
             if (isStatic ||
                     !member.getKind().isField() ||
                     member.getAnnotation(Transient.class) != null ||
-                    member.getAnnotation(ManyToOne.class) != null ||
-                    member.getAnnotation(ManyToMany.class) != null
+                    member.getAnnotation(ManyToOne.class) != null
+
 
             ) {
                 continue;
             }
 
             String name = member.toString();
+            JoinColumn joinColumn = member.getAnnotation(JoinColumn.class);
             OneToOne oneToOne = member.getAnnotation(OneToOne.class);
             OneToMany oneToMany = member.getAnnotation(OneToMany.class);
-            JoinColumn joinColumn = member.getAnnotation(JoinColumn.class);
+            ManyToMany manyToMany = member.getAnnotation(ManyToMany.class);
 
             if (joinColumn != null) {
                 if (!"".equals(joinColumn.name())) {
@@ -130,13 +131,19 @@ public class MybatisDomainProcessor extends AbstractProcessor {
                             .setFieldName(name);
                     if (oneToOne != null) {
                         joinMetadata.setMappedBy(oneToOne.mappedBy())
-                                .setFieldName(oneToOne.fetch().name().toLowerCase());
+                                .setFetchType(oneToOne.fetch().name().toLowerCase());
                         tableMetadata.getOneToOne().add(joinMetadata);
                     }
 
                     if (oneToMany != null) {
                         joinMetadata.setMappedBy(oneToMany.mappedBy())
-                                .setFieldName(oneToMany.fetch().name().toLowerCase());
+                                .setFetchType(oneToMany.fetch().name().toLowerCase());
+                        tableMetadata.getOneToMany().add(joinMetadata);
+                    }
+
+                    if (manyToMany != null) {
+                        joinMetadata.setMappedBy(manyToMany.mappedBy())
+                                .setFetchType(manyToMany.fetch().name().toLowerCase());
                         tableMetadata.getOneToMany().add(joinMetadata);
                     }
                 }
