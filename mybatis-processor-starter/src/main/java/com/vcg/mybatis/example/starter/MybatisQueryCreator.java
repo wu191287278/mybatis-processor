@@ -14,11 +14,13 @@ import java.util.regex.Pattern;
 
 public class MybatisQueryCreator extends AbstractQueryCreator<String, StringBuilder> {
 
-    private static final Pattern FIND_PATTERN = Pattern.compile("^(findBy|getBy|queryBy)");
+    private static final Pattern FIND_PATTERN = Pattern.compile("^(findBy|getBy|queryBy|readBy)");
 
     private static final Pattern COUNT_PATTERN = Pattern.compile("^(countBy)");
 
     private static final Pattern EXIST_PATTERN = Pattern.compile("^(existsBy)");
+
+    private static final Pattern DELETE_PATTERN = Pattern.compile("^(removeBy|deleteBy)");
 
     private static final String FIND_SQL = "select <include refid=\"Base_Column_List\" /> from <include refid=\"TABLE_NAME\" /> ";
 
@@ -26,7 +28,11 @@ public class MybatisQueryCreator extends AbstractQueryCreator<String, StringBuil
 
     private static final String EXIST_SQl = "select ifnull(select 1 from <include refid=\"TABLE_NAME\" />,0) ";
 
-    private static final String MAPPER_XML = "<select id=\"%s\" %s>%s</select>";
+    private static final String DELETE_SQl = "delete from <include refid=\"TABLE_NAME\" />  ";
+
+    private static final String SELECT_MAPPER_XML = "<select id=\"%s\" %s>%s</select>";
+
+    private static final String DELETE_MAPPER_XML = "<delete id=\"%s\" %s>%s</select>";
 
     private Method method;
 
@@ -76,10 +82,11 @@ public class MybatisQueryCreator extends AbstractQueryCreator<String, StringBuil
         if (!sort.isEmpty()) {
             for (Sort.Order order : sort) {
                 String property = order.getProperty();
+                String columnName = this.columnMap.get(property);
                 String name = order.getDirection().name();
-                criteria.append(property)
+                criteria.append(columnName)
                         .append(" ")
-                        .append(name)
+                        .append(name.toLowerCase())
                         .append(",");
             }
             criteria = new StringBuilder(criteria.substring(0, criteria.length() - 1));
@@ -109,12 +116,19 @@ public class MybatisQueryCreator extends AbstractQueryCreator<String, StringBuil
         if (EXIST_PATTERN.matcher(this.method.getName()).find()) {
             resultType = "resultType=\"boolean\"";
             sql = (EXIST_SQl + " where " + criteria.toString());
-            return String.format(MAPPER_XML, this.method.getName(), resultType, sql);
+            return String.format(SELECT_MAPPER_XML, this.method.getName(), resultType, sql);
         }
+
+        if (DELETE_PATTERN.matcher(this.method.getName()).find()) {
+            resultType = "resultType=\"int\"";
+            sql = (DELETE_SQl + " where " + criteria.toString());
+            return String.format(DELETE_MAPPER_XML, this.method.getName(), resultType, sql);
+        }
+
 
         sql = (sql + " where " + criteria.toString());
 
-        return String.format(MAPPER_XML, this.method.getName(), resultType, sql);
+        return String.format(SELECT_MAPPER_XML, this.method.getName(), resultType, sql);
     }
 
     private int numberOfArguments = 0;
