@@ -32,10 +32,13 @@ public class MybatisQueryCreator extends AbstractQueryCreator<String, StringBuil
 
     private Map<String, String> columnMap;
 
-    public MybatisQueryCreator(PartTree tree, Method method, Map<String, String> columnMap) {
+    private String orderBy;
+
+    public MybatisQueryCreator(PartTree tree, Method method, Map<String, String> columnMap, String orderBy) {
         super(tree);
         this.method = method;
         this.columnMap = columnMap;
+        this.orderBy = orderBy;
     }
 
 
@@ -65,22 +68,31 @@ public class MybatisQueryCreator extends AbstractQueryCreator<String, StringBuil
 
     @Override
     protected String complete(StringBuilder criteria, Sort sort) {
-        if (!sort.isEmpty()) {
+
+        if (this.orderBy != null || !sort.isEmpty()) {
             criteria.append(" order by ");
+        }
+
+        if (!sort.isEmpty()) {
             for (Sort.Order order : sort) {
                 String property = order.getProperty();
                 String name = order.getDirection().name();
                 criteria.append(property)
                         .append(" ")
                         .append(name)
-                        .append(" ");
+                        .append(",");
             }
+            criteria = new StringBuilder(criteria.substring(0, criteria.length() - 1));
+        }
+
+        if (this.orderBy != null) {
+            criteria.append(this.orderBy);
         }
 
         for (int i = 0; i < method.getParameterTypes().length; i++) {
             if (Pageable.class == method.getParameterTypes()[i]) {
                 String param = "param" + (i + 1);
-                criteria.append("<foreach open=\"order by\"  collection=\""+param+".sort\" item=\"item\" separator=\",\">${item.property} ${item.direction}</foreach> ")
+                criteria.append("<foreach open=\"order by\"  collection=\"" + param + ".sort\" item=\"item\" separator=\",\">${item.property} ${item.direction}</foreach> ")
                         .append(" limit ${(" + param + ".pageNumber-1)*" + param + ".pageSize}, ${" + param + ".pageSize}");
                 break;
             }

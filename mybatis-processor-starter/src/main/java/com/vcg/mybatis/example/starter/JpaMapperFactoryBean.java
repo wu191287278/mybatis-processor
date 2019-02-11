@@ -64,6 +64,8 @@ public class JpaMapperFactoryBean<T> extends MapperFactoryBean<T> {
             Delete delete = method.getAnnotation(Delete.class);
             Update update = method.getAnnotation(Update.class);
             Insert insert = method.getAnnotation(Insert.class);
+            OrderBy orderBy = method.getAnnotation(OrderBy.class);
+
             if (select != null || delete != null || update != null || insert != null) continue;
 
             Collection<String> mappedStatementNames = configuration.getMappedStatementNames();
@@ -71,7 +73,12 @@ public class JpaMapperFactoryBean<T> extends MapperFactoryBean<T> {
 
             if (MybatisQueryCreator.match(method.getName())) {
                 PartTree tree = new PartTree(method.getName(), domainClass);
-                MybatisQueryCreator mybatisQueryCreator = new MybatisQueryCreator(tree, method, getColumns(domainClass));
+                MybatisQueryCreator mybatisQueryCreator = new MybatisQueryCreator(
+                        tree,
+                        method,
+                        getColumns(domainClass),
+                        orderBy == null ? null : orderBy.value()
+                );
                 String query = mybatisQueryCreator.createQuery();
                 queries.add(query);
             }
