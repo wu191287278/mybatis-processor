@@ -1,14 +1,19 @@
 package com.vcg.mybatis.example.starter;
 
+import com.vcg.mybatis.example.starter.annotations.IncludeColumns;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.mapping.PropertyPath;
 import org.springframework.data.repository.query.parser.AbstractQueryCreator;
 import org.springframework.data.repository.query.parser.Part;
 import org.springframework.data.repository.query.parser.PartTree;
+import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 
+import javax.persistence.OrderBy;
 import java.lang.reflect.Method;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -24,6 +29,8 @@ public class MybatisQueryCreator extends AbstractQueryCreator<String, StringBuil
 
     private static final String FIND_SQL = "select <include refid=\"Base_Column_List\" /> from <include refid=\"TABLE_NAME\" /> ";
 
+    private static final String DYNAMIC_COLUMN_FIND_SQL = "select %s from <include refid=\"TABLE_NAME\" /> ";
+
     private static final String COUNT_SQL = "select count(*) from <include refid=\"TABLE_NAME\" /> ";
 
     private static final String EXIST_SQl = "select ifnull(select 1 from <include refid=\"TABLE_NAME\" />,0) ";
@@ -36,15 +43,19 @@ public class MybatisQueryCreator extends AbstractQueryCreator<String, StringBuil
 
     private Method method;
 
+    private Class<?> domainClass;
+
     private Map<String, String> columnMap;
 
     private String orderBy;
 
-    public MybatisQueryCreator(PartTree tree, Method method, Map<String, String> columnMap, String orderBy) {
+    public MybatisQueryCreator(PartTree tree, Method method, Map<String, String> columnMap, Class<?> domainClass) {
         super(tree);
         this.method = method;
         this.columnMap = columnMap;
-        this.orderBy = orderBy;
+        OrderBy orderByAnnotation = method.getAnnotation(OrderBy.class);
+        this.orderBy = orderByAnnotation == null ? null : orderByAnnotation.value();
+        this.domainClass = domainClass;
     }
 
 
@@ -112,6 +123,12 @@ public class MybatisQueryCreator extends AbstractQueryCreator<String, StringBuil
             sql = COUNT_SQL;
             resultType = "resultType=\"long\"";
         }
+
+        IncludeColumns includeColumns = method.getAnnotation(IncludeColumns.class);
+        if (includeColumns != null) {
+            sql = String.format(DYNAMIC_COLUMN_FIND_SQL, String.join(",", includeColumns.name()));
+        }
+
 
         if (EXIST_PATTERN.matcher(this.method.getName()).find()) {
             resultType = "resultType=\"boolean\"";
@@ -217,15 +234,63 @@ public class MybatisQueryCreator extends AbstractQueryCreator<String, StringBuil
             return Prefix + " regexp '#{" + propertyName + "}'";
         }
 
-
         return Prefix + " = #{" + propertyName + "} ";
     }
 
 
+    @Override
+    public String createQuery() {
+        String querySql = getQuerySql();
+        if (querySql != null) return querySql;
+        return super.createQuery();
+    }
+
+    @Override
+    public String createQuery(Sort dynamicSort) {
+        String querySql = getQuerySql();
+        if (querySql != null) return querySql;
+        return super.createQuery(dynamicSort);
+    }
+
+    public String getQuerySql() {
+        Query query = method.getAnnotation(Query.class);
+        if (query != null && query.nativeQuery()) {
+            Class<?> returnType = this.method.getReturnType();
+            if (List.class.isAssignableFrom(returnType)) {
+                ParameterizedTypeImpl parameterizedType = (ParameterizedTypeImpl) method.getGenericReturnType();
+                returnType = (Class) parameterizedType.getActualTypeArguments()[0];
+            }
+            String resultType = "resultType=\"" + returnType.getName() + "\"";
+            if (returnType == this.domainClass) {
+                resultType = "resultMap=\"BaseResultMap\"";
+            }
+            String sql = query.value().replaceAll("\\?(\\d+)", "#{param$1}").trim();
+            String queryMapper = "<select id=\"%s\" %s>%s</select>";
+            if (sql.startsWith("delete")) {
+                queryMapper = "<delete id=\"%s\" %s>%s</delete>";
+                resultType = "";
+            }
+
+            if (sql.startsWith("update")) {
+                queryMapper = "<update id=\"%s\" %s>%s</update>";
+                resultType = "";
+            }
+
+            if (sql.startsWith("insert")) {
+                queryMapper = "<insert id=\"%s\" %s>%s</insert>";
+                resultType = "";
+            }
+
+            return String.format(queryMapper, method.getName(), resultType, sql);
+        }
+        return null;
+    }
+
     public static boolean match(String methodName) {
         return FIND_PATTERN.matcher(methodName).find() ||
                 COUNT_PATTERN.matcher(methodName).find() ||
-                EXIST_PATTERN.matcher(methodName).find();
+                EXIST_PATTERN.matcher(methodName).find() ||
+                DELETE_PATTERN.matcher(methodName).find();
     }
 
 }

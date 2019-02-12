@@ -64,7 +64,6 @@ public class JpaMapperFactoryBean<T> extends MapperFactoryBean<T> {
             Delete delete = method.getAnnotation(Delete.class);
             Update update = method.getAnnotation(Update.class);
             Insert insert = method.getAnnotation(Insert.class);
-            OrderBy orderBy = method.getAnnotation(OrderBy.class);
 
             if (select != null || delete != null || update != null || insert != null) continue;
 
@@ -77,10 +76,10 @@ public class JpaMapperFactoryBean<T> extends MapperFactoryBean<T> {
                         tree,
                         method,
                         getColumns(domainClass),
-                        orderBy == null ? null : orderBy.value()
+                        getDomainClass()
                 );
-                String query = mybatisQueryCreator.createQuery();
-                queries.add(query);
+                String queryXml = mybatisQueryCreator.createQuery();
+                queries.add(queryXml);
             }
         }
 
@@ -136,4 +135,5 @@ public class JpaMapperFactoryBean<T> extends MapperFactoryBean<T> {
         }
         return Object.class;
     }
+
 }
