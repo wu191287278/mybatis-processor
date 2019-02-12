@@ -192,7 +192,7 @@ public class MybatisDomainProcessor extends AbstractProcessor {
         String columns = tableMetadata.getColumnMetadataList()
                 .stream()
                 .map(ColumnMetadata::getColumnName)
-                .collect(Collectors.joining(","));
+                .collect(Collectors.joining(", "));
 
         return tableMetadata.setColumns(columns);
     }
