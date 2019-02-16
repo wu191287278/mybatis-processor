@@ -2,10 +2,7 @@ package com.vcg.mybatis.example.starter;
 
 import com.vcg.mybatis.example.processor.CamelUtils;
 import com.vcg.mybatis.example.processor.MybatisExampleRepository;
-import org.apache.ibatis.annotations.Delete;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.annotations.*;
 import org.apache.ibatis.builder.xml.XMLMapperBuilder;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.session.Configuration;
@@ -64,8 +61,13 @@ public class JpaMapperFactoryBean<T> extends MapperFactoryBean<T> {
             Delete delete = method.getAnnotation(Delete.class);
             Update update = method.getAnnotation(Update.class);
             Insert insert = method.getAnnotation(Insert.class);
+            SelectProvider selectProvider = method.getAnnotation(SelectProvider.class);
+            DeleteProvider deleteProvider = method.getAnnotation(DeleteProvider.class);
+            UpdateProvider updateProvider = method.getAnnotation(UpdateProvider.class);
+            InsertProvider insertProvider = method.getAnnotation(InsertProvider.class);
 
             if (select != null || delete != null || update != null || insert != null) continue;
+            if (selectProvider != null || deleteProvider != null || updateProvider != null || insertProvider != null) continue;
 
             Collection<String> mappedStatementNames = configuration.getMappedStatementNames();
             if (mappedStatementNames.contains(this.getMapperInterface().getName() + "." + method.getName())) continue;
