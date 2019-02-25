@@ -77,8 +77,7 @@ public class JpaMapperFactoryBean<T> extends MapperFactoryBean<T> {
                 MybatisQueryCreator mybatisQueryCreator = new MybatisQueryCreator(
                         tree,
                         method,
-                        getColumns(domainClass),
-                        getDomainClass()
+                        getColumns(domainClass)
                 );
                 String queryXml = mybatisQueryCreator.createQuery();
                 queries.add(queryXml);
