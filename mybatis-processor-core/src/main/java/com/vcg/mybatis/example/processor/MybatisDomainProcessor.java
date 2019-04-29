@@ -26,10 +26,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @SupportedAnnotationTypes("com.vcg.mybatis.example.processor.Example")
@@ -43,8 +40,9 @@ public class MybatisDomainProcessor extends AbstractProcessor {
         try {
             Filer filer = processingEnv.getFiler();
             Set<? extends Element> elements = roundEnv.getElementsAnnotatedWith(Example.class);
-
+            Set<String> mappers = new LinkedHashSet<>();
             MustacheFactory mf = new DefaultMustacheFactory();
+            ClassLoader classLoader = MybatisDomainProcessor.class.getClassLoader();
 
             for (Element element : elements) {
                 PackageElement packageOf = processingEnv.getElementUtils().getPackageOf(element);
@@ -56,7 +54,6 @@ public class MybatisDomainProcessor extends AbstractProcessor {
                 HashMap<String, Object> scopes = new HashMap<>();
                 scopes.put("metadata", tableMetadata);
 
-                ClassLoader classLoader = MybatisDomainProcessor.class.getClassLoader();
 
                 InputStream exampleInputStream = classLoader.getResourceAsStream("templates/Example.java");
                 try (InputStreamReader in = new InputStreamReader(exampleInputStream, StandardCharsets.UTF_8); Writer writer = javaFileObject.openWriter()) {
@@ -65,15 +62,27 @@ public class MybatisDomainProcessor extends AbstractProcessor {
                 }
 
 
-                FileObject resource = filer.createResource(StandardLocation.CLASS_OUTPUT, packageOf.toString(),
-                        (tableMetadata.getDomainClazzSimpleName() + "ExampleMapper.xml"));
+                String xml = tableMetadata.getDomainClazzSimpleName() + "ExampleMapper.xml";
+                mappers.add(tableMetadata.getDomainClazzName().replace(".", "/") + "ExampleMapper.xml");
+                FileObject xmlOut = filer.createResource(StandardLocation.CLASS_OUTPUT, packageOf.toString(), xml);
                 InputStream xmlInputStream = classLoader.getResourceAsStream("templates/Example.xml");
                 try (InputStreamReader in = new InputStreamReader(xmlInputStream, StandardCharsets.UTF_8);
-                     Writer writer = resource.openWriter()) {
+                     Writer writer = xmlOut.openWriter()) {
                     Mustache mustache = mf.compile(in, tableMetadata.getDomainClazzName() + ".xml");
                     mustache.execute(writer, scopes);
                 }
 
+
+            }
+
+            FileObject configXmlOut = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "MybatisExampleConfig.xml");
+            InputStream configXmlIn = classLoader.getResourceAsStream("templates/MybatisExampleConfig.xml");
+            try (InputStreamReader in = new InputStreamReader(configXmlIn, StandardCharsets.UTF_8);
+                 Writer writer = configXmlOut.openWriter()) {
+                Mustache mustache = mf.compile(in, "MybatisExampleConfig.xml");
+                HashMap<String, Object> configScopes = new HashMap<>();
+                configScopes.put("mappers", mappers);
+                mustache.execute(writer, configScopes);
             }
         } catch (Exception e) {
             processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING, Arrays.toString(e.getStackTrace()));
@@ -101,7 +110,6 @@ public class MybatisDomainProcessor extends AbstractProcessor {
 
         String repositoryName = !example.namespace().equals("") ? example.namespace() :
                 exampleName + "." + tableMetadata.getExampleClazzSimpleName() + "Repository";
-
         tableMetadata.setRepositoryClazzName(repositoryName)
                 .setTableName(table != null ? table.name() : String.join("_",
                         CamelUtils.split(tableMetadata.getDomainClazzSimpleName(), true)));

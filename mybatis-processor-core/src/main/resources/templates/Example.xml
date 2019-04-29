@@ -385,7 +385,7 @@
 
 
   <select id="existsByExample" parameterType="{{metadata.exampleClazzName}}" resultType="Boolean">
-  select count(*) from
+  select count(*)>0 from
     <include refid="Table_Name_Dy"></include>
       <if test="_parameter != null">
         <include refid="Example_Where_Clause"/>
