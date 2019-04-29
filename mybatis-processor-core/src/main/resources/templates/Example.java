@@ -49,7 +49,7 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
 
     private static final String ASC = " ASC";
 
-    private String table;
+    private String table = TABLE_NAME;
 
     {{#metadata.partitionKey}}
     private static final String partitionKey = "{{fieldName}}";
@@ -90,6 +90,9 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
     }
     {{/metadata.primaryMetadata}}
 
+    public static {{metadata.exampleClazzSimpleName}} create(){
+        return new {{metadata.exampleClazzSimpleName}}();
+    }
 
 
     public {{metadata.exampleClazzSimpleName}} limit(Integer... limit) {
@@ -226,7 +229,7 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
         checkTable();
         {{/metadata.partitionKey}}
         checkCriteria();
-        Boolean exist = CRUD_REPOSITORY.existByExample(this);
+        Boolean exist = CRUD_REPOSITORY.existsByExample(this);
         return exist!=null&&exist;
     }
 
@@ -334,7 +337,7 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
         return distinct;
     }
 
-    protected List<Criteria> getOredCriteria() {
+    public List<Criteria> getOredCriteria() {
         if(this.oredCriteria == null){
             this.oredCriteria = new ArrayList<>();
         }
@@ -765,4 +768,12 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
     }
     {{/metadata.partitionKey}}
 
+    public String getTable(){
+        return table;
+    }
+
+
+    public List<Integer> getLimit(){
+        return this.limit;
+    }
 }

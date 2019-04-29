@@ -13,6 +13,8 @@ public interface MybatisExampleRepository<T, ID, Example> {
 
     List<T> selectByExample(Example query);
 
+    List<T> selectAll();
+
     List<Map<String, Object>> selectByExampleWithMap(Example query);
 
     void insert(T t);
@@ -29,6 +31,8 @@ public interface MybatisExampleRepository<T, ID, Example> {
 
     long countByExample(Example query);
 
+    long count();
+
     int updateByPrimaryKeySelective(T t);
 
     int updateByPrimaryKey(T t);
@@ -43,8 +47,8 @@ public interface MybatisExampleRepository<T, ID, Example> {
 
     int deleteByExample(Example query);
 
-    boolean existById(ID id);
+    boolean existsById(ID id);
 
-    Boolean existByExample(Example query);
+    boolean existsByExample(Example query);
 
 }

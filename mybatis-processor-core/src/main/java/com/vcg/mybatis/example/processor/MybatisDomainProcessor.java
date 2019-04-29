@@ -178,7 +178,7 @@ public class MybatisDomainProcessor extends AbstractProcessor {
                 tableMetadata.setPrimaryMetadata(columnMetadata);
             }
 
-            if (partitionKey != null && (columnMetadata.getColumnName().equals(partitionKey) || columnMetadata.getFieldName().equals(partitionKey))) {
+            if ((columnMetadata.getColumnName().equals(partitionKey) || columnMetadata.getFieldName().equals(partitionKey))) {
                 columnMetadata.setPartitionKey(true);
                 tableMetadata.setPartitionKey(columnMetadata)
                         .setShard(example.shard());
@@ -212,7 +212,7 @@ public class MybatisDomainProcessor extends AbstractProcessor {
         JDBC_TYPE_MAPPING.put("TINYTEXT", "VARCHAR");
         JDBC_TYPE_MAPPING.put("MEDIUMTEXT", "LONGVARCHAR");
         JDBC_TYPE_MAPPING.put("LONGTEXT", "LONGVARCHAR");
-        JDBC_TYPE_MAPPING.put("DATETIME", "DATE");
+        JDBC_TYPE_MAPPING.put("DATETIME", "TIMESTAMP");
     }
 
 

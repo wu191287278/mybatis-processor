@@ -180,6 +180,12 @@
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
+    <if test="example.limit != null">
+      limit
+      <foreach collection="example.limit" item="num" separator=",">
+        ${num}
+      </foreach>
+    </if>
   </delete>
 
   <insert id="insert" parameterType="{{metadata.domainClazzName}}" {{#metadata.primaryMetadata}} {{#metadata.primaryMetadata.useGeneratedKeys}} keyProperty="{{metadata.primaryMetadata.fieldName}}" useGeneratedKeys="{{metadata.primaryMetadata.useGeneratedKeys}}" {{/metadata.primaryMetadata.useGeneratedKeys}} {{/metadata.primaryMetadata}}>
@@ -293,6 +299,12 @@
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
     </if>
+    <if test="example.limit != null">
+      limit
+      <foreach collection="example.limit" item="num" separator=",">
+        ${num}
+      </foreach>
+    </if>
   </update>
 
   <update id="updateByExample" parameterType="map">
@@ -311,6 +323,12 @@
     </trim>
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
+    </if>
+    <if test="example.limit != null">
+      limit
+      <foreach collection="example.limit" item="num" separator=",">
+        ${num}
+      </foreach>
     </if>
   </update>
 
@@ -366,17 +384,41 @@
   {{/metadata.primaryMetadata}}
 
 
-  <select id="existByExample" parameterType="{{metadata.exampleClazzName}}" resultType="Boolean">
-  select IFNULL( select 1 from
+  <select id="existsByExample" parameterType="{{metadata.exampleClazzName}}" resultType="Boolean">
+  select count(*) from
     <include refid="Table_Name_Dy"></include>
       <if test="_parameter != null">
         <include refid="Example_Where_Clause"/>
       </if>
-      limit 1
-      )
+  </select>
+
+
+  <select id="selectAll" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List" /> from {{metadata.tableName}}
   </select>
 
   <select id="count" resultType="long">
     select count(*) from {{metadata.tableName}}
   </select>
+
+  <select id="deleteAllEntities" resultType="long">
+    delete from {{metadata.tableName}}
+  </select>
+
+{{#metadata.primaryMetadata}}
+  <delete id="delete" parameterType="{{metadata.domainClazzName}}">
+    delete from {{metadata.tableName}}
+    where {{metadata.primaryMetadata.columnName}} = #{ {{metadata.primaryMetadata.fieldName}}{{#metadata.primaryMetadata.jdbcType}},jdbcType={{metadata.primaryMetadata.jdbcType}}{{/metadata.primaryMetadata.jdbcType}} }
+  </delete>
+{{/metadata.primaryMetadata}}
+
+{{#metadata.primaryMetadata}}
+  <delete id="deleteAllByEntities" parameterType="java.util.List">
+    delete from {{metadata.tableName}}
+    where {{metadata.primaryMetadata.columnName}} in
+    <foreach close=")" collection="list" item="item" open="(" separator=",">
+    #{ {{metadata.primaryMetadata.fieldName}}  }
+    </foreach>
+  </delete>
+{{/metadata.primaryMetadata}}
 </mapper>
