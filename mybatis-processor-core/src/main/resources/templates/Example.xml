@@ -4,11 +4,11 @@
 
   <resultMap id="BaseResultMap" type="{{metadata.domainClazzName}}">
     {{#metadata.primaryMetadata}}
-    <id column="{{columnName}}" {{#jdbcType}} jdbcType="{{jdbcType}}" {{/jdbcType}} property="{{fieldName}}" />
+    <id column="{{columnName}}" property="{{fieldName}}" />
     {{/metadata.primaryMetadata}}
 {{#metadata.columnMetadataList}}
     {{^primary}}
-    <result column="{{columnName}}" {{#jdbcType}} jdbcType="{{jdbcType}}" {{/jdbcType}} property="{{fieldName}}" />
+    <result column="{{columnName}}"  property="{{fieldName}}" />
     {{/primary}}
 {{/metadata.columnMetadataList}}
 {{#metadata.oneToOne}}
@@ -153,14 +153,14 @@
     select 
     <include refid="Base_Column_List" />
     from {{metadata.tableName}}
-    where {{metadata.primaryMetadata.columnName}} = #{ {{metadata.primaryMetadata.fieldName}}{{#metadata.primaryMetadata.jdbcType}},jdbcType={{metadata.primaryMetadata.jdbcType}}{{/metadata.primaryMetadata.jdbcType}} }
+    where {{metadata.primaryMetadata.columnName}} = #{ {{metadata.primaryMetadata.fieldName}} }
   </select>
   {{/metadata.primaryMetadata}}
 
   {{#metadata.primaryMetadata}}
   <delete id="deleteByPrimaryKey" parameterType="{{metadata.primaryMetadata.javaType}}">
     delete from {{metadata.tableName}}
-    where {{metadata.primaryMetadata.columnName}} = #{ {{metadata.primaryMetadata.fieldName}}{{#metadata.primaryMetadata.jdbcType}},jdbcType={{metadata.primaryMetadata.jdbcType}}{{/metadata.primaryMetadata.jdbcType}} }
+    where {{metadata.primaryMetadata.columnName}} = #{ {{metadata.primaryMetadata.fieldName}} }
   </delete>
   {{/metadata.primaryMetadata}}
 
@@ -193,7 +193,7 @@
     values (
     <trim  suffixOverrides=",">
       {{#metadata.columnMetadataList}}
-        #{ {{fieldName}}{{#jdbcType}},jdbcType={{jdbcType}} {{/jdbcType}} } ,
+        #{ {{fieldName}} } ,
       {{/metadata.columnMetadataList}}
     </trim>
     )
@@ -211,7 +211,7 @@
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       {{#metadata.columnMetadataList}}
       <if test="{{fieldName}} != null">
-        #{ {{fieldName}}{{#jdbcType}},jdbcType={{jdbcType}} {{/jdbcType}} } ,
+        #{ {{fieldName}}  } ,
       </if>
       {{/metadata.columnMetadataList}}
     </trim>
@@ -225,7 +225,7 @@
     <foreach collection="list" index="index" item="item" separator=",">
     <trim prefix="(" suffix=")" suffixOverrides=",">
       {{#metadata.columnMetadataList}}
-      #{ item.{{fieldName}} {{#jdbcType}},jdbcType={{jdbcType}} {{/jdbcType}} },
+      #{ item.{{fieldName}} },
       {{/metadata.columnMetadataList}}
     </trim>
     </foreach>
@@ -235,7 +235,7 @@
     values (
       <trim  suffixOverrides=",">
       {{#metadata.columnMetadataList}}
-      #{ record.{{fieldName}}{{#jdbcType}},jdbcType={{jdbcType}} {{/jdbcType}} } ,
+      #{ record.{{fieldName}} } ,
       {{/metadata.columnMetadataList}}
       </trim>
         )
@@ -253,7 +253,7 @@
     <trim prefix="values (" suffix=")" suffixOverrides=",">
     {{#metadata.columnMetadataList}}
     <if test="record.{{fieldName}} != null">
-      #{ record.{{fieldName}}{{#jdbcType}},jdbcType={{jdbcType}} {{/jdbcType}} } ,
+      #{ record.{{fieldName}} } ,
     </if>
     {{/metadata.columnMetadataList}}
     </trim>
@@ -268,7 +268,7 @@
     <foreach collection="records" index="index" item="item" separator=",">
       <trim prefix="(" suffix=")" suffixOverrides=",">
         {{#metadata.columnMetadataList}}
-        #{ item.{{fieldName}} {{#jdbcType}},jdbcType={{jdbcType}} {{/jdbcType}} },
+        #{ item.{{fieldName}} },
         {{/metadata.columnMetadataList}}
       </trim>
     </foreach>
@@ -292,7 +292,7 @@
     <set>
     {{#metadata.columnMetadataList}}
     <if test="record.{{fieldName}} != null">
-      {{columnName}} = #{ record.{{fieldName}}{{#jdbcType}},jdbcType={{jdbcType}} {{/jdbcType}} } ,
+      {{columnName}} = #{ record.{{fieldName}} } ,
     </if>
     {{/metadata.columnMetadataList}}
     </set>
@@ -318,7 +318,7 @@
     set
     <trim  suffixOverrides=",">
     {{#metadata.columnMetadataList}}
-      {{columnName}} = #{ {{fieldName}}{{#jdbcType}},jdbcType={{jdbcType}} {{/jdbcType}} } ,
+      {{columnName}} = #{ {{fieldName}} } ,
     {{/metadata.columnMetadataList}}
     </trim>
     <if test="_parameter != null">
@@ -339,11 +339,11 @@
     set
     <trim  suffixOverrides=",">
     {{#metadata.columnMetadataList}}
-      {{columnName}} = #{ {{fieldName}}{{#jdbcType}},jdbcType={{jdbcType}} {{/jdbcType}} } ,
+      {{columnName}} = #{ {{fieldName}} } ,
     {{/metadata.columnMetadataList}}
     </trim>
     where
-     {{columnName}} = #{ {{fieldName}},jdbcType=INTEGER}
+     {{columnName}} = #{ {{fieldName}} }
   </update>
   {{/metadata.primaryMetadata}}
 
@@ -353,12 +353,12 @@
     <set>
     {{#metadata.columnMetadataList}}
       <if test="{{fieldName}} != null">
-        {{columnName}} = #{ {{fieldName}}{{#jdbcType}},jdbcType={{jdbcType}} {{/jdbcType}} } ,
+        {{columnName}} = #{ {{fieldName}} } ,
       </if>
     {{/metadata.columnMetadataList}}
     </set>
     where
-     {{columnName}} = #{ {{fieldName}},jdbcType=INTEGER}
+     {{columnName}} = #{ {{fieldName}} }
   </update>
   {{/metadata.primaryMetadata}}
 
@@ -379,7 +379,7 @@
   {{#metadata.primaryMetadata}}
   <select id="existsById" parameterType="{{metadata.primaryMetadata.javaType}}" resultType="boolean">
     select count(*)>0 from {{metadata.tableName}}
-    where {{metadata.primaryMetadata.columnName}} = #{ {{metadata.primaryMetadata.fieldName}}{{#metadata.primaryMetadata.jdbcType}},jdbcType={{metadata.primaryMetadata.jdbcType}}{{/metadata.primaryMetadata.jdbcType}} }
+    where {{metadata.primaryMetadata.columnName}} = #{ {{metadata.primaryMetadata.fieldName}} }
   </select>
   {{/metadata.primaryMetadata}}
 
@@ -408,7 +408,7 @@
 {{#metadata.primaryMetadata}}
   <delete id="delete" parameterType="{{metadata.domainClazzName}}">
     delete from {{metadata.tableName}}
-    where {{metadata.primaryMetadata.columnName}} = #{ {{metadata.primaryMetadata.fieldName}}{{#metadata.primaryMetadata.jdbcType}},jdbcType={{metadata.primaryMetadata.jdbcType}}{{/metadata.primaryMetadata.jdbcType}} }
+    where {{metadata.primaryMetadata.columnName}} = #{ {{metadata.primaryMetadata.fieldName}} }
   </delete>
 {{/metadata.primaryMetadata}}
 
