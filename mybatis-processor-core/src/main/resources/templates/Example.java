@@ -15,20 +15,8 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
 
     private static final long serialVersionUID = 314035125506252121L;
 
-    {{#metadata.primaryMetadata}}
-    private static MybatisExampleRepository<{{metadata.domainClazzSimpleName}},{{javaType}},{{metadata.exampleClazzSimpleName}}> CRUD_REPOSITORY;
-    {{/metadata.primaryMetadata}}
-
-    {{^metadata.primaryMetadata}}
-    private static MybatisExampleRepository<{{metadata.domainClazzSimpleName}},Object,{{metadata.exampleClazzSimpleName}}> CRUD_REPOSITORY;
-    {{/metadata.primaryMetadata}}
-
     public static final String TABLE_NAME = "{{metadata.tableName}}";
 
-    {{#metadata.columnMetadataList}}
-    public static final String {{fieldName}} = "{{columnName}}";
-
-    {{/metadata.columnMetadataList}}
     private List<String> columns;
 
     private List<Integer> limit;
@@ -65,38 +53,21 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
 
     public {{metadata.exampleClazzSimpleName}}() {}
 
-    {{#metadata.primaryMetadata}}
-    private {{metadata.exampleClazzSimpleName}}(MybatisExampleRepository<{{metadata.domainClazzSimpleName}},{{javaType}},{{metadata.exampleClazzSimpleName}}> repository) {
-        if(CRUD_REPOSITORY == null){
-            CRUD_REPOSITORY = repository;
-        }
-    }
-
-    public static {{metadata.exampleClazzSimpleName}} repository(MybatisExampleRepository<{{metadata.domainClazzSimpleName}},{{javaType}},{{metadata.exampleClazzSimpleName}}> repository){
-        return new {{metadata.exampleClazzSimpleName}}(repository);
-    }
-    {{/metadata.primaryMetadata}}
-
-
-    {{^metadata.primaryMetadata}}
-    private {{metadata.exampleClazzSimpleName}}(MybatisExampleRepository<{{metadata.repositoryClazzSimpleName}},Object,{{metadata.exampleClazzSimpleName}}> repository) {
-        if(CRUD_REPOSITORY == null){
-            CRUD_REPOSITORY = repository;
-        }
-    }
-
-    public static {{metadata.exampleClazzSimpleName}} repository(MybatisExampleRepository<{{metadata.repositoryClazzSimpleName}},Object,{{metadata.exampleClazzSimpleName}}> repository){
-        return new {{metadata.exampleClazzSimpleName}}(repository);
-    }
-    {{/metadata.primaryMetadata}}
 
     public static {{metadata.exampleClazzSimpleName}} create(){
         return new {{metadata.exampleClazzSimpleName}}();
     }
 
 
-    public {{metadata.exampleClazzSimpleName}} limit(Integer... limit) {
+    public {{metadata.exampleClazzSimpleName}} limit(int offset, int limit) {
+        this.limit = Arrays.asList(offset,limit);
+        com.github.pagehelper.PageHelper.offsetPage(offset,limit,false);
+        return this;
+    }
+
+    public {{metadata.exampleClazzSimpleName}} limit(int limit) {
         this.limit = Arrays.asList(limit);
+        com.github.pagehelper.PageHelper.offsetPage(0,limit,false);
         return this;
     }
 
@@ -143,13 +114,8 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
         return this;
     }
 
-    public {{metadata.exampleClazzSimpleName}} page(Integer page, Integer size) {
-        if(page==null || size==null || page<=0 ||size <=0){
-            throw new RuntimeException("page or size for condition cannot be null or less 1");
-        }
-        this.page = page;
-        this.size = size;
-        this.limit = Arrays.asList((page - 1) * size, size);
+    public {{metadata.exampleClazzSimpleName}} page(int pageNum, int pageSize) {
+        com.github.pagehelper.page.PageMethod.startPage(pageNum,pageSize);
         return this;
     }
 
@@ -165,154 +131,12 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
         return this;
     }
 
-    public List<{{metadata.domainClazzSimpleName}}> get(){
-        {{#metadata.partitionKey}}
-        checkTable();
-        {{/metadata.partitionKey}}
-        return CRUD_REPOSITORY.selectByExample(this);
-    }
-
-    public {{metadata.domainClazzSimpleName}} getOne(){
-        {{#metadata.partitionKey}}
-        checkTable();
-        {{/metadata.partitionKey}}
-        limit(1);
-        List<{{metadata.domainClazzSimpleName}}> result = CRUD_REPOSITORY.selectByExample(this);
-        return result.isEmpty() ? null : result.get(0);
-    }
-
-    @SuppressWarnings("unchecked")
-    public  <V> List<V> get(String column, Class<V> v){
-        {{#metadata.partitionKey}}
-        checkTable();
-        {{/metadata.partitionKey}}
-        this.columns = Arrays.asList(column);
-        List<Map<String,Object>> result = CRUD_REPOSITORY.selectByExampleWithMap(this);
-        List<V> values = new ArrayList<>(result.size());
-        for(Map<String, Object> map : result){
-           V value = (V) map.get(column);
-           values.add(value);
-        }
-        return values;
-    }
-
-    @SuppressWarnings("unchecked")
-    public  <V> V getOne(String column, Class<V> v){
-        {{#metadata.partitionKey}}
-        checkTable();
-        {{/metadata.partitionKey}}
-        limit(1);
-        this.columns = Arrays.asList(column);
-        List<Map<String,Object>> result = CRUD_REPOSITORY.selectByExampleWithMap(this);
-        return result.isEmpty() ? null : (V) result.get(0).get(column);
-    }
-
-    public com.vcg.mybatis.example.processor.domain.PageInfo<{{metadata.domainClazzSimpleName}}> getPage(){
-        {{#metadata.partitionKey}}
-        checkTable();
-        {{/metadata.partitionKey}}
-        if(this.page==null || this.size==null){
-            throw new RuntimeException("page or size for condition cannot be null");
-        }
-        return new com.vcg.mybatis.example.processor.domain.PageInfo<>(this.page, this.size, count(), get());
-    }
-
-    public long count(){
-        {{#metadata.partitionKey}}
-        checkTable();
-        {{/metadata.partitionKey}}
-        return CRUD_REPOSITORY.countByExample(this);
-    }
-
-    public boolean exist(){
-        {{#metadata.partitionKey}}
-        checkTable();
-        {{/metadata.partitionKey}}
-        checkCriteria();
-        Boolean exist = CRUD_REPOSITORY.existsByExample(this);
-        return exist!=null&&exist;
-    }
-
-    public int update({{metadata.domainClazzSimpleName}} t){
-        {{#metadata.partitionKey}}
-        checkTable();
-        {{/metadata.partitionKey}}
-        checkCriteria();
-        return CRUD_REPOSITORY.updateByExampleSelective(t,this);
-    }
-
-    public {{metadata.domainClazzSimpleName}} insert({{metadata.domainClazzSimpleName}} t){
-        {{#metadata.partitionKey}}
-        shardTable(t.get{{firstUpFieldName}}());
-        this.record = t;
-        CRUD_REPOSITORY.insertByExample(this);
-        this.record = null;
-        {{/metadata.partitionKey}}
-        {{^metadata.partitionKey}}
-        CRUD_REPOSITORY.insert(t);
-        {{/metadata.partitionKey}}
-        return t;
-    }
-
-    public {{metadata.domainClazzSimpleName}} insertSelective({{metadata.domainClazzSimpleName}} t){
-        {{#metadata.partitionKey}}
-        shardTable(t.get{{firstUpFieldName}}());
-        this.record = t;
-        CRUD_REPOSITORY.insertSelectiveByExample(this);
-        this.record = null;
-        {{/metadata.partitionKey}}
-        {{^metadata.partitionKey}}
-        CRUD_REPOSITORY.insertSelective(t);
-        {{/metadata.partitionKey}}
-        return t;
-    }
-
-    public List<{{metadata.domainClazzSimpleName}}> insert(List<{{metadata.domainClazzSimpleName}}> ts){
-        {{#metadata.partitionKey}}
-        Map<Integer, List<Comment>> batchRecordsMap = new LinkedHashMap<>();
-        for ({{metadata.domainClazzSimpleName}} t : ts) {
-            {{#stringType}}
-            int partitionValue = com.vcg.mybatis.example.processor.util.Crc16Utils.getSlot(t.get{{firstUpFieldName}}()) % shard;
-            {{/stringType}}
-            {{^stringType}}
-            {{javaType}} partitionValue = t.get{{firstUpFieldName}}();
-            {{/stringType}}
-
-            List<{{metadata.domainClazzSimpleName}}> records = batchRecordsMap.get(partitionValue);
-            if (records == null) {
-                records = new ArrayList<>();
-                batchRecordsMap.put(partitionValue,records);
-
-            }
-            records.add(t);
-        }
-
-        for (Map.Entry<Integer, List<{{metadata.domainClazzSimpleName}}>> entry : batchRecordsMap.entrySet()) {
-            shardTable(entry.getKey());
-            this.records = entry.getValue();
-            CRUD_REPOSITORY.insertBatchByExample(this);
-        }
-        this.records = ts;
-        CRUD_REPOSITORY.insertBatchByExample(this);
-        this.records = null;
-        {{/metadata.partitionKey}}
-        {{^metadata.partitionKey}}
-        CRUD_REPOSITORY.insertBatch(ts);
-        {{/metadata.partitionKey}}
-        return ts;
-    }
-
-    public int delete(){
-        checkCriteria();
-        return CRUD_REPOSITORY.deleteByExample(this);
-    }
-
-
     private void checkCriteria(){
         if(this.currentCriteria == null){
             throw new RuntimeException("criteria for condition cannot be null");
         }
     }
+
     private void checkTable(){
         {{#metadata.partitionKey}}
         if(table == null){
@@ -320,6 +144,7 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
         }
         {{/metadata.partitionKey}}
     }
+
 
     public void setOrderByClause(String orderByClause) {
         this.orderByClause = orderByClause;
@@ -748,6 +573,14 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
         protected Criterion(String condition, Object value, Object secondValue) {
             this(condition, value, secondValue, null);
         }
+    }
+
+
+    public static interface Column {
+
+        {{#metadata.columnMetadataList}}
+        public static final String {{fieldName}} = "{{columnName}}";
+        {{/metadata.columnMetadataList}}
     }
 
     protected static List<String> allColumns(){
