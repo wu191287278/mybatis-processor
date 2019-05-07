@@ -2,6 +2,7 @@ package com.vcg.mybatis.example.processor.domain;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class TableMetadata {
 
@@ -34,6 +35,8 @@ public class TableMetadata {
     private Integer shard;
 
     private List<String> shardTables;
+
+    private Long randomId = new Random().nextLong();
 
     private List<JoinMetadata> oneToOne = new ArrayList<>();
 
@@ -209,5 +212,13 @@ public class TableMetadata {
 
     public void setOneToMany(List<JoinMetadata> oneToMany) {
         this.oneToMany = oneToMany;
+    }
+
+    public Long getRandomId() {
+        return randomId;
+    }
+
+    public void setRandomId(Long randomId) {
+        this.randomId = randomId;
     }
 }

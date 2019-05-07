@@ -180,9 +180,9 @@
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
-    <if test="example.limit != null">
+    <if test="limit != null">
       limit
-      <foreach collection="example.limit" item="num" separator=",">
+      <foreach collection="limit" item="num" separator=",">
         ${num}
       </foreach>
     </if>

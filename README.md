@@ -1,6 +1,5 @@
 # mybatis-processor
-mybatis-processor 该工具是用于在编译阶段自动生成mybatis 的Example.java
-和Mapper.xml文件
+mybatis-processor 该工具是用于在编译阶段自动生成mybatis 的Example.java 和Mapper.xml文件
 
 ### 使用方式
 ```
@@ -21,11 +20,6 @@ maven 编译插件:
         <source>1.8</source>
         <target>1.8</target>
         <annotationProcessorPaths>
-            <path>
-                <groupId>org.projectlombok</groupId>
-                <artifactId>lombok</artifactId>
-                <version>${lombok.version}</version>
-            </path>
             <path>
                 <artifactId>mybatis-processor-core</artifactId>
                 <groupId>com.vcg</groupId>
@@ -71,10 +65,51 @@ public class Comment {
 }
 ```
 
-2. 需要扫描生成的DomainExampleMapper.xml文件
+2. SpringBoot需要扫描生成的DomainExampleMapper.xml文件
+
+
+application.yml
 
 ```
 mybatis:
   mapper-locations:
     - classpath:com/example/domain/*ExampleMapper.xml
+```
+
+3. mybatisConfig.xml 使用方式
+
+```
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <environments default="development">
+        <environment id="development">
+            <transactionManager type="JDBC" />
+            <dataSource type="POOLED">
+                <property name="driver" value="com.mysql.cj.jdbc.Driver" />
+                <property name="url" value="jdbc:mysql://localhost/users" />
+                <property name="username" value="root" />
+                <property name="password" value="root" />
+            </dataSource>
+        </environment>
+    </environments>
+    <mappers>
+        <mapper resource="com/example/domain/CommentExampleMapper.xml"/>
+    </mappers>
+
+</configuration>
+```
+
+使用方式
+
+```
+    InputStream in = Demo.class.getClassLoader().getResourceAsStream("mybatisConfig.xml");
+    SqlSessionFactory sessionFactory = new SqlSessionFactoryBuilder()
+            .build(in);
+    SqlSession sqlSession = sessionFactory.openSession();
+    CommentRepository commentRepository = sqlSession.getMapper(CommentRepository.class);
+    Comment comment = commentRepository.selectByPrimaryKey(1);
+    System.err.println(comment);
 ```

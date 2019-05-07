@@ -13,7 +13,7 @@ import com.vcg.mybatis.example.processor.MybatisExampleRepository;
 
 public class {{metadata.exampleClazzSimpleName}} implements Serializable {
 
-    private static final long serialVersionUID = 314035125506252121L;
+    private static final long serialVersionUID = {{metadata.randomId}}L;
 
     public static final String TABLE_NAME = "{{metadata.tableName}}";
 
@@ -51,23 +51,31 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
 
     private List<{{metadata.domainClazzSimpleName}}> records;
 
-    public {{metadata.exampleClazzSimpleName}}() {}
 
+    public {{metadata.exampleClazzSimpleName}}() {}
 
     public static {{metadata.exampleClazzSimpleName}} create(){
         return new {{metadata.exampleClazzSimpleName}}();
     }
 
-
     public {{metadata.exampleClazzSimpleName}} limit(int offset, int limit) {
         this.limit = Arrays.asList(offset,limit);
-        com.github.pagehelper.PageHelper.offsetPage(offset,limit,false);
         return this;
     }
 
     public {{metadata.exampleClazzSimpleName}} limit(int limit) {
         this.limit = Arrays.asList(limit);
-        com.github.pagehelper.PageHelper.offsetPage(0,limit,false);
+        return this;
+    }
+
+
+    public {{metadata.exampleClazzSimpleName}} page(int page, int size) {
+        if(page<=0 ||size <=0){
+            throw new RuntimeException("page or size for condition must greate 0");
+        }
+        this.page = page;
+        this.size = size;
+        this.limit = Arrays.asList((page - 1) * size, size);
         return this;
     }
 
@@ -114,11 +122,6 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
         return this;
     }
 
-    public {{metadata.exampleClazzSimpleName}} page(int pageNum, int pageSize) {
-        com.github.pagehelper.page.PageMethod.startPage(pageNum,pageSize);
-        return this;
-    }
-
     public {{metadata.exampleClazzSimpleName}} asc(String... columns){
         String orderBy = String.join(",",columns) + ASC;
         orderByClause(this.orderByClause==null ? orderBy : (this.orderByClause +","+ orderBy));
@@ -128,6 +131,33 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
     public {{metadata.exampleClazzSimpleName}} desc(String... columns){
         String orderBy = String.join(",",columns) + DESC;
         orderByClause(this.orderByClause==null ? orderBy : (this.orderByClause +","+ orderBy));
+        return this;
+    }
+
+    public {{metadata.domainClazzSimpleName}} getRecord() {
+        return this.record;
+    }
+
+    public List<{{metadata.domainClazzSimpleName}}> getRecords() {
+        return this.records;
+    }
+
+    public {{metadata.exampleClazzSimpleName}} record({{metadata.domainClazzSimpleName}} record) {
+        this.record = record;
+        return this;
+    }
+
+    public {{metadata.exampleClazzSimpleName}} records(List<{{metadata.domainClazzSimpleName}}> records) {
+        this.records = records;
+        return this;
+    }
+
+    public String getTable() {
+        return this.table;
+    }
+
+    public {{metadata.exampleClazzSimpleName}} table(String table) {
+        this.table = table;
         return this;
     }
 
@@ -357,7 +387,7 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
 
     protected abstract static class GeneratedCriteria implements Serializable {
 
-        private static final long serialVersionUID = 1543541368793026835L;
+        private static final long serialVersionUID = {{metadata.randomId}}L;
 
         protected List<Criterion> criteria;
 
@@ -478,7 +508,7 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
 
     public static class Criteria extends GeneratedCriteria implements Serializable {
 
-        private static final long serialVersionUID = 9185867838086944489L;
+        private static final long serialVersionUID = {{metadata.randomId}}L;
 
 
         protected Criteria() {
@@ -488,7 +518,7 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
 
     public static class Criterion implements Serializable {
 
-        private static final long serialVersionUID = 5502500909305190410L;
+        private static final long serialVersionUID = {{metadata.randomId}}L;
 
         private String condition;
 
@@ -600,10 +630,6 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
         return tables;
     }
     {{/metadata.partitionKey}}
-
-    public String getTable(){
-        return table;
-    }
 
 
     public List<Integer> getLimit(){

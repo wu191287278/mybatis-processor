@@ -6,6 +6,7 @@ import com.github.mustachejava.MustacheFactory;
 import com.vcg.mybatis.example.processor.domain.ColumnMetadata;
 import com.vcg.mybatis.example.processor.domain.JoinMetadata;
 import com.vcg.mybatis.example.processor.domain.TableMetadata;
+import com.vcg.mybatis.example.processor.util.CamelUtils;
 import com.vcg.mybatis.example.processor.visitor.DomainTypeVisitor;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -22,11 +23,15 @@ import javax.tools.Diagnostic;
 import javax.tools.FileObject;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardLocation;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @SupportedAnnotationTypes("com.vcg.mybatis.example.processor.Example")
@@ -40,8 +45,16 @@ public class MybatisDomainProcessor extends AbstractProcessor {
         try {
             Filer filer = processingEnv.getFiler();
             Set<? extends Element> elements = roundEnv.getElementsAnnotatedWith(Example.class);
-            Set<String> mappers = new LinkedHashSet<>();
-            MustacheFactory mf = new DefaultMustacheFactory();
+            MustacheFactory mf = new DefaultMustacheFactory() {
+                @Override
+                public void encode(String value, Writer writer) {
+                    try {
+                        writer.write(value);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e.getMessage(), e);
+                    }
+                }
+            };
             ClassLoader classLoader = MybatisDomainProcessor.class.getClassLoader();
 
             for (Element element : elements) {
@@ -63,7 +76,6 @@ public class MybatisDomainProcessor extends AbstractProcessor {
 
 
                 String xml = tableMetadata.getDomainClazzSimpleName() + "ExampleMapper.xml";
-                mappers.add(tableMetadata.getDomainClazzName().replace(".", "/") + "ExampleMapper.xml");
                 FileObject xmlOut = filer.createResource(StandardLocation.CLASS_OUTPUT, packageOf.toString(), xml);
                 InputStream xmlInputStream = classLoader.getResourceAsStream("templates/Example.xml");
                 try (InputStreamReader in = new InputStreamReader(xmlInputStream, StandardCharsets.UTF_8);
@@ -71,19 +83,8 @@ public class MybatisDomainProcessor extends AbstractProcessor {
                     Mustache mustache = mf.compile(in, tableMetadata.getDomainClazzName() + ".xml");
                     mustache.execute(writer, scopes);
                 }
-
-
             }
 
-            FileObject configXmlOut = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "MybatisExampleConfig.xml");
-            InputStream configXmlIn = classLoader.getResourceAsStream("templates/MybatisExampleConfig.xml");
-            try (InputStreamReader in = new InputStreamReader(configXmlIn, StandardCharsets.UTF_8);
-                 Writer writer = configXmlOut.openWriter()) {
-                Mustache mustache = mf.compile(in, "MybatisExampleConfig.xml");
-                HashMap<String, Object> configScopes = new HashMap<>();
-                configScopes.put("mappers", mappers);
-                mustache.execute(writer, configScopes);
-            }
         } catch (Exception e) {
             processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING, Arrays.toString(e.getStackTrace()));
         }
@@ -115,14 +116,9 @@ public class MybatisDomainProcessor extends AbstractProcessor {
                         CamelUtils.split(tableMetadata.getDomainClazzSimpleName(), true)));
 
         for (Element member : element.getEnclosedElements()) {
-            boolean isStatic = member.getModifiers().stream().anyMatch(c -> Modifier.STATIC == c || Modifier.FINAL == c);
-            if (isStatic ||
-                    !member.getKind().isField() ||
+            if (member.getModifiers().contains(Modifier.STATIC) || !member.getKind().isField() ||
                     member.getAnnotation(Transient.class) != null ||
-                    member.getAnnotation(ManyToOne.class) != null
-
-
-            ) {
+                    member.getAnnotation(ManyToOne.class) != null) {
                 continue;
             }
 

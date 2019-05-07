@@ -1,7 +1,6 @@
 package com.vcg.mybatis.example.starter;
 
-import com.vcg.mybatis.example.starter.annotations.IncludeColumns;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mapping.PropertyPath;
 import org.springframework.data.repository.query.parser.AbstractQueryCreator;
@@ -16,7 +15,9 @@ import java.util.regex.Pattern;
 
 public class MybatisQueryCreator extends AbstractQueryCreator<String, StringBuilder> {
 
-    private static final Pattern FIND_PATTERN = Pattern.compile("^(findBy|getBy|queryBy|readBy)");
+    private static final Pattern FIND_PATTERN = Pattern.compile("^(findBy|getBy|queryBy|readBy|streamBy)");
+
+    private static final Pattern FIND_ALL_PATTERN = Pattern.compile("^(streamAll|selectAll|streamAllBy|selectAllBy)");
 
     private static final Pattern COUNT_PATTERN = Pattern.compile("^(countBy)");
 
@@ -24,15 +25,17 @@ public class MybatisQueryCreator extends AbstractQueryCreator<String, StringBuil
 
     private static final Pattern DELETE_PATTERN = Pattern.compile("^(removeBy|deleteBy)");
 
-    private static final String FIND_SQL = "select <include refid=\"Base_Column_List\" /> from <include refid=\"TABLE_NAME\" /> ";
+    private static final String FIND_SQL = "select <include refid=\"JqlBaseColumnList\" /> from <include refid=\"JqlTableName\" /> ";
 
-    private static final String DYNAMIC_COLUMN_FIND_SQL = "select %s from <include refid=\"TABLE_NAME\" /> ";
+    public static final String FIND_ALL_MAPPER_XML = "<SELECT id=\"%s\" resultMap=\"JqlBaseResultMap\">select <include refid=\"JqlBaseColumnList\" /> from <include refid=\"JqlTableName\" /> </SELECT>";
 
-    private static final String COUNT_SQL = "select count(*) from <include refid=\"TABLE_NAME\" /> ";
+    private static final String DYNAMIC_COLUMN_FIND_SQL = "select %s from <include refid=\"JqlTableName\" /> ";
 
-    private static final String EXIST_SQl = "select count(*) from  <include refid=\"TABLE_NAME\" /> ";
+    private static final String COUNT_SQL = "select count(*) from <include refid=\"JqlTableName\" /> ";
 
-    private static final String DELETE_SQl = "delete from <include refid=\"TABLE_NAME\" />  ";
+    private static final String EXIST_SQl = "select count(*) from  <include refid=\"JqlTableName\" /> ";
+
+    private static final String DELETE_SQl = "delete from <include refid=\"JqlTableName\" />  ";
 
     private static final String SELECT_MAPPER_XML = "<select id=\"%s\" %s>%s</select>";
 
@@ -55,13 +58,13 @@ public class MybatisQueryCreator extends AbstractQueryCreator<String, StringBuil
 
     @Override
     protected StringBuilder create(Part part, Iterator<Object> iterator) {
-        String condition = getCondition(part);
+        String condition = nextCondition(part);
         return new StringBuilder(condition);
     }
 
     @Override
     protected StringBuilder and(Part part, StringBuilder base, Iterator<Object> iterator) {
-        String condition = getCondition(part);
+        String condition = nextCondition(part);
         return base.append(" and ")
                 .append(condition);
     }
@@ -101,26 +104,21 @@ public class MybatisQueryCreator extends AbstractQueryCreator<String, StringBuil
             criteria.append(this.orderBy);
         }
 
-        for (int i = 0; i < method.getParameterTypes().length; i++) {
-            if (Pageable.class == method.getParameterTypes()[i]) {
-                String param = "param" + (i + 1);
-                criteria.append("<foreach open=\"order by\"  collection=\"" + param + ".sort\" item=\"item\" separator=\",\">${item.property} ${item.direction}</foreach> ")
-                        .append(" limit ${(" + param + ".pageNumber-1)*" + param + ".pageSize}, ${" + param + ".pageSize}");
-                break;
-            }
+        String sql = FIND_SQL;
+
+        IncludeColumns includeColumns = this.method.getAnnotation(IncludeColumns.class);
+        if (includeColumns != null && includeColumns.value().length > 0) {
+            sql = String.format(DYNAMIC_COLUMN_FIND_SQL, String.join(",", includeColumns.value()));
         }
 
-
-        String sql = FIND_SQL;
-        String resultType = "resultMap=\"BaseResultMap\"";
+        String resultType = "resultMap=\"JqlBaseResultMap\"";
         if (COUNT_PATTERN.matcher(this.method.getName()).find()) {
             sql = COUNT_SQL;
             resultType = "resultType=\"long\"";
         }
 
-        IncludeColumns includeColumns = method.getAnnotation(IncludeColumns.class);
-        if (includeColumns != null) {
-            sql = String.format(DYNAMIC_COLUMN_FIND_SQL, String.join(",", includeColumns.name()));
+        if (method.getReturnType() == PageRequest.class) {
+            resultType = "resultType=\"" + PageRequest.class.getName() + "\"";
         }
 
 
@@ -144,7 +142,7 @@ public class MybatisQueryCreator extends AbstractQueryCreator<String, StringBuil
 
     private int numberOfArguments = 0;
 
-    private String getCondition(Part part) {
+    private String nextCondition(Part part) {
         PropertyPath property = part.getProperty();
         String segment = property.getSegment();
         String propertyName = "param" + (++numberOfArguments);
@@ -237,6 +235,10 @@ public class MybatisQueryCreator extends AbstractQueryCreator<String, StringBuil
                 COUNT_PATTERN.matcher(methodName).find() ||
                 EXIST_PATTERN.matcher(methodName).find() ||
                 DELETE_PATTERN.matcher(methodName).find();
+    }
+
+    public static boolean isSelectAll(String methodName) {
+        return FIND_ALL_PATTERN.matcher(methodName).find();
     }
 
 }
