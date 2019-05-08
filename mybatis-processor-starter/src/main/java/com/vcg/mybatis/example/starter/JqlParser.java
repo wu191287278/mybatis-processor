@@ -7,9 +7,13 @@ import com.vcg.mybatis.example.processor.MybatisExampleRepository;
 import com.vcg.mybatis.example.processor.domain.ColumnMetadata;
 import com.vcg.mybatis.example.processor.domain.JoinMetadata;
 import com.vcg.mybatis.example.processor.domain.TableMetadata;
+import com.vcg.mybatis.example.processor.handler.PlaceHolderTypeHandler;
+import com.vcg.mybatis.example.processor.handler.Separator;
 import com.vcg.mybatis.example.processor.util.CamelUtils;
 import org.apache.ibatis.annotations.*;
 import org.apache.ibatis.builder.xml.XMLMapperBuilder;
+import org.apache.ibatis.mapping.ResultMap;
+import org.apache.ibatis.mapping.ResultMapping;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.data.domain.Page;
@@ -115,7 +119,7 @@ public class JqlParser {
 
 
         if (queries.size() > 0) {
-            TableMetadata tableMetadata = read(domainClass, mapperInterface);
+            TableMetadata tableMetadata = read(configuration, domainClass, mapperInterface);
             HashMap<String, Object> scopes = new HashMap<>();
             scopes.put("metadata", tableMetadata);
             scopes.put("queries", queries);
@@ -145,6 +149,17 @@ public class JqlParser {
             } catch (IOException e) {
                 throw new RuntimeException(e.getMessage(), e);
             }
+        }
+
+        ResultMap baseResultMap = configuration.getResultMap(mapperInterface.getName() + ".BaseResultMap");
+        ResultMap jqlResultMap = configuration.getResultMap(mapperInterface.getName() + ".JqlBaseResultMap");
+
+        if (baseResultMap != null) {
+            registerTypeHandler(baseResultMap);
+        }
+
+        if (jqlResultMap != null) {
+            registerTypeHandler(jqlResultMap);
         }
     }
 
@@ -183,7 +198,7 @@ public class JqlParser {
     }
 
 
-    private static TableMetadata read(Class clazz, Class mapper) {
+    private static TableMetadata read(Configuration configuration, Class clazz, Class mapper) {
         Table table = (Table) clazz.getAnnotation(Table.class);
         String packageOf = clazz.getPackage().getName();
 
@@ -208,6 +223,7 @@ public class JqlParser {
                     member.getAnnotation(ManyToOne.class) != null) {
                 continue;
             }
+
 
             String name = member.getName();
             JoinColumn joinColumn = member.getAnnotation(JoinColumn.class);
@@ -240,11 +256,10 @@ public class JqlParser {
                 }
                 continue;
             }
-
-
             Id id = member.getAnnotation(Id.class);
             Column column = member.getAnnotation(Column.class);
             GeneratedValue generatedValue = member.getAnnotation(GeneratedValue.class);
+            Separator typeHandler = member.getAnnotation(Separator.class);
             ColumnMetadata columnMetadata = new ColumnMetadata();
             columnMetadata.setFieldName(name)
                     .setJavaType(member.getType().getName())
@@ -269,6 +284,12 @@ public class JqlParser {
                 tableMetadata.setPrimaryMetadata(columnMetadata);
             }
 
+
+            if (typeHandler != null && !"".equals(typeHandler.typeHandler())) {
+                columnMetadata.setTypeHandler(typeHandler.typeHandler());
+            }
+
+
             tableMetadata.getColumnMetadataList().add(columnMetadata);
 
         }
@@ -279,6 +300,27 @@ public class JqlParser {
                 .collect(Collectors.joining(", "));
 
         return tableMetadata.setColumns(columns);
+    }
+
+    private static void registerTypeHandler(ResultMap resultMap) {
+        if (resultMap != null) {
+            Class<?> type = resultMap.getType();
+            List<ResultMapping> resultMappings = resultMap.getResultMappings();
+            for (ResultMapping resultMapping : resultMappings) {
+                String property = resultMapping.getProperty();
+                if (resultMapping.getTypeHandler() != null && resultMapping.getTypeHandler() instanceof PlaceHolderTypeHandler) {
+                    try {
+                        Field field = type.getDeclaredField(property);
+                        Field handler = resultMapping.getClass().getDeclaredField("typeHandler");
+                        handler.setAccessible(true);
+                        handler.set(resultMapping, new GenericSeparatorTypeHandler(field));
+                    } catch (NoSuchFieldException | IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                }
+            }
+        }
     }
 
     private static final Map<String, String> JDBC_TYPE_MAPPING = new HashMap<>();

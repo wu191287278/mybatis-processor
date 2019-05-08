@@ -20,6 +20,8 @@ public class ColumnMetadata {
 
     private boolean partitionKey = false;
 
+    private String typeHandler;
+
     public String getFieldName() {
         return fieldName;
     }
@@ -106,5 +108,14 @@ public class ColumnMetadata {
 
     public void setPartitionKey(boolean partitionKey) {
         this.partitionKey = partitionKey;
+    }
+
+    public String getTypeHandler() {
+        return typeHandler;
+    }
+
+    public ColumnMetadata setTypeHandler(String typeHandler) {
+        this.typeHandler = typeHandler;
+        return this;
     }
 }

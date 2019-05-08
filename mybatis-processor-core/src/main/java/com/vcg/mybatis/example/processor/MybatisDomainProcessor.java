@@ -6,6 +6,7 @@ import com.github.mustachejava.MustacheFactory;
 import com.vcg.mybatis.example.processor.domain.ColumnMetadata;
 import com.vcg.mybatis.example.processor.domain.JoinMetadata;
 import com.vcg.mybatis.example.processor.domain.TableMetadata;
+import com.vcg.mybatis.example.processor.handler.Separator;
 import com.vcg.mybatis.example.processor.util.CamelUtils;
 import com.vcg.mybatis.example.processor.visitor.DomainTypeVisitor;
 
@@ -83,6 +84,7 @@ public class MybatisDomainProcessor extends AbstractProcessor {
                     Mustache mustache = mf.compile(in, tableMetadata.getDomainClazzName() + ".xml");
                     mustache.execute(writer, scopes);
                 }
+
             }
 
         } catch (Exception e) {
@@ -158,6 +160,7 @@ public class MybatisDomainProcessor extends AbstractProcessor {
             Id id = member.getAnnotation(Id.class);
             Column column = member.getAnnotation(Column.class);
             GeneratedValue generatedValue = member.getAnnotation(GeneratedValue.class);
+            Separator typeHandler = member.getAnnotation(Separator.class);
             ColumnMetadata columnMetadata = new ColumnMetadata();
             member.asType().accept(domainTypeVisitor, columnMetadata);
             columnMetadata.setFieldName(name)
@@ -188,6 +191,11 @@ public class MybatisDomainProcessor extends AbstractProcessor {
                         .setShard(example.shard());
 
             }
+
+            if (typeHandler != null && !"".equals(typeHandler.typeHandler())) {
+                columnMetadata.setTypeHandler(typeHandler.typeHandler());
+            }
+
 
             tableMetadata.getColumnMetadataList().add(columnMetadata);
 

@@ -24,11 +24,13 @@ public class DomainTypeVisitor implements TypeVisitor<DomainTypeVisitor, ColumnM
 
     @Override
     public DomainTypeVisitor visitNull(NullType t, ColumnMetadata columnMetadata) {
+        columnMetadata.setJavaType(t.toString());
         return this;
     }
 
     @Override
     public DomainTypeVisitor visitArray(ArrayType t, ColumnMetadata columnMetadata) {
+        columnMetadata.setJavaType(t.toString());
         return this;
     }
 

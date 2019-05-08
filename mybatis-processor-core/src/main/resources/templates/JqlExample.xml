@@ -4,11 +4,11 @@
 
   <resultMap id="JqlBaseResultMap" type="{{metadata.domainClazzName}}">
     {{#metadata.primaryMetadata}}
-    <id column="{{columnName}}" property="{{fieldName}}" />
+    <id column="{{columnName}}" property="{{fieldName}}"  {{#typeHandler}}typeHandler="{{typeHandler}}" {{/typeHandler}} />
     {{/metadata.primaryMetadata}}
 {{#metadata.columnMetadataList}}
     {{^primary}}
-    <result column="{{columnName}}"  property="{{fieldName}}" />
+    <result column="{{columnName}}"  property="{{fieldName}}"  {{#typeHandler}}typeHandler="{{typeHandler}}" {{/typeHandler}}/>
     {{/primary}}
 {{/metadata.columnMetadataList}}
 {{#metadata.oneToOne}}
