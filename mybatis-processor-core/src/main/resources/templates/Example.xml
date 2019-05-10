@@ -147,6 +147,27 @@
       </foreach>
     </if>
    </select>
+  <select id="cursorByExample" parameterType="{{metadata.exampleClazzName}}" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List_Dy" />
+    from
+    <include refid="Table_Name_Dy" />
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+    <if test="limit != null">
+      limit
+      <foreach collection="limit" item="num" separator=",">
+        ${num}
+      </foreach>
+    </if>
+   </select>
 
   <select id="selectByExampleWithMap" parameterType="{{metadata.exampleClazzName}}" resultType="java.util.LinkedHashMap">
     select
@@ -423,6 +444,11 @@
     select <include refid="Base_Column_List" /> from {{metadata.tableName}}
   </select>
 
+
+  <select id="cursorAll" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List" /> from {{metadata.tableName}}
+  </select>
+
   <select id="count" resultType="long">
     select count(*) from {{metadata.tableName}}
   </select>
@@ -447,4 +473,8 @@
     </foreach>
   </delete>
 {{/metadata.primaryMetadata}}
+
+{{#queries}}
+  {{.}}
+{{/queries}}
 </mapper>

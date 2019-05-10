@@ -1,9 +1,11 @@
 package com.vcg.mybatis.example.processor;
 
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.cursor.Cursor;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 public interface MybatisExampleRepository<T, ID, Example> {
 
@@ -14,6 +16,10 @@ public interface MybatisExampleRepository<T, ID, Example> {
     List<T> selectByExample(Example query);
 
     List<T> selectAll();
+
+    Cursor<T> cursorAll();
+
+    Cursor<T> cursorByExample(Example query);
 
     List<Map<String, Object>> selectByExampleWithMap(Example query);
 

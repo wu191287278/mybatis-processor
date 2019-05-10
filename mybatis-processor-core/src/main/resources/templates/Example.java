@@ -8,8 +8,6 @@ import java.util.Map;
 import java.util.LinkedHashMap;
 
 import {{metadata.domainClazzName}};
-import {{metadata.repositoryClazzName}};
-import com.vcg.mybatis.example.processor.MybatisExampleRepository;
 
 public class {{metadata.exampleClazzSimpleName}} implements Serializable {
 

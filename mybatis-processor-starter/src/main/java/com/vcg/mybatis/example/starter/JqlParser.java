@@ -150,41 +150,48 @@ public class JqlParser {
                 throw new RuntimeException(e.getMessage(), e);
             }
         }
+        Collection<String> resultMapNames = configuration.getResultMapNames();
+        String baseResultMapName = mapperInterface.getName() + ".BaseResultMap";
+        String jqlBaseResultMapName = mapperInterface.getName() + ".JqlBaseResultMap";
 
-        ResultMap baseResultMap = configuration.getResultMap(mapperInterface.getName() + ".BaseResultMap");
-        ResultMap jqlResultMap = configuration.getResultMap(mapperInterface.getName() + ".JqlBaseResultMap");
-
-        if (baseResultMap != null) {
+        if (resultMapNames.contains(baseResultMapName)) {
+            ResultMap baseResultMap = configuration.getResultMap(baseResultMapName);
             registerTypeHandler(baseResultMap);
         }
 
-        if (jqlResultMap != null) {
+        if (resultMapNames.contains(jqlBaseResultMapName)) {
+            ResultMap jqlResultMap = configuration.getResultMap(mapperInterface.getName() + ".JqlBaseResultMap");
             registerTypeHandler(jqlResultMap);
         }
+
     }
 
     private static Map<String, String> getColumns(Class domainClass) {
-        Field[] declaredFields = domainClass.getDeclaredFields();
+        Class superclass = domainClass;
         Map<String, String> columns = new LinkedHashMap<>();
-        for (Field field : declaredFields) {
-            Column column = field.getAnnotation(Column.class);
+        while (superclass != null) {
+            Field[] declaredFields = superclass.getDeclaredFields();
+            for (Field field : declaredFields) {
+                Column column = field.getAnnotation(Column.class);
+                int modifiers = field.getModifiers();
+                if (Modifier.isStatic(modifiers) ||
+                        Modifier.isTransient(modifiers) ||
+                        field.getAnnotation(Transient.class) != null ||
+                        field.getAnnotation(ManyToMany.class) != null ||
+                        field.getAnnotation(OneToMany.class) != null ||
+                        field.getAnnotation(ManyToOne.class) != null) {
+                    continue;
+                }
 
-            int modifiers = field.getModifiers();
-            if (Modifier.isStatic(modifiers) ||
-                    Modifier.isTransient(modifiers) ||
-                    field.getAnnotation(Transient.class) != null ||
-                    field.getAnnotation(ManyToMany.class) != null ||
-                    field.getAnnotation(OneToMany.class) != null ||
-                    field.getAnnotation(ManyToOne.class) != null) {
-                continue;
+                if (column != null && !column.name().equals("")) {
+                    columns.put(field.getName(), column.name());
+                } else {
+                    columns.put(field.getName(), CamelUtils.toSnake(field.getName()));
+                }
             }
-
-            if (column != null && !column.name().equals("")) {
-                columns.put(field.getName(), column.name());
-            } else {
-                columns.put(field.getName(), CamelUtils.toSnake(field.getName()));
-            }
+            superclass = superclass.getSuperclass();
         }
+
         return columns;
     }
 
