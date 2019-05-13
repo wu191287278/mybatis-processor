@@ -81,8 +81,7 @@ public class PersistenceInterceptor implements Interceptor {
                                 continue;
                             }
 
-                            CreatedDate createdDate = field.getAnnotation(CreatedDate.class);
-                            if (createdDate != null && sqlCommandType == SqlCommandType.INSERT) {
+                            if (sqlCommandType == SqlCommandType.INSERT) {
                                 field.set(parameter, currentDate(field));
                             }
                         }

@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 
 public class MybatisQueryCreator extends AbstractQueryCreator<String, StringBuilder> {
 
-    private static final Pattern FIND_PATTERN = Pattern.compile("^(findBy|getBy|queryBy|readBy|streamBy)");
+    private static final Pattern FIND_PATTERN = Pattern.compile("^(findBy|getBy|queryBy|readBy|streamBy|cursorBy)");
 
     private static final Pattern FIND_ALL_PATTERN = Pattern.compile("^(streamAll|selectAll|streamAllBy|selectAllBy)");
 

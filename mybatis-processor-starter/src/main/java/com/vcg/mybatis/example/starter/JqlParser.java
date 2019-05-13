@@ -317,7 +317,7 @@ public class JqlParser {
                 String property = resultMapping.getProperty();
                 if (resultMapping.getTypeHandler() != null && resultMapping.getTypeHandler() instanceof PlaceHolderTypeHandler) {
                     try {
-                        Field field = type.getDeclaredField(property);
+                        Field field = getField(type, property);
                         Field handler = resultMapping.getClass().getDeclaredField("typeHandler");
                         handler.setAccessible(true);
                         handler.set(resultMapping, new GenericSeparatorTypeHandler(field));
@@ -328,6 +328,19 @@ public class JqlParser {
                 }
             }
         }
+    }
+
+    private static Field getField(Class clazz, String name) throws NoSuchFieldException {
+        Class parentClass = clazz;
+        while (parentClass != null) {
+            for (Field field : clazz.getDeclaredFields()) {
+                if (field.getName().equals(name)) {
+                    return field;
+                }
+            }
+            parentClass = clazz.getSuperclass();
+        }
+        throw new NoSuchFieldException();
     }
 
     private static final Map<String, String> JDBC_TYPE_MAPPING = new HashMap<>();

@@ -211,7 +211,7 @@
   <delete id="deleteByPrimaryKeys" parameterType="{{metadata.primaryMetadata.javaType}}">
     delete from {{metadata.tableName}}
     where {{metadata.primaryMetadata.columnName}} in
-    <foreach close=")" collection="list" item="id" open="(" separator=",">
+    <foreach close=")" collection="collection" item="id" open="(" separator=",">
       #{id}
     </foreach>
   </delete>
@@ -264,7 +264,7 @@
     insert into {{metadata.tableName}}
     (<include refid="Base_Column_List" />)
     values
-    <foreach collection="list" index="index" item="item" separator=",">
+    <foreach collection="collection" index="index" item="item" separator=",">
     <trim prefix="(" suffix=")" suffixOverrides=",">
       {{#metadata.columnMetadataList}}
       #{ item.{{fieldName}} },
@@ -412,7 +412,7 @@
     from {{metadata.tableName}}
     where {{metadata.primaryMetadata.columnName}}  in
 
-    <foreach open="(" close=")" collection="list" item="id" separator=",">
+    <foreach open="(" close=")" collection="collection" item="id" separator=",">
       #{id}
     </foreach>
   </select>
@@ -468,7 +468,7 @@
   <delete id="deleteAllByEntities" parameterType="java.util.List">
     delete from {{metadata.tableName}}
     where {{metadata.primaryMetadata.columnName}} in
-    <foreach close=")" collection="list" item="item" open="(" separator=",">
+    <foreach close=")" collection="collection" item="item" open="(" separator=",">
     #{ {{metadata.primaryMetadata.fieldName}}  }
     </foreach>
   </delete>
