@@ -341,6 +341,9 @@
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
     </if>
+    <if test="example.orderByClause != null">
+      order by ${example.orderByClause}
+    </if>
     <if test="example.limit != null">
       limit
       <foreach collection="example.limit" item="num" separator=",">
@@ -365,6 +368,9 @@
     </trim>
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
+    </if>
+    <if test="example.orderByClause != null">
+      order by ${example.orderByClause}
     </if>
     <if test="example.limit != null">
       limit

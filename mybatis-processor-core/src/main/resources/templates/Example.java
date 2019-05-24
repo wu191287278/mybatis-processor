@@ -178,7 +178,7 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
         this.orderByClause = orderByClause;
     }
 
-    protected String getOrderByClause() {
+    public String getOrderByClause() {
         return orderByClause;
     }
 
