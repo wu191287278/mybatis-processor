@@ -1,11 +1,7 @@
 package {{metadata.packageName}};
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.LinkedHashMap;
+import java.util.*;
 
 import {{metadata.domainClazzName}};
 
@@ -387,22 +383,22 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
 
         private static final long serialVersionUID = {{metadata.randomId}}L;
 
-        protected List<Criterion> criteria;
+        protected Set<Criterion> criteria;
 
         protected GeneratedCriteria() {
             super();
-            criteria = new ArrayList<Criterion>();
+            criteria = new LinkedHashSet<Criterion>();
         }
 
         public boolean isValid() {
             return criteria.size() > 0;
         }
 
-        public List<Criterion> getAllCriteria() {
+        public Set<Criterion> getAllCriteria() {
             return criteria;
         }
 
-        public List<Criterion> getCriteria() {
+        public Set<Criterion> getCriteria() {
             return criteria;
         }
 
@@ -601,6 +597,17 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
         protected Criterion(String condition, Object value, Object secondValue) {
             this(condition, value, secondValue, null);
         }
+
+        @Override
+        public int hashCode() {
+            return condition.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return condition.hashCode()==obj.hashCode();
+        }
+
     }
 
 
