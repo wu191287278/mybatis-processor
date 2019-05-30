@@ -147,7 +147,7 @@
       </foreach>
     </if>
    </select>
-  <select id="cursorByExample" parameterType="{{metadata.exampleClazzName}}" resultMap="BaseResultMap">
+  <select id="cursorByExample" parameterType="{{metadata.exampleClazzName}}" resultMap="BaseResultMap" fetchSize="-2147483648">
     select
     <if test="distinct">
       distinct
@@ -451,7 +451,7 @@
   </select>
 
 
-  <select id="cursorAll" resultMap="BaseResultMap">
+  <select id="cursorAll" resultMap="BaseResultMap" fetchSize="-2147483648">
     select <include refid="Base_Column_List" /> from {{metadata.tableName}}
   </select>
 
