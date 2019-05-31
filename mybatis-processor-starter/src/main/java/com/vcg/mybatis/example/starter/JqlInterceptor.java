@@ -35,10 +35,13 @@ public class JqlInterceptor extends PageInterceptor {
         Object[] args = invocation.getArgs();
         MappedStatement ms = (MappedStatement) args[0];
         Object parameter = args[1];
+
+
         //跳过接口已有方法
         if (JqlParser.isIgnoreMethod(ms.getId())) {
             return invocation.proceed();
         }
+
 
         //遍历参数 判断是否存在 PageRequest 进行分页
         if (parameter instanceof Map) {
@@ -68,6 +71,12 @@ public class JqlInterceptor extends PageInterceptor {
                 Object result = ((List) proceed).get(0);
                 if (result instanceof Optional) return proceed;
                 return Collections.singletonList(result == null ? Optional.empty() : Optional.of(result));
+            }
+        }
+
+        if (JqlParser.isBooleanResultId(ms.getId()) && proceed instanceof List) {
+            if (((List) proceed).isEmpty()) {
+                return Collections.singletonList(false);
             }
         }
 

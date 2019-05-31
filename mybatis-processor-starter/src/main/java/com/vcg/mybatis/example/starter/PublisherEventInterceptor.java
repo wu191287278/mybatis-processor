@@ -36,7 +36,7 @@ public class PublisherEventInterceptor implements Interceptor {
         String baseResultMap = ms.getId().substring(0, ms.getId().lastIndexOf(".")) + ".BaseResultMap";
         if (typeCache.get(baseResultMap) != null) {
             Class type = typeCache.get(baseResultMap);
-            MybatisUpdateEvent event = new MybatisUpdateEvent(ms.getId(), ms.getSqlCommandType().toString(), type, proceed, parameter);
+            Event event = new Event(ms.getId(), ms.getSqlCommandType().toString(), type, proceed, parameter);
             this.applicationContext.publishEvent(event);
         } else {
             Configuration configuration = ms.getConfiguration();
@@ -44,7 +44,7 @@ public class PublisherEventInterceptor implements Interceptor {
                 ResultMap resultMap = configuration.getResultMap(baseResultMap);
                 Class<?> type = resultMap.getType();
                 typeCache.put(ms.getId(), type);
-                MybatisUpdateEvent event = new MybatisUpdateEvent(ms.getId(), ms.getSqlCommandType().toString(), type, proceed, parameter);
+                Event event = new Event(ms.getId(), ms.getSqlCommandType().toString(), type, proceed, parameter);
                 this.applicationContext.publishEvent(event);
             }
         }

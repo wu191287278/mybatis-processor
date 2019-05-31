@@ -426,14 +426,14 @@
 
   {{#metadata.primaryMetadata}}
   <select id="existsById" parameterType="{{metadata.primaryMetadata.javaType}}" resultType="boolean">
-    select count(*)>0 from {{metadata.tableName}}
+    select 1 from {{metadata.tableName}}
     where {{metadata.primaryMetadata.columnName}} = #{ {{metadata.primaryMetadata.fieldName}} }
   </select>
   {{/metadata.primaryMetadata}}
 
 
   <select id="existsByExample" parameterType="{{metadata.exampleClazzName}}" resultType="Boolean">
-  select count(*)>0 from
+  select 1 from
     <include refid="Table_Name_Dy"></include>
       <if test="_parameter != null">
         <include refid="Example_Where_Clause"/>

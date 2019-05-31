@@ -5,7 +5,7 @@ import org.springframework.context.ApplicationEvent;
 
 import javax.persistence.Table;
 
-public class MybatisUpdateEvent extends ApplicationEvent {
+public class Event extends ApplicationEvent {
 
     private String mappedStatementId;
 
@@ -20,11 +20,11 @@ public class MybatisUpdateEvent extends ApplicationEvent {
      *
      * @param source the object on which the event initially occurred (never {@code null})
      */
-    public MybatisUpdateEvent(String mappedStatementId,
-                              String sqlCommandType,
-                              Class type,
-                              Object result,
-                              Object source) {
+    public Event(String mappedStatementId,
+                 String sqlCommandType,
+                 Class type,
+                 Object result,
+                 Object source) {
         super(source);
         this.sqlCommandType = sqlCommandType;
         this.mappedStatementId = mappedStatementId;

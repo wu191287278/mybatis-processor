@@ -40,6 +40,8 @@ public class JqlParser {
 
     private static final Set<String> OPTIONAL_RESULT_ID = new HashSet<>();
 
+    private static final Set<String> BOOLEAN_RESULT_ID = new HashSet<>();
+
     private static final Map<String, Method> METHODS = new HashMap<>();
 
     public static synchronized void parse(SqlSessionFactory sqlSessionFactory) {
@@ -58,6 +60,13 @@ public class JqlParser {
 
     public static synchronized void parse(Configuration configuration, Class mapperInterface) {
 
+        for (Method method : mapperInterface.getMethods()) {
+            Class<?> returnType = method.getReturnType();
+            if (returnType == Boolean.class || returnType == boolean.class) {
+                String msId = mapperInterface.getName() + "." + method.getName();
+                BOOLEAN_RESULT_ID.add(msId);
+            }
+        }
         if (!MybatisRepository.class.isAssignableFrom(mapperInterface)) {
             return;
         }
@@ -361,30 +370,10 @@ public class JqlParser {
         JDBC_TYPE_MAPPING.put("DATETIME", "TIMESTAMP");
     }
 
-    private static final Set<String> IGNORE_METHOD_NAMES = new HashSet<>(
-            Arrays.asList("count",
-                    "insert",
-                    "selectByPrimaryKeys",
-                    "selectByExample",
-                    "selectByPrimaryKey",
-                    "selectAll",
-                    "selectByExampleWithMap",
-                    "insertSelective",
-                    "insertBatch",
-                    "insertByExample",
-                    "insertSelectiveByExample",
-                    "insertBatchByExample",
-                    "countByExample",
-                    "updateByPrimaryKeySelective",
-                    "updateByPrimaryKey",
-                    "updateByExampleSelective",
-                    "updateByExample",
-                    "deleteByPrimaryKey",
-                    "deleteByPrimaryKeys",
-                    "deleteByExample",
-                    "existsById",
-                    "existsByExample")
-    );
+    private static final Set<String> IGNORE_METHOD_NAMES = Arrays.stream(MybatisCrudRepository.class.getMethods())
+            .filter(method -> method.getReturnType() != Boolean.class && method.getReturnType() != boolean.class)
+            .map(Method::getName)
+            .collect(Collectors.toSet());
 
 
     public static boolean isIgnoreMethod(Method method) {
@@ -409,6 +398,10 @@ public class JqlParser {
 
     public static boolean isOptionalResultId(String msId) {
         return OPTIONAL_RESULT_ID.contains(msId);
+    }
+
+    public static boolean isBooleanResultId(String msId) {
+        return BOOLEAN_RESULT_ID.contains(msId);
     }
 
 
