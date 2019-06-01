@@ -33,7 +33,7 @@ public class MybatisQueryCreator extends AbstractQueryCreator<String, StringBuil
 
     private static final String COUNT_SQL = "select count(*) from <include refid=\"JqlTableName\" /> ";
 
-    private static final String EXIST_SQl = "select 1 from  <include refid=\"JqlTableName\" /> limit 1";
+    private static final String EXIST_SQl = "select 1 from  <include refid=\"JqlTableName\" /> ";
 
     private static final String DELETE_SQl = "delete from <include refid=\"JqlTableName\" />  ";
 
@@ -125,7 +125,7 @@ public class MybatisQueryCreator extends AbstractQueryCreator<String, StringBuil
         if (EXIST_PATTERN.matcher(this.method.getName()).find()) {
             resultType = "resultType=\"boolean\"";
             sql = (EXIST_SQl + " where " + criteria.toString());
-            return String.format(SELECT_MAPPER_XML, this.method.getName(), resultType, sql);
+            return String.format(SELECT_MAPPER_XML, this.method.getName(), resultType, sql) + "limit 1";
         }
 
         if (DELETE_PATTERN.matcher(this.method.getName()).find()) {
