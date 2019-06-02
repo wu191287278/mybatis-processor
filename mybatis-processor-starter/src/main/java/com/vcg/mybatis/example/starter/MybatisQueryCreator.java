@@ -124,8 +124,8 @@ public class MybatisQueryCreator extends AbstractQueryCreator<String, StringBuil
 
         if (EXIST_PATTERN.matcher(this.method.getName()).find()) {
             resultType = "resultType=\"boolean\"";
-            sql = (EXIST_SQl + " where " + criteria.toString());
-            return String.format(SELECT_MAPPER_XML, this.method.getName(), resultType, sql) + "limit 1";
+            sql = (EXIST_SQl + " where " + criteria.toString()) +" limit 1";
+            return String.format(SELECT_MAPPER_XML, this.method.getName(), resultType, sql);
         }
 
         if (DELETE_PATTERN.matcher(this.method.getName()).find()) {
