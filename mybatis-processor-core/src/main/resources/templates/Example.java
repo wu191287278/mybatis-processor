@@ -277,7 +277,6 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
         return this;
     }
 
-    {{^stringType}}
     public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}Between({{javaType}} {{fieldName}}1, {{javaType}} {{fieldName}}2) {
         {{#partitionKey}}
         shardTable({{fieldName}}1);
@@ -325,7 +324,6 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
         getCriteria().and{{firstUpFieldName}}LessThanOrEqualTo({{fieldName}});
         return this;
     }
-    {{/stringType}}
 
     {{#stringType}}
     public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}Like({{javaType}} {{fieldName}}) {
