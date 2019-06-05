@@ -451,7 +451,6 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
             return (Criteria) this;
         }
 
-        {{^stringType}}
         public Criteria and{{firstUpFieldName}}Between({{javaType}} {{fieldName}}1, {{javaType}} {{fieldName}}2) {
             addCriterion("{{columnName}} between", {{fieldName}}1, {{fieldName}}2, "{{fieldName}}");
             return (Criteria) this;
@@ -481,7 +480,6 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
             addCriterion("{{columnName}} <=", {{fieldName}}, "{{fieldName}}");
             return (Criteria) this;
         }
-        {{/stringType}}
 
         {{#stringType}}
         public Criteria and{{firstUpFieldName}}Like({{javaType}} {{fieldName}}) {
