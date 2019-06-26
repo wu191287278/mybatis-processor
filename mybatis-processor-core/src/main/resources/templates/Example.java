@@ -186,6 +186,7 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
         return distinct;
     }
 
+
     public List<Criteria> getOredCriteria() {
         if(this.oredCriteria == null){
             this.oredCriteria = new ArrayList<>();
@@ -203,7 +204,7 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
         return or(createCriteriaInternal());
     }
 
-    protected Criteria createCriteria() {
+    public Criteria createCriteria() {
         Criteria criteria = createCriteriaInternal();
         List<Criteria> cs = getOredCriteria();
         if (cs.size() == 0) {
