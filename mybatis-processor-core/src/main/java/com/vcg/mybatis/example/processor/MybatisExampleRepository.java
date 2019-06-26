@@ -27,6 +27,10 @@ public interface MybatisExampleRepository<T, ID, Example> {
 
     void insertSelective(T t);
 
+    void upsert(T t);
+
+    void upsertSelective(T t);
+
     void insertBatch(List<T> ts);
 
     void insertByExample(Example query);

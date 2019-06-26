@@ -259,6 +259,35 @@
     </trim>
   </insert>
 
+  <insert id="upsert" parameterType="{{metadata.domainClazzName}}" {{#metadata.primaryMetadata}} {{#metadata.primaryMetadata.useGeneratedKeys}} keyProperty="{{metadata.primaryMetadata.fieldName}}" useGeneratedKeys="{{metadata.primaryMetadata.useGeneratedKeys}}" {{/metadata.primaryMetadata.useGeneratedKeys}} {{/metadata.primaryMetadata}}>
+    replace into {{metadata.tableName}} ({{metadata.columns}})
+    values (
+    <trim  suffixOverrides=",">
+      {{#metadata.columnMetadataList}}
+        #{ {{fieldName}} } ,
+      {{/metadata.columnMetadataList}}
+    </trim>
+    )
+  </insert>
+
+  <insert id="upsertSelective" parameterType="{{metadata.domainClazzName}}" {{#metadata.primaryMetadata}} {{#metadata.primaryMetadata.useGeneratedKeys}} keyProperty="{{metadata.primaryMetadata.fieldName}}" useGeneratedKeys="{{metadata.primaryMetadata.useGeneratedKeys}}" {{/metadata.primaryMetadata.useGeneratedKeys}} {{/metadata.primaryMetadata}}>
+    replace into {{metadata.tableName}}
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      {{#metadata.columnMetadataList}}
+      <if test="{{fieldName}} != null">
+        {{columnName}},
+      </if>
+      {{/metadata.columnMetadataList}}
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      {{#metadata.columnMetadataList}}
+      <if test="{{fieldName}} != null">
+        #{ {{fieldName}}  } ,
+      </if>
+      {{/metadata.columnMetadataList}}
+    </trim>
+  </insert>
+
 
   <insert id="insertBatch" parameterType="java.util.List"  {{#metadata.primaryMetadata}} {{#metadata.primaryMetadata.useGeneratedKeys}} keyProperty="{{metadata.primaryMetadata.fieldName}}" useGeneratedKeys="{{metadata.primaryMetadata.useGeneratedKeys}}" {{/metadata.primaryMetadata.useGeneratedKeys}} {{/metadata.primaryMetadata}}>
     insert into {{metadata.tableName}}
