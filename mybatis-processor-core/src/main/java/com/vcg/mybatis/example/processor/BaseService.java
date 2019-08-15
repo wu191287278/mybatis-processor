@@ -36,6 +36,14 @@ public class BaseService<T, ID, Example> {
         this.repository.insertBatch(ts);
     }
 
+    public void upsert(T t) {
+        this.repository.upsert(t);
+    }
+
+    public void upsertSelective(T t) {
+        this.repository.upsertSelective(t);
+    }
+
     public int updateByPrimaryKeySelective(T t) {
         return this.repository.updateByPrimaryKeySelective(t);
     }
