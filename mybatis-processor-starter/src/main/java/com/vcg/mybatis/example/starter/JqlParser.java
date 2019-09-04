@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 
 public class JqlParser {
 
-    private static final Set<Method> IGNORE_METHODS = new HashSet<>(Arrays.asList(MybatisExampleRepository.class.getMethods()));
+    private static final Set<Method> IGNORE_METHODS = new HashSet<>(Arrays.asList(MybatisCrudRepository.class.getMethods()));
 
     private static final Set<String> PAGEABLE_RESULT_ID = new HashSet<>();
 
