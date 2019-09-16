@@ -17,38 +17,6 @@
     </modules>
 
 
-    <profiles>
-        <profile>
-            <id>me</id>
-            <distributionManagement>
-                <snapshotRepository>
-                    <id>maven-snapshots</id>
-                    <name>maven-snapshots</name>
-                    <url>http://maven.500px.me/repository/maven-snapshots/</url>
-                </snapshotRepository>
-                <repository>
-                    <id>maven-releases</id>
-                    <name>maven-releases</name>
-                    <url>http://maven.500px.me/repository/maven-releases/</url>
-                </repository>
-            </distributionManagement>
-        </profile>
-        <profile>
-            <id>com</id>
-            <distributionManagement>
-                <repository>
-                    <id>dop-releases</id>
-                    <name>Local Nexus Repository</name>
-                    <url>https://nexus-500px.55if.com/repository/maven-releases/</url>
-                </repository>
-                <snapshotRepository>
-                    <id>dop-snapshots</id>
-                    <name>Local Nexus Repository</name>
-                    <url>https://nexus-500px.55if.com/repository/maven-snapshots/</url>
-                </snapshotRepository>
-            </distributionManagement>
-        </profile>
-    </profiles>
 
 
 </project>

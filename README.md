@@ -8,7 +8,7 @@ mybatis-processor 该工具是用于在编译阶段自动生成mybatis 的Exampl
  <dependency>
       <artifactId>mybatis-processor-core</artifactId>
       <groupId>com.vcg</groupId>
-      <version>0.0.1-SNAPSHOT</version>
+      <version>2.0.0-SNAPSHOT</version>
 </dependency>
 
 maven 编译插件:
@@ -23,7 +23,7 @@ maven 编译插件:
             <path>
                 <artifactId>mybatis-processor-core</artifactId>
                 <groupId>com.vcg</groupId>
-                <version>0.0.1-SNAPSHOT</version>
+                <version>2.0.0-SNAPSHOT</version>
             </path>
         </annotationProcessorPaths>
     </configuration>
