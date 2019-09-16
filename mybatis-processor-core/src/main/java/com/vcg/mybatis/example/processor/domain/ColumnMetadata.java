@@ -61,8 +61,8 @@ public class ColumnMetadata {
     }
 
     public ColumnMetadata setJavaType(String javaType) {
-        this.javaType = javaType;
-        this.stringType = "java.lang.String".equals(javaType);
+        this.javaType = javaType.replaceAll("@.+? ","");
+        this.stringType = "java.lang.String".equals(this.javaType);
         return this;
     }
 
