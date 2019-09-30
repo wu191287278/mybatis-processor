@@ -28,7 +28,7 @@ public class BaseService<T, ID, Example> {
         return this.repository.existsByExample(example);
     }
 
-    public boolean existsByBy(ID id) {
+    public boolean existsById(ID id) {
         return this.repository.existsById(id);
     }
 
