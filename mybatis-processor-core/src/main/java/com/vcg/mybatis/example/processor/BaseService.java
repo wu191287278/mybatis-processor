@@ -28,6 +28,10 @@ public class BaseService<T, ID, Example> {
         return this.repository.existsByExample(example);
     }
 
+    public boolean existsByBy(ID id) {
+        return this.repository.existsById(id);
+    }
+
     public void insert(T t) {
         this.repository.insert(t);
     }
