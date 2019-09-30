@@ -24,6 +24,10 @@ public class BaseService<T, ID, Example> {
         return this.repository.selectByExample(example);
     }
 
+    public boolean existsByExample(Example example) {
+        return this.repository.existsByExample(example);
+    }
+
     public void insert(T t) {
         this.repository.insert(t);
     }
