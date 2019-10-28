@@ -382,22 +382,22 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
 
         private static final long serialVersionUID = {{metadata.randomId}}L;
 
-        protected Set<Criterion> criteria;
+        protected List<Criterion> criteria;
 
         protected GeneratedCriteria() {
             super();
-            criteria = new LinkedHashSet<Criterion>();
+            criteria = new ArrayList<>();
         }
 
         public boolean isValid() {
             return criteria.size() > 0;
         }
 
-        public Set<Criterion> getAllCriteria() {
+        public List<Criterion> getAllCriteria() {
             return criteria;
         }
 
-        public Set<Criterion> getCriteria() {
+        public List<Criterion> getCriteria() {
             return criteria;
         }
 
@@ -593,16 +593,6 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
 
         protected Criterion(String condition, Object value, Object secondValue) {
             this(condition, value, secondValue, null);
-        }
-
-        @Override
-        public int hashCode() {
-            return condition.hashCode();
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            return condition.hashCode()==obj.hashCode();
         }
 
     }
