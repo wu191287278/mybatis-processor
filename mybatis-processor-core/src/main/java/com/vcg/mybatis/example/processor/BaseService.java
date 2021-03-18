@@ -133,7 +133,7 @@ public class BaseService<T, ID, Example> {
     }
 
     private List<ID> removeIfNull(List<ID> ids) {
-        if (ids == null || ids.isEmpty()) {
+        if (ids == null) {
             return new ArrayList<>();
         }
         ids.removeIf(Objects::isNull);

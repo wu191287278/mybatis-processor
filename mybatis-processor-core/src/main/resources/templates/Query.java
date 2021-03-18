@@ -23,14 +23,14 @@ public class {{query.queryClazzSimpleName}} {
 	/**
 	 * 排序字段 默认 {{query.orderBy}}.
 	 */
-	private String {{query.orderBy}}{{#query.orderByDefault}} = {{query.orderByDefault}}{{/query.orderByDefault}};
+	private String {{query.orderBy}}{{#query.orderByDefault}} = "{{query.orderByDefault}}"{{/query.orderByDefault}};
 
 {{/query.orderBy}}
 {{#query.sort}}
 	/**
 	 * asc/desc 默认 {{query.sort}}.
 	 */
-	private String {{query.sort}} {{#query.sortDefault}}= {{query.sortDefault}}{{/query.sortDefault}};
+	private String {{query.sort}} {{#query.sortDefault}}= "{{query.sortDefault}}"{{/query.sortDefault}};
 {{/query.sort}}
 
 {{#query.criteria}}
