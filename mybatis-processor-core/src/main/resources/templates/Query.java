@@ -153,7 +153,7 @@ public class {{query.queryClazzSimpleName}} {
 		{{/or}}
 		{{#criteria}}
 		{{#single}}
-        if ({{fieldName}} != null) {
+        if ({{fieldName}} != null && !"".equals({{fieldName}})) {
 			{{#equalTo}}query.and{{firstUpFieldName}}EqualTo({{fieldName}});{{/equalTo}}{{#notEqualTo}}query.and{{firstUpFieldName}}NotEqualTo({{fieldName}});{{/notEqualTo}}{{#greaterThan}}query.and{{firstUpFieldName}}GreaterThan({{fieldName}});{{/greaterThan}}{{#greaterThanOrEqualTo}}query.and{{firstUpFieldName}}GreaterThanOrEqualTo({{fieldName}});{{/greaterThanOrEqualTo}}{{#lessThan}}query.and{{firstUpFieldName}}LessThan({{fieldName}});{{/lessThan}}{{#lessThanOrEqualTo}}query.and{{firstUpFieldName}}LessThanOrEqualTo({{fieldName}});{{/lessThanOrEqualTo}}{{#like}}query.and{{firstUpFieldName}}Like({{fieldName}});{{/like}}{{#notLike}}query.and{{firstUpFieldName}}NotLike({{fieldName}});{{/notLike}}
         }
 		{{/single}}
