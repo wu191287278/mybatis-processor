@@ -27,6 +27,7 @@ public class JqlConfiguration implements BeanPostProcessor {
             if (interceptors != null) {
                 boolean containsJqlPageInterceptor = interceptors.stream().anyMatch(i -> JqlInterceptor.class.isAssignableFrom(i.getClass()));
                 boolean containsPersistenceInterceptor = interceptors.stream().anyMatch(i -> PersistenceInterceptor.class.isAssignableFrom(i.getClass()));
+                boolean containsShowSlowSqlInterceptor = interceptors.stream().anyMatch(i -> ShowSlowSqlInterceptor.class.isAssignableFrom(i.getClass()));
                 Configuration configuration = sqlSessionFactory.getConfiguration();
 
                 if (!containsJqlPageInterceptor) {
@@ -34,6 +35,9 @@ public class JqlConfiguration implements BeanPostProcessor {
                 }
                 if (!containsPersistenceInterceptor) {
                     configuration.addInterceptor(new PersistenceInterceptor());
+                }
+                if (!containsShowSlowSqlInterceptor) {
+                    configuration.addInterceptor(ShowSlowSqlInterceptor.INSTANCE);
                 }
             }
             Configuration configuration = sqlSessionFactory.getConfiguration();
