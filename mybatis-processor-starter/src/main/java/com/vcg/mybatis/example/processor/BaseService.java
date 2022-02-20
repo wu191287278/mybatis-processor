@@ -1,6 +1,8 @@
 package com.vcg.mybatis.example.processor;
 
 
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.*;
 import java.util.function.Function;
 
@@ -49,38 +51,47 @@ public class BaseService<T, ID, Example> {
         return this.repository.selectOne(example);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void insert(T t) {
         this.repository.insert(t);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void insertSelective(T t) {
         this.repository.insertSelective(t);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void insertBatch(List<T> ts) {
         this.repository.insertBatch(ts);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void upsert(T t) {
         this.repository.upsert(t);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void upsertSelective(T t) {
         this.repository.upsertSelective(t);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public int updateByPrimaryKeySelective(T t) {
         return this.repository.updateByPrimaryKeySelective(t);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public int updateByExampleSelective(T t, Example q) {
         return this.repository.updateByExampleSelective(t, q);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public int updateByExample(T t, Example q) {
         return this.repository.updateByExample(t, q);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public int updateByPrimaryKey(T t) {
         return this.repository.updateByPrimaryKey(t);
     }
@@ -89,10 +100,12 @@ public class BaseService<T, ID, Example> {
         return this.repository.countByExample(example);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public int deleteByPrimaryKey(ID id) {
         return this.repository.deleteByPrimaryKey(id);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public int deleteByPrimaryKeys(List<ID> ids) {
         if (removeIfNull(ids).isEmpty()) {
             return 0;
@@ -100,21 +113,24 @@ public class BaseService<T, ID, Example> {
         return this.repository.deleteByPrimaryKeys(ids);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public int deleteByExample(Example q) {
         return this.repository.deleteByExample(q);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void replaceByPrimaryKey(T t) {
-        int affect = updateByPrimaryKey(t);
+        int affect = repository.updateByPrimaryKey(t);
         if (affect == 0) {
-            insert(t);
+            repository.insert(t);
         }
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void replaceByPrimaryKeySelective(T t) {
-        int affect = updateByPrimaryKeySelective(t);
+        int affect = repository.updateByPrimaryKeySelective(t);
         if (affect == 0) {
-            insertSelective(t);
+            repository.insertSelective(t);
         }
     }
 
