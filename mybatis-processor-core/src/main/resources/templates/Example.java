@@ -222,8 +222,18 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
         return this;
     }
 
+    public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}In({{javaType}}... {{fieldName}}) {
+        getCriteria().and{{firstUpFieldName}}In(Arrays.as({{fieldName}}));
+        return this;
+    }
+
     public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}NotIn(List<{{javaType}}> {{fieldName}}) {
         getCriteria().and{{firstUpFieldName}}NotIn({{fieldName}});
+        return this;
+    }
+
+    public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}NotIn({{javaType}}... {{fieldName}}) {
+        getCriteria().and{{firstUpFieldName}}NotIn(Arrays.as({{fieldName}}));
         return this;
     }
 
@@ -459,6 +469,10 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
             return typeHandler;
         }
 
+        public Criterion() {
+            super();
+        }
+
         protected Criterion(String condition) {
             super();
             this.condition = condition;
@@ -495,6 +509,37 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
             this(condition, value, secondValue, null);
         }
 
+        public void setCondition(String condition) {
+            this.condition = condition;
+        }
+
+        public void setValue(Object value) {
+            this.value = value;
+        }
+
+        public void setSecondValue(Object secondValue) {
+            this.secondValue = secondValue;
+        }
+
+        public void setNoValue(boolean noValue) {
+            this.noValue = noValue;
+        }
+
+        public void setSingleValue(boolean singleValue) {
+            this.singleValue = singleValue;
+        }
+
+        public void setBetweenValue(boolean betweenValue) {
+            this.betweenValue = betweenValue;
+        }
+
+        public void setListValue(boolean listValue) {
+            this.listValue = listValue;
+        }
+
+        public void setTypeHandler(String typeHandler) {
+            this.typeHandler = typeHandler;
+        }
     }
 
 
