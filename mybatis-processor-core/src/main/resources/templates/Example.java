@@ -223,7 +223,7 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
     }
 
     public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}In({{javaType}}... {{fieldName}}) {
-        getCriteria().and{{firstUpFieldName}}In(Arrays.as({{fieldName}}));
+        getCriteria().and{{firstUpFieldName}}In(Arrays.asList({{fieldName}}));
         return this;
     }
 
@@ -233,7 +233,7 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
     }
 
     public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}NotIn({{javaType}}... {{fieldName}}) {
-        getCriteria().and{{firstUpFieldName}}NotIn(Arrays.as({{fieldName}}));
+        getCriteria().and{{firstUpFieldName}}NotIn(Arrays.asList({{fieldName}}));
         return this;
     }
 
@@ -293,6 +293,8 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
         private static final long serialVersionUID = 1000001L;
 
         protected List<Criterion> criteria;
+
+        private boolean valid;
 
         protected GeneratedCriteria() {
             super();
@@ -407,6 +409,49 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
 
     }
 
+    public List<String> getColumns() {
+        return columns;
+    }
+
+    public void setColumns(List<String> columns) {
+        this.columns = columns;
+    }
+
+    public void setLimit(List<Integer> limit) {
+        this.limit = limit;
+    }
+
+    public void setOredCriteria(List<Criteria> oredCriteria) {
+        this.oredCriteria = oredCriteria;
+    }
+
+    public Criteria getCurrentCriteria() {
+        return currentCriteria;
+    }
+
+    public void setCurrentCriteria(Criteria currentCriteria) {
+        this.currentCriteria = currentCriteria;
+    }
+
+    public Integer getPage() {
+        return page;
+    }
+
+    public void setPage(Integer page) {
+        this.page = page;
+    }
+
+    public Integer getSize() {
+        return size;
+    }
+
+    public void setSize(Integer size) {
+        this.size = size;
+    }
+
+    public void setTable(String table) {
+        this.table = table;
+    }
     public static class Criteria extends GeneratedCriteria implements Serializable {
 
         private static final long serialVersionUID = 1000002L;
