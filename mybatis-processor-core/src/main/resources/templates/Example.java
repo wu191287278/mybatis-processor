@@ -305,10 +305,6 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
             return criteria.size() > 0;
         }
 
-        public List<Criterion> getAllCriteria() {
-            return criteria;
-        }
-
         public List<Criterion> getCriteria() {
             return criteria;
         }
@@ -423,10 +419,6 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
 
     public void setOredCriteria(List<Criteria> oredCriteria) {
         this.oredCriteria = oredCriteria;
-    }
-
-    public Criteria getCurrentCriteria() {
-        return currentCriteria;
     }
 
     public void setCurrentCriteria(Criteria currentCriteria) {
