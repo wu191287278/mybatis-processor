@@ -35,6 +35,9 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
 
     private static final Map<String,String> MAPPING = new HashMap<String,String>();
 
+    private static final Map<String, Class> CLASS_MAP = new HashMap<String, Class>();
+
+
     public {{metadata.exampleClazzSimpleName}}() {}
 
     public static {{metadata.exampleClazzSimpleName}} create(){
@@ -153,8 +156,22 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
 
 
     public List<Criteria> getOredCriteria() {
-        if(this.oredCriteria == null){
+        if (this.oredCriteria == null) {
             this.oredCriteria = new ArrayList<>();
+        }
+        for (Criteria oredCriterion : oredCriteria) {
+            for (Criterion criterion : oredCriterion.getCriteria()) {
+                if (criterion.isDateValue()) {
+                    Object value = criterion.getValue();
+                    if (value instanceof Long) {
+                        criterion.setValue(new Date((Long) value));
+                    }
+                    Object secondValue = criterion.getSecondValue();
+                    if (secondValue instanceof Long) {
+                        criterion.setValue(new Date((Long) secondValue));
+                    }
+                }
+            }
         }
         return this.oredCriteria;
     }
@@ -472,7 +489,56 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
 
         private boolean listValue;
 
+        private boolean dateValue;
+
         private String typeHandler;
+
+        public Criterion() {
+            super();
+        }
+
+        protected Criterion(String condition) {
+            super();
+            this.condition = condition;
+            this.typeHandler = null;
+            this.noValue = true;
+        }
+
+        protected Criterion(String condition, Object value, String typeHandler) {
+            super();
+            this.condition = condition;
+            this.value = value;
+            this.typeHandler = typeHandler;
+            if (value instanceof List<?>) {
+                this.listValue = true;
+            } else {
+                this.singleValue = true;
+            }
+            if (value instanceof Date) {
+                this.dateValue = true;
+            }
+        }
+
+        protected Criterion(String condition, Object value) {
+            this(condition, value, null);
+        }
+
+        protected Criterion(String condition, Object value, Object secondValue, String typeHandler) {
+            super();
+            this.condition = condition;
+            this.value = value;
+            this.secondValue = secondValue;
+            this.typeHandler = typeHandler;
+            this.betweenValue = true;
+            if (value instanceof Date) {
+                this.dateValue = true;
+            }
+        }
+
+        protected Criterion(String condition, Object value, Object secondValue) {
+            this(condition, value, secondValue, null);
+        }
+
 
         public String getCondition() {
             return condition;
@@ -502,48 +568,16 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
             return listValue;
         }
 
+        public boolean isDateValue() {
+            return dateValue;
+        }
+
+        public void setDateValue(boolean dateValue) {
+            this.dateValue = dateValue;
+        }
+
         public String getTypeHandler() {
             return typeHandler;
-        }
-
-        public Criterion() {
-            super();
-        }
-
-        protected Criterion(String condition) {
-            super();
-            this.condition = condition;
-            this.typeHandler = null;
-            this.noValue = true;
-        }
-
-        protected Criterion(String condition, Object value, String typeHandler) {
-            super();
-            this.condition = condition;
-            this.value = value;
-            this.typeHandler = typeHandler;
-            if (value instanceof List<?>) {
-                this.listValue = true;
-            } else {
-                this.singleValue = true;
-            }
-        }
-
-        protected Criterion(String condition, Object value) {
-            this(condition, value, null);
-        }
-
-        protected Criterion(String condition, Object value, Object secondValue, String typeHandler) {
-            super();
-            this.condition = condition;
-            this.value = value;
-            this.secondValue = secondValue;
-            this.typeHandler = typeHandler;
-            this.betweenValue = true;
-        }
-
-        protected Criterion(String condition, Object value, Object secondValue) {
-            this(condition, value, secondValue, null);
         }
 
         public void setCondition(String condition) {
@@ -604,6 +638,7 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
         {{#metadata.columnMetadataList}}
         MAPPING.put("{{fieldName}}","{{columnName}}");
         MAPPING.put("{{columnName}}","{{columnName}}");
+        CLASS_MAPPING.put("{{columnName}}",{{javaType}}.class);
         {{/metadata.columnMetadataList}}
     }
 }
