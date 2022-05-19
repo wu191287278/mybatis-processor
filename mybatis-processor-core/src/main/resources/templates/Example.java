@@ -168,7 +168,7 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
                     }
                     Object secondValue = criterion.getSecondValue();
                     if (secondValue instanceof Long) {
-                        criterion.setValue(new Date((Long) secondValue));
+                        criterion.setSecondValue(new Date((Long) secondValue));
                     }
                 }
             }
