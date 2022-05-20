@@ -638,7 +638,6 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
         {{#metadata.columnMetadataList}}
         MAPPING.put("{{fieldName}}","{{columnName}}");
         MAPPING.put("{{columnName}}","{{columnName}}");
-        CLASS_MAPPING.put("{{columnName}}",{{javaType}}.class);
         {{/metadata.columnMetadataList}}
     }
 }
