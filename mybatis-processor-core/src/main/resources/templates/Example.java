@@ -35,9 +35,6 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
 
     private static final Map<String,String> MAPPING = new HashMap<String,String>();
 
-    private static final Map<String, Class> CLASS_MAP = new HashMap<String, Class>();
-
-
     public {{metadata.exampleClazzSimpleName}}() {}
 
     public static {{metadata.exampleClazzSimpleName}} create(){
