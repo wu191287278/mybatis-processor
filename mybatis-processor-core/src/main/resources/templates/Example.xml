@@ -90,7 +90,7 @@
       <include refid="TABLE_NAME" />
     </if>
     <if test="table!=null">
-        ${table}
+      {{metadata.tableName}}
     </if>
   </sql>
 
