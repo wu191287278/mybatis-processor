@@ -3,7 +3,6 @@ package {{metadata.packageName}};
 import java.io.Serializable;
 import java.util.*;
 
-import {{metadata.domainClazzName}};
 
 public class {{metadata.exampleClazzSimpleName}} implements Serializable {
 
@@ -74,7 +73,16 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
         return this;
     }
 
-    public {{metadata.exampleClazzSimpleName}} columns(List<String> columns) {
+    public {{metadata.exampleClazzSimpleName}} columns(List<String> columns){
+        return setColumns(columns);
+    }
+
+    public {{metadata.exampleClazzSimpleName}} setColumns(List<String> columns) {
+        for (int i = columns.size(); i >= 0; i--) {
+            if(!MAPPING.containsKey(columns.get(i))){
+                columns.remove(i);
+            }
+        }
         if(this.columns != null) {
             this.columns.addAll(columns);
         } else {
@@ -423,9 +431,6 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
         return columns;
     }
 
-    public void setColumns(List<String> columns) {
-        this.columns = columns;
-    }
 
     public void setLimit(List<Integer> limit) {
         this.limit = limit;
