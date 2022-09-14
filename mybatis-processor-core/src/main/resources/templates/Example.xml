@@ -117,12 +117,12 @@
       <include refid="Example_Where_Clause" />
     </if>
     <if test="orderByClause != null">
-      order by #{orderByClause}
+      order by ${orderByClause}
     </if>
     <if test="limit != null">
       limit
       <foreach collection="limit" item="num" separator=",">
-        #{num}
+        ${num}
       </foreach>
     </if>
   </select>
@@ -138,12 +138,12 @@
       <include refid="Example_Where_Clause" />
     </if>
     <if test="orderByClause != null">
-      order by #{orderByClause}
+      order by ${orderByClause}
     </if>
     <if test="limit != null">
       limit
       <foreach collection="limit" item="num" separator=",">
-        #{num}
+        ${num}
       </foreach>
     </if>
    </select>
@@ -159,12 +159,12 @@
       <include refid="Example_Where_Clause" />
     </if>
     <if test="orderByClause != null">
-      order by #{orderByClause}
+      order by ${orderByClause}
     </if>
     <if test="limit != null">
       limit
       <foreach collection="limit" item="num" separator=",">
-        #{num}
+        ${num}
       </foreach>
     </if>
    </select>
@@ -180,12 +180,12 @@
       <include refid="Example_Where_Clause" />
     </if>
     <if test="orderByClause != null">
-      order by #{orderByClause}
+      order by ${orderByClause}
     </if>
     <if test="limit != null">
       limit
       <foreach collection="limit" item="num" separator=",">
-        #{num}
+        ${num}
       </foreach>
     </if>
   </select>
@@ -235,7 +235,7 @@
     <if test="limit != null">
       limit
       <foreach collection="limit" item="num" separator=",">
-        #{num}
+        ${num}
       </foreach>
     </if>
   </delete>
@@ -338,12 +338,12 @@
       <include refid="Update_By_Example_Where_Clause" />
     </if>
     <if test="example.orderByClause != null">
-      order by #{example.orderByClause}
+      order by ${example.orderByClause}
     </if>
     <if test="example.limit != null">
       limit
       <foreach collection="example.limit" item="num" separator=",">
-        #{num}
+        ${num}
       </foreach>
     </if>
   </update>
@@ -366,12 +366,12 @@
       <include refid="Update_By_Example_Where_Clause" />
     </if>
     <if test="example.orderByClause != null">
-      order by #{example.orderByClause}
+      order by ${example.orderByClause}
     </if>
     <if test="example.limit != null">
       limit
       <foreach collection="example.limit" item="num" separator=",">
-        #{num}
+        ${num}
       </foreach>
     </if>
   </update>
