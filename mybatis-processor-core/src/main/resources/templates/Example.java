@@ -78,7 +78,7 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
     }
 
     public {{metadata.exampleClazzSimpleName}} setColumns(List<String> columns) {
-        for (int i = columns.size(); i >= 0; i--) {
+        for (int i = columns.size() -1; i >= 0; i--) {
             if(!MAPPING.containsKey(columns.get(i))){
                 columns.remove(i);
             }
