@@ -4,18 +4,18 @@
 
   <resultMap id="BaseResultMap" type="{{metadata.domainClazzName}}">
     {{#metadata.primaryMetadata}}
-    <id column="{{columnName}}" property="{{fieldName}}" {{#typeHandler}}typeHandler="{{typeHandler}}" {{/typeHandler}}/>
+    <id column="{{originColumnName}}" property="{{fieldName}}" {{#typeHandler}}typeHandler="{{typeHandler}}" {{/typeHandler}}/>
     {{/metadata.primaryMetadata}}
 {{#metadata.columnMetadataList}}
     {{^primary}}
-    <result column="{{columnName}}"  property="{{fieldName}}" {{#typeHandler}}typeHandler="{{typeHandler}}" {{/typeHandler}}/>
+    <result column="{{originColumnName}}"  property="{{fieldName}}" {{#typeHandler}}typeHandler="{{typeHandler}}" {{/typeHandler}}/>
     {{/primary}}
 {{/metadata.columnMetadataList}}
 {{#metadata.oneToOne}}
-    <association column="{{columnName}}" property="{{fieldName}}" fetchType="{{fetchType}}" select="{{mappedBy}}"/>
+    <association column="{{originColumnName}}" property="{{fieldName}}" fetchType="{{fetchType}}" select="{{mappedBy}}"/>
 {{/metadata.oneToOne}}
 {{#metadata.oneToMany}}
-    <collection  column="{{columnName}}" property="{{fieldName}}" fetchType="{{fetchType}}" select="{{mappedBy}}"/>
+    <collection  column="{{originColumnName}}" property="{{fieldName}}" fetchType="{{fetchType}}" select="{{mappedBy}}"/>
 {{/metadata.oneToMany}}
   </resultMap>
   <sql id="Example_Where_Clause">

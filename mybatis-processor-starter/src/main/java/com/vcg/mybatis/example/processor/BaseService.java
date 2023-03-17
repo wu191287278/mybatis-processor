@@ -1,9 +1,12 @@
 package com.vcg.mybatis.example.processor;
 
 
+import org.apache.ibatis.cursor.Cursor;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import com.vcg.mybatis.example.processor.domain.PageInfo;
@@ -25,10 +28,12 @@ public class BaseService<T, ID, Example> {
         this.apply = apply;
     }
 
+    @Transactional(readOnly = true)
     public T selectByPrimaryKey(ID id) {
         return repository.selectByPrimaryKey(id);
     }
 
+    @Transactional(readOnly = true)
     public List<T> selectByPrimaryKeys(List<ID> ids) {
         if (removeIfNull(ids).isEmpty()) {
             return new ArrayList<>();
@@ -36,6 +41,7 @@ public class BaseService<T, ID, Example> {
         return repository.selectByPrimaryKeys(ids);
     }
 
+    @Transactional(readOnly = true)
     public List<T> selectByPrimaryKeysWithSorted(List<ID> ids) {
         if (removeIfNull(ids).isEmpty()) {
             return new ArrayList<>();
@@ -43,10 +49,12 @@ public class BaseService<T, ID, Example> {
         return repository.selectByPrimaryKeysWithSorted(ids, apply);
     }
 
+    @Transactional(readOnly = true)
     public List<T> selectByExample(Example example) {
         return this.repository.selectByExample(example);
     }
 
+    @Transactional(readOnly = true)
     public T selectOne(Example example) {
         return this.repository.selectOne(example);
     }
@@ -96,6 +104,7 @@ public class BaseService<T, ID, Example> {
         return this.repository.updateByPrimaryKey(t);
     }
 
+    @Transactional(readOnly = true)
     public long countByExample(Example example) {
         return this.repository.countByExample(example);
     }
@@ -134,6 +143,7 @@ public class BaseService<T, ID, Example> {
         }
     }
 
+    @Transactional(readOnly = true)
     public Map<ID, T> mapById(List<ID> ids) {
         if (removeIfNull(ids).isEmpty()) {
             return new HashMap<>();
@@ -141,16 +151,33 @@ public class BaseService<T, ID, Example> {
         return repository.mapById(ids, apply);
     }
 
+    @Transactional(readOnly = true)
     public PageInfo<T> pageByExample(int page, int size, Example q) {
-        List<T> ts = selectByExample(q);
+        List<T> ts = repository.selectByExample(q);
         long total = ts.size();
         if (page == 1 && total < size) {
             total = ts.size();
         } else {
-            total = countByExample(q);
+            total = repository.countByExample(q);
         }
         return new PageInfo<>(page, size, total, ts);
     }
+
+
+    @Transactional(readOnly = true)
+    public void cursorByExample(Example query, Consumer<T> c) {
+        Cursor<T> ts = repository.cursorByExample(query);
+        try {
+            ts.forEach(c);
+        } finally {
+            try {
+                ts.close();
+            } catch (IOException ignore) {
+
+            }
+        }
+    }
+
 
     private List<ID> removeIfNull(List<ID> ids) {
         if (ids == null) {

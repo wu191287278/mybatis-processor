@@ -14,6 +14,7 @@ import com.vcg.mybatis.example.processor.domain.*;
 import com.vcg.mybatis.example.processor.util.CamelUtils;
 import com.vcg.mybatis.example.processor.visitor.DomainTypeVisitor;
 import com.vcg.mybatis.example.processor.visitor.QueryTypeVisitor;
+
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.RoundEnvironment;
@@ -29,6 +30,7 @@ import javax.tools.Diagnostic;
 import javax.tools.FileObject;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardLocation;
+
 import org.apache.ibatis.type.TypeHandler;
 
 @SupportedAnnotationTypes("com.vcg.mybatis.example.processor.Example")
@@ -119,7 +121,7 @@ public class MybatisDomainProcessor extends AbstractProcessor {
     }
 
 
-    public TableMetadata readTableMetadata(Element element) {
+    public TableMetadata readTableMetadata(Element element) throws IOException {
         Example example = element.getAnnotation(Example.class);
         Table table = element.getAnnotation(Table.class);
         PackageElement packageOf = processingEnv.getElementUtils().getPackageOf(element);
@@ -131,6 +133,8 @@ public class MybatisDomainProcessor extends AbstractProcessor {
                 .setDomainClazzName(clazzName)
                 .setExampleClazzName(exampleName)
                 .setPackageName(packageOf.toString())
+                .setLeftEncode(example.leftEncode())
+                .setRightEncode(example.rightEncode())
                 .setShard(null);
 
         String repositoryName = !example.namespace().equals("") ? example.namespace() :
@@ -138,7 +142,25 @@ public class MybatisDomainProcessor extends AbstractProcessor {
         tableMetadata.setRepositoryClazzName(repositoryName)
                 .setTableName(table != null ? table.name() : String.join("_",
                         CamelUtils.split(tableMetadata.getDomainClazzSimpleName(), true)));
+        tableMetadata.setOriginTableName(tableMetadata.getTableName());
         Elements elementUtils = processingEnv.getElementUtils();
+
+
+        Set<String> keywords = new HashSet<>();
+        ClassLoader classLoader = MybatisDomainProcessor.class.getClassLoader();
+        try (InputStream in = classLoader.getResourceAsStream("templates/keywords.txt");
+             BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                keywords.add(line.toLowerCase());
+            }
+        }
+
+
+        if (keywords.contains(tableMetadata.getTableName().toLowerCase())) {
+            String encodeTable = tableMetadata.getLeftEncode() + tableMetadata.getTableName() + tableMetadata.getRightEncode();
+            tableMetadata.setTableName(encodeTable);
+        }
 
         for (Element member : element.getEnclosedElements()) {
             if (member.getModifiers().contains(Modifier.STATIC) || !member.getKind().isField() ||
@@ -213,6 +235,12 @@ public class MybatisDomainProcessor extends AbstractProcessor {
                 columnMetadata.setTypeHandler(typeHandler);
             }
 
+            columnMetadata.setOriginColumnName(columnMetadata.getColumnName());
+
+            String columnName = columnMetadata.getColumnName();
+            if (keywords.contains(columnName)) {
+                columnMetadata.setColumnName(tableMetadata.getLeftEncode() + columnName + tableMetadata.getRightEncode());
+            }
             String docComment = elementUtils.getDocComment(member);
             columnMetadata.setJavaDoc(docComment);
             tableMetadata.getColumnMetadataList().add(columnMetadata);

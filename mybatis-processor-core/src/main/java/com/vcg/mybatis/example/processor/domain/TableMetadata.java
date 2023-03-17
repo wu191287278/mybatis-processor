@@ -8,6 +8,8 @@ public class TableMetadata {
 
     private String tableName;
 
+    private String originTableName;
+
     private String repositoryClazzName;
 
     private String domainClazzName;
@@ -41,6 +43,10 @@ public class TableMetadata {
     private List<JoinMetadata> oneToOne = new ArrayList<>();
 
     private List<JoinMetadata> oneToMany = new ArrayList<>();
+
+    private String rightEncode = "";
+
+    private String leftEncode = "";
 
 
     public String getTableName() {
@@ -220,5 +226,32 @@ public class TableMetadata {
 
     public void setRandomId(Long randomId) {
         this.randomId = randomId;
+    }
+
+    public String getRightEncode() {
+        return rightEncode;
+    }
+
+    public TableMetadata setRightEncode(String rightEncode) {
+        this.rightEncode = rightEncode;
+        return this;
+    }
+
+    public String getLeftEncode() {
+        return leftEncode;
+    }
+
+    public TableMetadata setLeftEncode(String leftEncode) {
+        this.leftEncode = leftEncode;
+        return this;
+    }
+
+    public String getOriginTableName() {
+        return originTableName;
+    }
+
+    public TableMetadata setOriginTableName(String originTableName) {
+        this.originTableName = originTableName;
+        return this;
     }
 }

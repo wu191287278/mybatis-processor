@@ -6,6 +6,8 @@ public class ColumnMetadata {
 
     private String columnName;
 
+    private String originColumnName;
+
     private String firstUpFieldName;
 
     private String jdbcType;
@@ -132,5 +134,13 @@ public class ColumnMetadata {
             this.javaDoc = javaDoc.substring(0, javaDoc.length() - 1);
         }
         return this;
+    }
+
+    public String getOriginColumnName() {
+        return originColumnName;
+    }
+
+    public void setOriginColumnName(String originColumnName) {
+        this.originColumnName = originColumnName;
     }
 }

@@ -2,6 +2,7 @@ package {{metadata.packageName}};
 
 import java.io.Serializable;
 import java.util.*;
+import java.math.*;
 
 
 public class {{metadata.exampleClazzSimpleName}} implements Serializable {
@@ -639,6 +640,7 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
     static {
         {{#metadata.columnMetadataList}}
         MAPPING.put("{{fieldName}}","{{columnName}}");
+        MAPPING.put("{{originColumnName}}","{{columnName}}");
         MAPPING.put("{{columnName}}","{{columnName}}");
         {{/metadata.columnMetadataList}}
     }

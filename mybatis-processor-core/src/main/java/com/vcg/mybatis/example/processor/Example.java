@@ -14,6 +14,10 @@ public @interface Example {
      */
     String namespace();
 
+    String leftEncode() default "`";
+
+    String rightEncode() default "`";
+
     /**
      * Query对象属性.
      */
