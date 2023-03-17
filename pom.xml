@@ -9,7 +9,7 @@
     <version>2.3.6</version>
     <description>Mybatis processor parent</description>
 
-    <url>https://github.com/wu191287278/swagger-springboot-maven-plugin</url>
+    <url>https://github.com/wu191287278/mybatis-processor</url>
     <modelVersion>4.0.0</modelVersion>
 
     <modules>
