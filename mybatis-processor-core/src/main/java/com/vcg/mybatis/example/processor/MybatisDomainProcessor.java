@@ -65,8 +65,10 @@ public class MybatisDomainProcessor extends AbstractProcessor {
                     HashMap<String, Object> scopes = new HashMap<>();
                     scopes.put("metadata", tableMetadata);
 
+                    Example example = element.getAnnotation(Example.class);
+                    DialectMetadata dialect = example.dialect().getValue();
 
-                    InputStream exampleInputStream = classLoader.getResourceAsStream("templates/Example.java");
+                    InputStream exampleInputStream = classLoader.getResourceAsStream(dialect.getExampleJavaTemplatePath());
                     try (InputStreamReader in = new InputStreamReader(exampleInputStream, StandardCharsets.UTF_8); Writer writer = javaFileObject.openWriter()) {
                         Mustache mustache = mf.compile(in, exampleName);
                         mustache.execute(writer, scopes);
@@ -75,14 +77,13 @@ public class MybatisDomainProcessor extends AbstractProcessor {
                     PackageElement packageOf = processingEnv.getElementUtils().getPackageOf(element);
                     String xml = tableMetadata.getDomainClazzSimpleName() + "ExampleMapper.xml";
                     FileObject xmlOut = filer.createResource(StandardLocation.CLASS_OUTPUT, packageOf.toString(), xml);
-                    InputStream xmlInputStream = classLoader.getResourceAsStream("templates/Example.xml");
+                    InputStream xmlInputStream = classLoader.getResourceAsStream(dialect.getExampleXmlTemplatePath());
                     try (InputStreamReader in = new InputStreamReader(xmlInputStream, StandardCharsets.UTF_8);
                          Writer writer = xmlOut.openWriter()) {
                         Mustache mustache = mf.compile(in, tableMetadata.getDomainClazzName() + ".xml");
                         mustache.execute(writer, scopes);
                     }
 
-                    Example example = element.getAnnotation(Example.class);
 
                     ExampleQuery exampleQuery = example.query();
                     if (!exampleQuery.enable()) {
@@ -92,7 +93,7 @@ public class MybatisDomainProcessor extends AbstractProcessor {
                     String queryName = queryMetadata.getQueryClazzName();
                     JavaFileObject queryJavaFileObject = filer.createSourceFile(queryName);
                     scopes.put("query", queryMetadata);
-                    InputStream queryInputStream = classLoader.getResourceAsStream("templates/Query.java");
+                    InputStream queryInputStream = classLoader.getResourceAsStream(dialect.getQueryTemplatePath());
                     try (InputStreamReader in = new InputStreamReader(queryInputStream, StandardCharsets.UTF_8);
                          Writer writer = queryJavaFileObject.openWriter();) {
                         Mustache mustache = mf.compile(in, queryName);
@@ -129,12 +130,13 @@ public class MybatisDomainProcessor extends AbstractProcessor {
 
         String exampleName = (clazzName + "Example");
 
+        DialectMetadata dialect = example.dialect().getValue();
         TableMetadata tableMetadata = new TableMetadata()
                 .setDomainClazzName(clazzName)
                 .setExampleClazzName(exampleName)
                 .setPackageName(packageOf.toString())
-                .setLeftEncode(example.leftEncode())
-                .setRightEncode(example.rightEncode())
+                .setLeftEncode(dialect.getLeftEscape())
+                .setRightEncode(dialect.getRightEscape())
                 .setShard(null);
 
         String repositoryName = !example.namespace().equals("") ? example.namespace() :

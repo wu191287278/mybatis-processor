@@ -3,6 +3,7 @@ package com.vcg.mybatis.example.processor;
 import java.lang.annotation.*;
 
 import com.vcg.mybatis.example.processor.annotation.ExampleQuery;
+import com.vcg.mybatis.example.processor.domain.DialectEnums;
 
 @Documented
 @Retention(RetentionPolicy.SOURCE)
@@ -14,9 +15,10 @@ public @interface Example {
      */
     String namespace();
 
-    String leftEncode() default "`";
-
-    String rightEncode() default "`";
+    /**
+     * 方言.
+     */
+    DialectEnums dialect() default DialectEnums.NONE;
 
     /**
      * Query对象属性.
