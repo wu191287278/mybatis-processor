@@ -1,17 +1,5 @@
 package com.vcg.mybatis.example.starter;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.repository.query.parser.PartTree;
-
-import java.io.*;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
@@ -19,12 +7,23 @@ import com.vcg.mybatis.example.processor.domain.ColumnMetadata;
 import com.vcg.mybatis.example.processor.domain.JoinMetadata;
 import com.vcg.mybatis.example.processor.domain.TableMetadata;
 import com.vcg.mybatis.example.processor.util.CamelUtils;
-import javax.persistence.*;
 import org.apache.ibatis.annotations.*;
 import org.apache.ibatis.builder.xml.XMLMapperBuilder;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSessionFactory;
-import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
+import org.springframework.data.domain.Page;
+import org.springframework.data.repository.query.parser.PartTree;
+
+import javax.persistence.*;
+import java.io.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class JqlParser {
 
@@ -189,7 +188,7 @@ public class JqlParser {
     private static Class getDomainClass(Class mapperInterface) {
         java.lang.reflect.Type[] genericSuperclass = mapperInterface.getGenericInterfaces();
         if (genericSuperclass != null && genericSuperclass.length > 0) {
-            ParameterizedTypeImpl parameterizedType = (ParameterizedTypeImpl) genericSuperclass[0];
+            ParameterizedType parameterizedType = (ParameterizedType) genericSuperclass[0];
             return (Class) parameterizedType.getActualTypeArguments()[0];
         }
         return Object.class;
