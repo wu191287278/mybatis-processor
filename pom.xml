@@ -6,7 +6,7 @@
     <artifactId>mybatis-processor</artifactId>
     <name>mybatis-processor</name>
     <packaging>pom</packaging>
-    <version>2.3.8-SNAPSHOT</version>
+    <version>3.0.0</version>
     <description>Mybatis processor parent</description>
 
     <url>https://github.com/wu191287278/mybatis-processor</url>
@@ -23,10 +23,9 @@
         <maven.compiler.target>8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring.version>2.1.4.RELEASE</spring.version>
-        <mybatis.spring.starter.version>2.3.1</mybatis.spring.starter.version>
+        <mybatis.spring.starter.version>3.0.3</mybatis.spring.starter.version>
         <pagehelper.version>5.3.2</pagehelper.version>
     </properties>
-
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
