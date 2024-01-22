@@ -68,6 +68,9 @@ public class ColumnMetadata {
         String[] split = javaType.split("\\s+");
         this.javaType = split[split.length - 1];
         this.stringType = "java.lang.String".equals(this.javaType);
+        if (javaType.toLowerCase().contains("string")) {
+            stringType = true;
+        }
         return this;
     }
 
