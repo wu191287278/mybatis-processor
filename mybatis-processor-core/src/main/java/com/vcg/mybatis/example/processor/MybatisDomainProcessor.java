@@ -207,6 +207,7 @@ public class MybatisDomainProcessor extends AbstractProcessor {
             Id id = member.getAnnotation(Id.class);
             Column column = member.getAnnotation(Column.class);
             GeneratedValue generatedValue = member.getAnnotation(GeneratedValue.class);
+            Version version = member.getAnnotation(Version.class);
             ColumnMetadata columnMetadata = new ColumnMetadata();
             member.asType().accept(domainTypeVisitor, columnMetadata);
             columnMetadata.setFieldName(name)
@@ -225,6 +226,12 @@ public class MybatisDomainProcessor extends AbstractProcessor {
 
             if (column != null && !"".equals(column.name())) {
                 columnMetadata.setColumnName(column.name());
+            }
+
+            if (column != null) {
+                columnMetadata.setInsertable(column.insertable());
+                columnMetadata.setUpdatable(column.updatable());
+                columnMetadata.setVersion(version != null);
             }
 
             if (id != null) {
