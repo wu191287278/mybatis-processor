@@ -82,8 +82,13 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
     }
 
     public {{metadata.exampleClazzSimpleName}} setColumns(List<String> columns) {
-        for (int i = columns.size() -1; i >= 0; i--) {
-            if(MAPPING.containsKey(columns.get(i))){
+        for (int i = 0; i < columns.size(); i++) {
+            String column = columns.get(i);
+            if(MAPPING.containsKey(column)){
+                addColumn(MAPPING.get(column));
+            }
+            if(column.startsWith("sum(") ||column.startsWith("max(")
+                    ||column.startsWith("min(") ||column.startsWith("count(")) {
                 addColumn(columns.get(i));
             }
         }
@@ -98,38 +103,72 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
     }
 
     public {{metadata.exampleClazzSimpleName}} sum(String column) {
-        addColumn("sum("+MAPPING.get(column)+") as "+MAPPING.get(column));
+        sum(column,MAPPING.get(column));
         return this;
     }
 
     public {{metadata.exampleClazzSimpleName}} sumDistinct(String column) {
-        addColumn("sum(distinct "+MAPPING.get(column)+") as "+MAPPING.get(column));
+        sumDistinct(column,MAPPING.get(column));
         return this;
     }
 
     public {{metadata.exampleClazzSimpleName}} count(String column) {
-        addColumn("count("+MAPPING.get(column)+") as "+MAPPING.get(column));
+        count(column,MAPPING.get(column));
         return this;
     }
 
     public {{metadata.exampleClazzSimpleName}} countDistinct(String column) {
-        addColumn("count(distinct "+MAPPING.get(column)+") as "+MAPPING.get(column));
+        countDistinct(column,MAPPING.get(column));
         return this;
     }
 
     public {{metadata.exampleClazzSimpleName}} min(String column) {
-        addColumn("min("+MAPPING.get(column)+") as "+MAPPING.get(column));
+        min(column,MAPPING.get(column));
         return this;
     }
 
     public {{metadata.exampleClazzSimpleName}} max(String column) {
-        addColumn("max("+MAPPING.get(column)+") as "+MAPPING.get(column));
+        max(column,MAPPING.get(column));
+        return this;
+    }
+
+    public {{metadata.exampleClazzSimpleName}} sum(String column,String alias) {
+        addColumn("sum("+MAPPING.get(column)+") as "+alias);
+        return this;
+    }
+
+    public {{metadata.exampleClazzSimpleName}} sumDistinct(String column,String alias) {
+        addColumn("sum(distinct "+MAPPING.get(column)+") as "+alias);
+        return this;
+    }
+
+    public {{metadata.exampleClazzSimpleName}} count(String column,String alias) {
+        addColumn("count("+MAPPING.get(column)+") as "+alias);
+        return this;
+    }
+
+    public {{metadata.exampleClazzSimpleName}} countDistinct(String column,String alias) {
+        addColumn("count(distinct "+MAPPING.get(column)+") as "+alias);
+        return this;
+    }
+
+    public {{metadata.exampleClazzSimpleName}} min(String column,String alias) {
+        addColumn("min("+MAPPING.get(column)+") as "+alias);
+        return this;
+    }
+
+    public {{metadata.exampleClazzSimpleName}} max(String column,String alias) {
+        addColumn("max("+MAPPING.get(column)+") as "+alias);
         return this;
     }
 
     public {{metadata.exampleClazzSimpleName}} groupBy(String... columns) {
         columns(columns);
-        this.groupByClause = String.join(", " , columns);
+        List<String> groupByColumns = new ArrayList<>();
+        for (String column : columns) {
+            groupByColumns.add(MAPPING.get(column));
+        }
+        this.groupByClause = String.join(", " , groupByColumns);
         return this;
     }
 
@@ -142,7 +181,9 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
         if(this.columns==null || this.columns.isEmpty()){
             this.columns = allColumns();
         }
-        this.columns.removeAll(columns);
+        for (String column : columns) {
+            this.columns.remove(MAPPING.get(column));
+        }
         return this;
     }
 
@@ -661,6 +702,13 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
     public static interface Column {
         {{#metadata.columnMetadataList}}
         public static final String {{fieldName}} = "{{columnName}}";
+        {{/metadata.columnMetadataList}}
+    }
+
+
+    public static interface Field {
+        {{#metadata.columnMetadataList}}
+        public static final String {{fieldName}} = "{{fieldName}}";
         {{/metadata.columnMetadataList}}
     }
 

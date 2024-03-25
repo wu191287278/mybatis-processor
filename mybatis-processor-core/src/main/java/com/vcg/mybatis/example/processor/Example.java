@@ -12,16 +12,19 @@ public @interface Example {
 
     /**
      * 命名空间.
+     * @return 命名空间.
      */
     String namespace();
 
     /**
      * 方言.
+     * @return 方言.
      */
     DialectEnums dialect() default DialectEnums.NONE;
 
     /**
      * Query对象属性.
+     * @return Query对象属性.
      */
     ExampleQuery query() default @ExampleQuery;
 
