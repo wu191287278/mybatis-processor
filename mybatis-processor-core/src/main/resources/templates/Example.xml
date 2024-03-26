@@ -423,12 +423,25 @@
     <trim  suffixOverrides=",">
     {{#metadata.columnMetadataList}}
       {{#updatable}}
+      {{^version}}
       {{columnName}} = #{ {{fieldName}} } ,
+      {{/version}}
+      {{/updatable}}
+      {{#updatable}}
+      {{#version}}
+      {{columnName}} = {{columnName}} + 1 ,
+      {{/version}}
       {{/updatable}}
     {{/metadata.columnMetadataList}}
     </trim>
     where
-     {{columnName}} = #{ {{fieldName}} }
+    {{columnName}} = #{ {{fieldName}} }
+    {{#metadata.columnMetadataList}}
+    {{#version}}
+    and {{columnName}} = #{ {{fieldName}} }
+    {{/version}}
+    {{/metadata.columnMetadataList}}
+
   </update>
   {{/metadata.primaryMetadata}}
 
@@ -438,14 +451,29 @@
     <set>
     {{#metadata.columnMetadataList}}
       {{#updatable}}
+      {{^version}}
       <if test="{{fieldName}} != null">
         {{columnName}} = #{ {{fieldName}} } ,
       </if>
+      {{/version}}
+      {{#version}}
+      <if test="{{fieldName}} != null">
+        {{columnName}} = {{columnName}} + 1 ,
+      </if>
+      {{/version}}
       {{/updatable}}
     {{/metadata.columnMetadataList}}
     </set>
     where
      {{columnName}} = #{ {{fieldName}} }
+    {{#metadata.columnMetadataList}}
+    {{#version}}
+    <if test="{{fieldName}} != null">
+    and {{columnName}} = #{ {{fieldName}} }
+    </if>
+    {{/version}}
+    {{/metadata.columnMetadataList}}
+
   </update>
   {{/metadata.primaryMetadata}}
 
