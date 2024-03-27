@@ -3,6 +3,8 @@ package com.vcg.mybatis.example.processor;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.cursor.Cursor;
 
+import java.math.BigDecimal;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -86,6 +88,41 @@ public interface MybatisExampleRepository<T, ID, Example> {
                 .stream()
                 .filter(Objects::nonNull)
                 .collect(Collectors.toMap(apply, Function.identity()));
+    }
+
+    default SegIterable<T> iterator(Function<T, Example> function) {
+        if (function == null) {
+            throw new IllegalArgumentException("Function convert can not be null!");
+        }
+        return new SegIterable<T>() {
+            @Override
+            public Iterator<T> iterator() {
+                return new Iterator<T>() {
+                    @Override
+                    public boolean hasNext() {
+                        Iterator<T> iterator = getIterator();
+                        if (iterator == null || !iterator.hasNext()) {
+                            Example apply = function.apply(getLast());
+                            List<T> announcements = selectByExample(apply);
+                            if (announcements.isEmpty()) {
+                                return false;
+                            }
+                            iterator = announcements.iterator();
+                            setIterator(iterator);
+                        }
+                        return iterator.hasNext();
+                    }
+
+                    @Override
+                    public T next() {
+                        T next = getIterator().next();
+                        setLast(next);
+                        increment();
+                        return next;
+                    }
+                };
+            }
+        };
     }
 
 }

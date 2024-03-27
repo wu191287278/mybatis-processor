@@ -11,6 +11,12 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
 
     public static final String TABLE_NAME = "{{metadata.tableName}}";
 
+    private static final String DESC = " DESC";
+
+    private static final String ASC = " ASC";
+
+    private static final Map<String,String> MAPPING = new HashMap<String,String>();
+
     private List<String> columns;
 
     private List<Integer> limit;
@@ -27,13 +33,10 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
 
     private Integer size;
 
-    private static final String DESC = " DESC";
-
-    private static final String ASC = " ASC";
-
     private String table = TABLE_NAME;
 
-    private static final Map<String,String> MAPPING = new HashMap<String,String>();
+    private String groupByClause;
+
 
     public {{metadata.exampleClazzSimpleName}}() {}
 
@@ -79,16 +82,93 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
     }
 
     public {{metadata.exampleClazzSimpleName}} setColumns(List<String> columns) {
-        for (int i = columns.size() -1; i >= 0; i--) {
-            if(!MAPPING.containsKey(columns.get(i))){
-                columns.remove(i);
+        for (int i = 0; i < columns.size(); i++) {
+            String column = columns.get(i);
+            if(MAPPING.containsKey(column)){
+                addColumn(MAPPING.get(column));
+            }
+            if(column.startsWith("sum(") ||column.startsWith("max(")
+                    ||column.startsWith("min(") ||column.startsWith("count(")) {
+                addColumn(columns.get(i));
             }
         }
-        if(this.columns != null) {
-            this.columns.addAll(columns);
-        } else {
-            this.columns = columns;
+        return this;
+    }
+
+    private void addColumn(String column){
+        if(this.columns == null){
+            this.columns = new ArrayList<>();
         }
+        this.columns.add(column);
+    }
+
+    public {{metadata.exampleClazzSimpleName}} sum(String column) {
+        sum(column,MAPPING.get(column));
+        return this;
+    }
+
+    public {{metadata.exampleClazzSimpleName}} sumDistinct(String column) {
+        sumDistinct(column,MAPPING.get(column));
+        return this;
+    }
+
+    public {{metadata.exampleClazzSimpleName}} count(String column) {
+        count(column,MAPPING.get(column));
+        return this;
+    }
+
+    public {{metadata.exampleClazzSimpleName}} countDistinct(String column) {
+        countDistinct(column,MAPPING.get(column));
+        return this;
+    }
+
+    public {{metadata.exampleClazzSimpleName}} min(String column) {
+        min(column,MAPPING.get(column));
+        return this;
+    }
+
+    public {{metadata.exampleClazzSimpleName}} max(String column) {
+        max(column,MAPPING.get(column));
+        return this;
+    }
+
+    public {{metadata.exampleClazzSimpleName}} sum(String column,String alias) {
+        addColumn("sum("+MAPPING.get(column)+") as "+alias);
+        return this;
+    }
+
+    public {{metadata.exampleClazzSimpleName}} sumDistinct(String column,String alias) {
+        addColumn("sum(distinct "+MAPPING.get(column)+") as "+alias);
+        return this;
+    }
+
+    public {{metadata.exampleClazzSimpleName}} count(String column,String alias) {
+        addColumn("count("+MAPPING.get(column)+") as "+alias);
+        return this;
+    }
+
+    public {{metadata.exampleClazzSimpleName}} countDistinct(String column,String alias) {
+        addColumn("count(distinct "+MAPPING.get(column)+") as "+alias);
+        return this;
+    }
+
+    public {{metadata.exampleClazzSimpleName}} min(String column,String alias) {
+        addColumn("min("+MAPPING.get(column)+") as "+alias);
+        return this;
+    }
+
+    public {{metadata.exampleClazzSimpleName}} max(String column,String alias) {
+        addColumn("max("+MAPPING.get(column)+") as "+alias);
+        return this;
+    }
+
+    public {{metadata.exampleClazzSimpleName}} groupBy(String... columns) {
+        columns(columns);
+        List<String> groupByColumns = new ArrayList<>();
+        for (String column : columns) {
+            groupByColumns.add(MAPPING.get(column));
+        }
+        this.groupByClause = String.join(", " , groupByColumns);
         return this;
     }
 
@@ -101,7 +181,9 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
         if(this.columns==null || this.columns.isEmpty()){
             this.columns = allColumns();
         }
-        this.columns.removeAll(columns);
+        for (String column : columns) {
+            this.columns.remove(MAPPING.get(column));
+        }
         return this;
     }
 
@@ -623,6 +705,13 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
         {{/metadata.columnMetadataList}}
     }
 
+
+    public static interface Field {
+        {{#metadata.columnMetadataList}}
+        public static final String {{fieldName}} = "{{fieldName}}";
+        {{/metadata.columnMetadataList}}
+    }
+
     protected static List<String> allColumns(){
         List<String> columns = new ArrayList<String>();
         {{#metadata.columnMetadataList}}
@@ -635,6 +724,9 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
         return this.limit;
     }
 
+    public String getGroupByClause(){
+        return this.groupByClause;
+    }
 
 
     static {

@@ -26,6 +26,12 @@ public class ColumnMetadata {
 
     private String javaDoc;
 
+    private boolean updatable = true;
+
+    private boolean insertable = true;
+
+    private boolean version = false;
+
     public String getFieldName() {
         return fieldName;
     }
@@ -68,9 +74,6 @@ public class ColumnMetadata {
         String[] split = javaType.split("\\s+");
         this.javaType = split[split.length - 1];
         this.stringType = "java.lang.String".equals(this.javaType);
-        if (javaType.toLowerCase().contains("string")) {
-            stringType = true;
-        }
         return this;
     }
 
@@ -145,5 +148,29 @@ public class ColumnMetadata {
 
     public void setOriginColumnName(String originColumnName) {
         this.originColumnName = originColumnName;
+    }
+
+    public boolean isUpdatable() {
+        return updatable;
+    }
+
+    public void setUpdatable(boolean updatable) {
+        this.updatable = updatable;
+    }
+
+    public boolean isInsertable() {
+        return insertable;
+    }
+
+    public void setInsertable(boolean insertable) {
+        this.insertable = insertable;
+    }
+
+    public boolean isVersion() {
+        return version;
+    }
+
+    public void setVersion(boolean version) {
+        this.version = version;
     }
 }

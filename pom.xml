@@ -6,7 +6,7 @@
     <artifactId>mybatis-processor</artifactId>
     <name>mybatis-processor</name>
     <packaging>pom</packaging>
-    <version>3.0.1</version>
+    <version>3.0.2-SNAPSHOT</version>
     <description>Mybatis processor parent</description>
 
     <url>https://github.com/wu191287278/mybatis-processor</url>
@@ -62,7 +62,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-plugin-plugin</artifactId>
-                <version>3.10.12</version>
+                <version>3.11.0</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

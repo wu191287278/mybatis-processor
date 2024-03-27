@@ -116,6 +116,9 @@
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
+    <if test="groupByClause != null">
+      group by ${groupByClause}
+    </if>
     <if test="orderByClause != null">
       order by ${orderByClause}
     </if>
@@ -136,6 +139,9 @@
     <include refid="Table_Name_Dy" />
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
+    </if>
+    <if test="groupByClause != null">
+      group by ${groupByClause}
     </if>
     <if test="orderByClause != null">
       order by ${orderByClause}
@@ -158,6 +164,9 @@
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
+    <if test="groupByClause != null">
+      group by ${groupByClause}
+    </if>
     <if test="orderByClause != null">
       order by ${orderByClause}
     </if>
@@ -178,6 +187,9 @@
     from <include refid="Table_Name_Dy"></include>
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
+    </if>
+    <if test="groupByClause != null">
+      group by ${groupByClause}
     </if>
     <if test="orderByClause != null">
       order by ${orderByClause}
@@ -241,11 +253,20 @@
   </delete>
 
   <insert id="insert" parameterType="{{metadata.domainClazzName}}" {{#metadata.primaryMetadata}} {{#metadata.primaryMetadata.useGeneratedKeys}} keyProperty="{{metadata.primaryMetadata.fieldName}}" useGeneratedKeys="{{metadata.primaryMetadata.useGeneratedKeys}}" {{/metadata.primaryMetadata.useGeneratedKeys}} {{/metadata.primaryMetadata}}>
-    insert into {{metadata.tableName}} ({{metadata.columns}})
+    insert into {{metadata.tableName}}
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      {{#metadata.columnMetadataList}}
+      {{#insertable}}
+        {{columnName}},
+      {{/insertable}}
+      {{/metadata.columnMetadataList}}
+    </trim>
     values (
     <trim  suffixOverrides=",">
       {{#metadata.columnMetadataList}}
+      {{#insertable}}
         #{ {{fieldName}} } ,
+      {{/insertable}}
       {{/metadata.columnMetadataList}}
     </trim>
     )
@@ -255,16 +276,20 @@
     insert into {{metadata.tableName}}
     <trim prefix="(" suffix=")" suffixOverrides=",">
       {{#metadata.columnMetadataList}}
+      {{#insertable}}
       <if test="{{fieldName}} != null">
         {{columnName}},
       </if>
+      {{/insertable}}
       {{/metadata.columnMetadataList}}
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       {{#metadata.columnMetadataList}}
+      {{#insertable}}
       <if test="{{fieldName}} != null">
         #{ {{fieldName}}  } ,
       </if>
+      {{/insertable}}
       {{/metadata.columnMetadataList}}
     </trim>
   </insert>
@@ -301,19 +326,29 @@
 
   <insert id="insertBatch" parameterType="java.util.List"  {{#metadata.primaryMetadata}} {{#metadata.primaryMetadata.useGeneratedKeys}} keyProperty="{{metadata.primaryMetadata.fieldName}}" useGeneratedKeys="{{metadata.primaryMetadata.useGeneratedKeys}}" {{/metadata.primaryMetadata.useGeneratedKeys}} {{/metadata.primaryMetadata}}>
     insert into {{metadata.tableName}}
-    (<include refid="Base_Column_List" />)
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      {{#metadata.columnMetadataList}}
+      {{#insertable}}
+      <if test="{{fieldName}} != null">
+        {{columnName}},
+      </if>
+      {{/insertable}}
+      {{/metadata.columnMetadataList}}
+    </trim>
     values
     <foreach collection="collection" index="index" item="item" separator=",">
     <trim prefix="(" suffix=")" suffixOverrides=",">
       {{#metadata.columnMetadataList}}
+      {{#insertable}}
       #{ item.{{fieldName}} },
+      {{/insertable}}
       {{/metadata.columnMetadataList}}
     </trim>
     </foreach>
   </insert>
 
   <select id="countByExample" parameterType="{{metadata.exampleClazzName}}" resultType="long">
-    select count(*) from <include refid="Table_Name_Dy"></include>
+  select count(<if test="columns == null">*</if><if test="columns != null"><if test="distinct"> distinct </if><include refid="Base_Column_List_Dy" /></if>) from <include refid="Table_Name_Dy"></include>
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
@@ -329,9 +364,11 @@
     </if>
     <set>
     {{#metadata.columnMetadataList}}
+      {{#updatable}}
     <if test="record.{{fieldName}} != null">
       {{columnName}} = #{ record.{{fieldName}} } ,
     </if>
+      {{/updatable}}
     {{/metadata.columnMetadataList}}
     </set>
     <if test="_parameter != null">
@@ -359,7 +396,9 @@
     set
     <trim  suffixOverrides=",">
     {{#metadata.columnMetadataList}}
+      {{#updatable}}
       {{columnName}} = #{ {{fieldName}} } ,
+      {{/updatable}}
     {{/metadata.columnMetadataList}}
     </trim>
     <if test="_parameter != null">
@@ -383,11 +422,26 @@
     set
     <trim  suffixOverrides=",">
     {{#metadata.columnMetadataList}}
+      {{#updatable}}
+      {{^version}}
       {{columnName}} = #{ {{fieldName}} } ,
+      {{/version}}
+      {{/updatable}}
+      {{#updatable}}
+      {{#version}}
+      {{columnName}} = {{columnName}} + 1 ,
+      {{/version}}
+      {{/updatable}}
     {{/metadata.columnMetadataList}}
     </trim>
     where
-     {{columnName}} = #{ {{fieldName}} }
+    {{columnName}} = #{ {{fieldName}} }
+    {{#metadata.columnMetadataList}}
+    {{#version}}
+    and {{columnName}} = #{ {{fieldName}} }
+    {{/version}}
+    {{/metadata.columnMetadataList}}
+
   </update>
   {{/metadata.primaryMetadata}}
 
@@ -396,13 +450,30 @@
     update {{metadata.tableName}}
     <set>
     {{#metadata.columnMetadataList}}
+      {{#updatable}}
+      {{^version}}
       <if test="{{fieldName}} != null">
         {{columnName}} = #{ {{fieldName}} } ,
       </if>
+      {{/version}}
+      {{#version}}
+      <if test="{{fieldName}} != null">
+        {{columnName}} = {{columnName}} + 1 ,
+      </if>
+      {{/version}}
+      {{/updatable}}
     {{/metadata.columnMetadataList}}
     </set>
     where
      {{columnName}} = #{ {{fieldName}} }
+    {{#metadata.columnMetadataList}}
+    {{#version}}
+    <if test="{{fieldName}} != null">
+    and {{columnName}} = #{ {{fieldName}} }
+    </if>
+    {{/version}}
+    {{/metadata.columnMetadataList}}
+
   </update>
   {{/metadata.primaryMetadata}}
 
