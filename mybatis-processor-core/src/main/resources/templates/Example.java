@@ -203,6 +203,11 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
         return this;
     }
 
+    public {{metadata.exampleClazzSimpleName}} distinct() {
+        setDistinct(true);
+        return this;
+    }
+
     public {{metadata.exampleClazzSimpleName}} asc(String column){
         return orderBy(column,ASC);
     }
