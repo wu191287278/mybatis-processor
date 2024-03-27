@@ -20,8 +20,8 @@ public class SegIterable<T> implements Iterable<T> {
         return total;
     }
 
-    public void increment() {
-        total++;
+    public long increment() {
+        return ++total;
     }
 
     public void setIterator(Iterator<T> iterator) {

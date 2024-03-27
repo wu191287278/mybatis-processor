@@ -115,6 +115,7 @@ public interface MybatisExampleRepository<T, ID, Example> {
                     public T next() {
                         T next = getIterator().next();
                         setLast(next);
+                        increment();
                         return next;
                     }
                 };
