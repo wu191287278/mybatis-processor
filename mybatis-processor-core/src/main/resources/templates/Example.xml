@@ -329,9 +329,7 @@
     <trim prefix="(" suffix=")" suffixOverrides=",">
       {{#metadata.columnMetadataList}}
       {{#insertable}}
-      <if test="{{fieldName}} != null">
         {{columnName}},
-      </if>
       {{/insertable}}
       {{/metadata.columnMetadataList}}
     </trim>
