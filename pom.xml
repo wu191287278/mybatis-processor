@@ -6,7 +6,7 @@
     <artifactId>mybatis-processor</artifactId>
     <name>mybatis-processor</name>
     <packaging>pom</packaging>
-    <version>3.0.2-SNAPSHOT</version>
+    <version>3.0.2</version>
     <description>Mybatis processor parent</description>
 
     <url>https://github.com/wu191287278/mybatis-processor</url>
@@ -70,7 +70,7 @@
                 <version>3.3.0</version>
                 <executions>
                     <execution>
-                        <phase>compile</phase>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>jar</goal>
                         </goals>
@@ -116,7 +116,7 @@
                     </execution>
                 </executions>
             </plugin>
-         <!--   <plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
                 <version>3.1.0</version>
@@ -129,7 +129,7 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>-->
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
