@@ -6,6 +6,7 @@ import org.mybatis.spring.mapper.MapperFactoryBean;
 import org.mybatis.spring.mapper.MapperScannerConfigurer;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.annotation.AliasFor;
 
 import java.lang.annotation.*;
 
@@ -56,18 +57,21 @@ import java.lang.annotation.*;
 public @interface EnableMybatisRepository {
 
     /**
-     * Alias for the {@link #basePackages()} attribute. Allows for more concise
-     * annotation declarations e.g.:
-     * @return String[].
+     * Alias for the {@link #basePackages()} attribute. Allows for more concise annotation declarations e.g.:
+     * {@code @MapperScan("org.my.pkg")} instead of {@code @MapperScan(basePackages = "org.my.pkg"})}.
+     *
+     * @return base package names
      */
+    @AliasFor("basePackages")
     String[] value() default {};
 
     /**
-     * Base packages to scan for MyBatis interfaces. Note that only interfaces
-     * with at least one method will be registered; concrete classes will be
-     * ignored.
-     * @return String[].
+     * Base packages to scan for MyBatis interfaces. Note that only interfaces with at least one method will be
+     * registered; concrete classes will be ignored.
+     *
+     * @return base package names for scanning mapper interface
      */
+    @AliasFor("value")
     String[] basePackages() default {};
 
     /**
