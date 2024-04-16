@@ -44,6 +44,19 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
         return new {{metadata.exampleClazzSimpleName}}();
     }
 
+    public {{metadata.exampleClazzSimpleName}} copy(){
+        {{metadata.exampleClazzSimpleName}} example = create()
+                .setColumns(this.columns)
+                .distinct(this.distinct)
+                .orderByClause(this.orderByClause);
+        example.setLimit(this.limit);
+        example.setOredCriteria(this.oredCriteria);
+        example.setPage(this.page);
+        example.setSize(this.size);
+        example.setTable(this.table);
+        return example;
+    }
+
     public {{metadata.exampleClazzSimpleName}} limit(int offset, int limit) {
         this.limit = Arrays.asList(offset,limit);
         return this;
@@ -451,22 +464,50 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
         }
 
         public Criteria and{{firstUpFieldName}}EqualTo({{javaType}} {{fieldName}}) {
+            {{#encrypt}}
+            addCriterion("{{columnName}} =", {{typeHandler}}.encrypt({{fieldName}}), "{{fieldName}}");
+            {{/encrypt}}
+            {{^encrypt}}
             addCriterion("{{columnName}} =", {{fieldName}}, "{{fieldName}}");
+            {{/encrypt}}
             return (Criteria) this;
         }
 
         public Criteria and{{firstUpFieldName}}NotEqualTo({{javaType}} {{fieldName}}) {
+            {{#encrypt}}
+            addCriterion("{{columnName}} <>", {{typeHandler}}.encrypt({{fieldName}}), "{{fieldName}}");
+            {{/encrypt}}
+            {{^encrypt}}
             addCriterion("{{columnName}} <>", {{fieldName}}, "{{fieldName}}");
+            {{/encrypt}}
             return (Criteria) this;
         }
 
         public Criteria and{{firstUpFieldName}}In(List<{{javaType}}> {{fieldName}}) {
+            {{#encrypt}}
+            List<String> newList = new ArrayList<>();
+            for (String value : {{fieldName}}){
+                newList.add({{typeHandler}}.encrypt(value))
+            }
+            addCriterion("{{columnName}} in", newList, "{{fieldName}}");
+            {{/encrypt}}
+            {{^encrypt}}
             addCriterion("{{columnName}} in", {{fieldName}}, "{{fieldName}}");
+            {{/encrypt}}
             return (Criteria) this;
         }
 
         public Criteria and{{firstUpFieldName}}NotIn(List<{{javaType}}> {{fieldName}}) {
+            {{#encrypt}}
+            List<String> newList = new ArrayList<>();
+            for (String value : {{fieldName}}){
+                newList.add({{typeHandler}}.encrypt(value))
+            }
+            addCriterion("{{columnName}} not in", newList, "{{fieldName}}");
+            {{/encrypt}}
+            {{^encrypt}}
             addCriterion("{{columnName}} not in", {{fieldName}}, "{{fieldName}}");
+            {{/encrypt}}
             return (Criteria) this;
         }
 
@@ -724,6 +765,7 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
         {{/metadata.columnMetadataList}}
         return columns;
     }
+
 
     public List<Integer> getLimit(){
         return this.limit;
