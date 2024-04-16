@@ -32,6 +32,8 @@ public class ColumnMetadata {
 
     private boolean version = false;
 
+    private boolean encrypt = false;
+
     public String getFieldName() {
         return fieldName;
     }
@@ -175,5 +177,13 @@ public class ColumnMetadata {
 
     public void setVersion(boolean version) {
         this.version = version;
+    }
+
+    public boolean isEncrypt() {
+        return encrypt;
+    }
+
+    public void setEncrypt(boolean encrypt) {
+        this.encrypt = encrypt;
     }
 }

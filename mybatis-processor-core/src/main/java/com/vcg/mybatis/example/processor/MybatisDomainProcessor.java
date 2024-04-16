@@ -11,6 +11,7 @@ import com.github.mustachejava.MustacheFactory;
 import com.vcg.mybatis.example.processor.annotation.ExampleQuery;
 import com.vcg.mybatis.example.processor.annotation.*;
 import com.vcg.mybatis.example.processor.domain.*;
+import com.vcg.mybatis.example.processor.encrypt.Encrypt;
 import com.vcg.mybatis.example.processor.util.CamelUtils;
 import com.vcg.mybatis.example.processor.visitor.DomainTypeVisitor;
 import com.vcg.mybatis.example.processor.visitor.QueryTypeVisitor;
@@ -239,9 +240,15 @@ public class MybatisDomainProcessor extends AbstractProcessor {
             }
 
             Convert annotation = member.getAnnotation(Convert.class);
-            if (annotation != null && TypeHandler.class.isAssignableFrom(annotation.converter())) {
+            if (annotation != null) {
                 String typeHandler = annotation.converter().getName();
                 columnMetadata.setTypeHandler(typeHandler);
+            }
+
+            Encrypt encrypt = member.getAnnotation(Encrypt.class);
+            if (encrypt != null && columnMetadata.isStringType()) {
+                columnMetadata.setTypeHandler(encrypt.value());
+                columnMetadata.setEncrypt(true);
             }
 
             columnMetadata.setOriginColumnName(columnMetadata.getColumnName());

@@ -265,7 +265,7 @@
     <trim  suffixOverrides=",">
       {{#metadata.columnMetadataList}}
       {{#insertable}}
-        #{ {{fieldName}} } ,
+        #{ {{fieldName}} {{#typeHandler}},typeHandler={{typeHandler}} {{/typeHandler}} } ,
       {{/insertable}}
       {{/metadata.columnMetadataList}}
     </trim>
@@ -287,7 +287,7 @@
       {{#metadata.columnMetadataList}}
       {{#insertable}}
       <if test="{{fieldName}} != null">
-        #{ {{fieldName}}  } ,
+        #{ {{fieldName}}  {{#typeHandler}},typeHandler={{typeHandler}} {{/typeHandler}} } ,
       </if>
       {{/insertable}}
       {{/metadata.columnMetadataList}}
@@ -317,7 +317,7 @@
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       {{#metadata.columnMetadataList}}
       <if test="{{fieldName}} != null">
-        #{ {{fieldName}}  } ,
+        #{ {{fieldName}}  {{#typeHandler}},typeHandler={{typeHandler}} {{/typeHandler}} } ,
       </if>
       {{/metadata.columnMetadataList}}
     </trim>
@@ -338,7 +338,7 @@
     <trim prefix="(" suffix=")" suffixOverrides=",">
       {{#metadata.columnMetadataList}}
       {{#insertable}}
-      #{ item.{{fieldName}} },
+      #{ item.{{fieldName}} {{#typeHandler}},typeHandler={{typeHandler}} {{/typeHandler}} },
       {{/insertable}}
       {{/metadata.columnMetadataList}}
     </trim>
@@ -364,7 +364,7 @@
     {{#metadata.columnMetadataList}}
       {{#updatable}}
     <if test="record.{{fieldName}} != null">
-      {{columnName}} = #{ record.{{fieldName}} } ,
+      {{columnName}} = #{ record.{{fieldName}} {{#typeHandler}},typeHandler={{typeHandler}} {{/typeHandler}} } ,
     </if>
       {{/updatable}}
     {{/metadata.columnMetadataList}}
@@ -395,7 +395,7 @@
     <trim  suffixOverrides=",">
     {{#metadata.columnMetadataList}}
       {{#updatable}}
-      {{columnName}} = #{ {{fieldName}} } ,
+      {{columnName}} = #{ {{fieldName}} {{#typeHandler}},typeHandler={{typeHandler}} {{/typeHandler}} } ,
       {{/updatable}}
     {{/metadata.columnMetadataList}}
     </trim>
@@ -422,7 +422,7 @@
     {{#metadata.columnMetadataList}}
       {{#updatable}}
       {{^version}}
-      {{columnName}} = #{ {{fieldName}} } ,
+      {{columnName}} = #{ {{fieldName}} {{#typeHandler}},typeHandler={{typeHandler}} {{/typeHandler}} } ,
       {{/version}}
       {{/updatable}}
       {{#updatable}}
@@ -433,10 +433,10 @@
     {{/metadata.columnMetadataList}}
     </trim>
     where
-    {{columnName}} = #{ {{fieldName}} }
+    {{columnName}} = #{ {{fieldName}} {{#typeHandler}},typeHandler={{typeHandler}} {{/typeHandler}} }
     {{#metadata.columnMetadataList}}
     {{#version}}
-    and {{columnName}} = #{ {{fieldName}} }
+    and {{columnName}} = #{ {{fieldName}} {{#typeHandler}},typeHandler={{typeHandler}} {{/typeHandler}} }
     {{/version}}
     {{/metadata.columnMetadataList}}
 
@@ -451,7 +451,7 @@
       {{#updatable}}
       {{^version}}
       <if test="{{fieldName}} != null">
-        {{columnName}} = #{ {{fieldName}} } ,
+        {{columnName}} = #{ {{fieldName}} {{#typeHandler}},typeHandler={{typeHandler}} {{/typeHandler}} } ,
       </if>
       {{/version}}
       {{#version}}
@@ -463,11 +463,11 @@
     {{/metadata.columnMetadataList}}
     </set>
     where
-     {{columnName}} = #{ {{fieldName}} }
+     {{columnName}} = #{ {{fieldName}} {{#typeHandler}},typeHandler={{typeHandler}} {{/typeHandler}} }
     {{#metadata.columnMetadataList}}
     {{#version}}
     <if test="{{fieldName}} != null">
-    and {{columnName}} = #{ {{fieldName}} }
+    and {{columnName}} = #{ {{fieldName}} {{#typeHandler}},typeHandler={{typeHandler}} {{/typeHandler}} }
     </if>
     {{/version}}
     {{/metadata.columnMetadataList}}
