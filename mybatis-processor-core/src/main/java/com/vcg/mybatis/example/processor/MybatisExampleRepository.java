@@ -91,9 +91,7 @@ public interface MybatisExampleRepository<T, ID, Example> {
     }
 
     default SegIterable<T> iterator(Function<T, Example> function) {
-        if (function == null) {
-            throw new IllegalArgumentException("Function convert can not be null!");
-        }
+
         return new SegIterable<T>() {
             @Override
             public Iterator<T> iterator() {

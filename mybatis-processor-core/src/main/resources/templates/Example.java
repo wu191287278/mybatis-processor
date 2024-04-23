@@ -216,11 +216,6 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
         return this;
     }
 
-    public {{metadata.exampleClazzSimpleName}} distinct() {
-        setDistinct(true);
-        return this;
-    }
-
     public {{metadata.exampleClazzSimpleName}} asc(String column){
         return orderBy(column,ASC);
     }
@@ -487,7 +482,7 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
             {{#encrypt}}
             List<String> newList = new ArrayList<>();
             for (String value : {{fieldName}}){
-                newList.add({{typeHandler}}.encrypt(value))
+                newList.add({{typeHandler}}.encrypt(value));
             }
             addCriterion("{{columnName}} in", newList, "{{fieldName}}");
             {{/encrypt}}
@@ -501,7 +496,7 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
             {{#encrypt}}
             List<String> newList = new ArrayList<>();
             for (String value : {{fieldName}}){
-                newList.add({{typeHandler}}.encrypt(value))
+                newList.add({{typeHandler}}.encrypt(value));
             }
             addCriterion("{{columnName}} not in", newList, "{{fieldName}}");
             {{/encrypt}}

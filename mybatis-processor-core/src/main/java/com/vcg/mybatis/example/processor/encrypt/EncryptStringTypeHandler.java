@@ -1,5 +1,6 @@
 package com.vcg.mybatis.example.processor.encrypt;
 
+import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.StringTypeHandler;
 
@@ -9,34 +10,29 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.function.Function;
 
-public class EncryptStringTypeHandler extends StringTypeHandler {
+public class EncryptStringTypeHandler extends BaseTypeHandler<String> {
 
     private static Function<String, String> ENCRYPT_FUNCTION = s -> s;
 
     private static Function<String, String> DECRYPT_FUNCTION = s -> s;
 
 
-    @Override
     public void setNonNullParameter(PreparedStatement ps, int i, String parameter, JdbcType jdbcType) throws SQLException {
-        super.setNonNullParameter(ps, i, encrypt(parameter), jdbcType);
+        ps.setString(i, encrypt(parameter));
     }
 
-
-    @Override
     public String getNullableResult(ResultSet rs, String columnName) throws SQLException {
-        String result = super.getNullableResult(rs, columnName);
+        String result = rs.getString(columnName);
         return result == null ? null : decrypt(result);
     }
 
-    @Override
     public String getNullableResult(ResultSet rs, int columnIndex) throws SQLException {
-        String result = super.getNullableResult(rs, columnIndex);
+        String result = rs.getString(columnIndex);
         return result == null ? null : decrypt(result);
     }
 
-    @Override
     public String getNullableResult(CallableStatement cs, int columnIndex) throws SQLException {
-        String result = super.getNullableResult(cs, columnIndex);
+        String result = cs.getString(columnIndex);
         return result == null ? null : decrypt(result);
     }
 
