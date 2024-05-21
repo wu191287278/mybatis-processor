@@ -1,15 +1,10 @@
 package com.vcg.mybatis.example.processor;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.stream.Collectors;
-
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
+import com.vcg.mybatis.example.processor.annotation.Criterion;
 import com.vcg.mybatis.example.processor.annotation.ExampleQuery;
-import com.vcg.mybatis.example.processor.annotation.*;
 import com.vcg.mybatis.example.processor.domain.*;
 import com.vcg.mybatis.example.processor.encrypt.Encrypt;
 import com.vcg.mybatis.example.processor.util.CamelUtils;
@@ -25,14 +20,17 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.MirroredTypeException;
 import javax.lang.model.util.Elements;
 import javax.persistence.*;
 import javax.tools.Diagnostic;
 import javax.tools.FileObject;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardLocation;
-
-import org.apache.ibatis.type.TypeHandler;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @SupportedAnnotationTypes("com.vcg.mybatis.example.processor.Example")
 public class MybatisDomainProcessor extends AbstractProcessor {
@@ -241,7 +239,15 @@ public class MybatisDomainProcessor extends AbstractProcessor {
 
             Convert annotation = member.getAnnotation(Convert.class);
             if (annotation != null) {
-                String typeHandler = annotation.converter().getName();
+                String typeHandler = annotation.attributeName();
+                if (typeHandler.isEmpty()) {
+                    try {
+                        typeHandler = annotation.converter().getName();
+                    } catch (MirroredTypeException mirroredTypeException) {
+                        String errorMessage = mirroredTypeException.getLocalizedMessage();
+                        typeHandler = errorMessage.substring(errorMessage.lastIndexOf(" ") + 1);
+                    }
+                }
                 columnMetadata.setTypeHandler(typeHandler);
             }
 
