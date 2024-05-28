@@ -25,6 +25,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.MirroredTypeException;
 import javax.lang.model.util.Elements;
 import javax.persistence.*;
 import javax.tools.Diagnostic;
@@ -139,6 +140,9 @@ public class MybatisDomainProcessor extends AbstractProcessor {
                 .setLeftEncode(dialect.getLeftEscape())
                 .setRightEncode(dialect.getRightEscape())
                 .setShard(null);
+        if(tableMetadata.getPackageName().startsWith("package ")){
+            tableMetadata.setTableName(tableMetadata.getPackageName().replace("package ","").trim());
+        }
 
         String repositoryName = !example.namespace().equals("") ? example.namespace() :
                 exampleName + "." + tableMetadata.getExampleClazzSimpleName() + "Repository";
@@ -241,7 +245,15 @@ public class MybatisDomainProcessor extends AbstractProcessor {
 
             Convert annotation = member.getAnnotation(Convert.class);
             if (annotation != null) {
-                String typeHandler = annotation.converter().getName();
+                String typeHandler = annotation.attributeName();
+                if (typeHandler.isEmpty()) {
+                    try {
+                        typeHandler = annotation.converter().getName();
+                    } catch (MirroredTypeException mirroredTypeException) {
+                        String errorMessage = mirroredTypeException.getLocalizedMessage();
+                        typeHandler = errorMessage.substring(errorMessage.lastIndexOf(" ") + 1);
+                    }
+                }
                 columnMetadata.setTypeHandler(typeHandler);
             }
 
