@@ -77,8 +77,9 @@ public class MybatisDomainProcessor extends AbstractProcessor {
                     }
 
                     PackageElement packageOf = processingEnv.getElementUtils().getPackageOf(element);
+
                     String xml = tableMetadata.getDomainClazzSimpleName() + "ExampleMapper.xml";
-                    FileObject xmlOut = filer.createResource(StandardLocation.CLASS_OUTPUT, packageOf.toString(), xml);
+                    FileObject xmlOut = filer.createResource(StandardLocation.CLASS_OUTPUT, trimPackageSpace(packageOf.toString()), xml);
                     InputStream xmlInputStream = classLoader.getResourceAsStream(dialect.getExampleXmlTemplatePath());
                     try (InputStreamReader in = new InputStreamReader(xmlInputStream, StandardCharsets.UTF_8);
                          Writer writer = xmlOut.openWriter()) {
@@ -136,13 +137,10 @@ public class MybatisDomainProcessor extends AbstractProcessor {
         TableMetadata tableMetadata = new TableMetadata()
                 .setDomainClazzName(clazzName)
                 .setExampleClazzName(exampleName)
-                .setPackageName(packageOf.toString())
+                .setPackageName(trimPackageSpace(packageOf.toString()))
                 .setLeftEncode(dialect.getLeftEscape())
                 .setRightEncode(dialect.getRightEscape())
                 .setShard(null);
-        if(tableMetadata.getPackageName().startsWith("package ")){
-            tableMetadata.setTableName(tableMetadata.getPackageName().replace("package ","").trim());
-        }
 
         String repositoryName = !example.namespace().equals("") ? example.namespace() :
                 exampleName + "." + tableMetadata.getExampleClazzSimpleName() + "Repository";
@@ -451,5 +449,12 @@ public class MybatisDomainProcessor extends AbstractProcessor {
     @Override
     public SourceVersion getSupportedSourceVersion() {
         return SourceVersion.latestSupported();
+    }
+
+    private String trimPackageSpace(String packageName) {
+        if (packageName.startsWith("package ")) {
+            return packageName.replace("package ", "");
+        }
+        return packageName;
     }
 }
