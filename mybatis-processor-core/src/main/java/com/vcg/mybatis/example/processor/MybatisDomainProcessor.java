@@ -74,8 +74,9 @@ public class MybatisDomainProcessor extends AbstractProcessor {
                     }
 
                     PackageElement packageOf = processingEnv.getElementUtils().getPackageOf(element);
+                    String packageName = getPackageName(packageOf);
                     String xml = tableMetadata.getDomainClazzSimpleName() + "ExampleMapper.xml";
-                    FileObject xmlOut = filer.createResource(StandardLocation.CLASS_OUTPUT, packageOf.toString(), xml);
+                    FileObject xmlOut = filer.createResource(StandardLocation.CLASS_OUTPUT, packageName, xml);
                     InputStream xmlInputStream = classLoader.getResourceAsStream(dialect.getExampleXmlTemplatePath());
                     try (InputStreamReader in = new InputStreamReader(xmlInputStream, StandardCharsets.UTF_8);
                          Writer writer = xmlOut.openWriter()) {
@@ -125,7 +126,7 @@ public class MybatisDomainProcessor extends AbstractProcessor {
         Example example = element.getAnnotation(Example.class);
         Table table = element.getAnnotation(Table.class);
         PackageElement packageOf = processingEnv.getElementUtils().getPackageOf(element);
-        String clazzName = element.toString();
+        String clazzName = getPackageName(element);
 
         String exampleName = (clazzName + "Example");
 
@@ -133,7 +134,7 @@ public class MybatisDomainProcessor extends AbstractProcessor {
         TableMetadata tableMetadata = new TableMetadata()
                 .setDomainClazzName(clazzName)
                 .setExampleClazzName(exampleName)
-                .setPackageName(packageOf.toString())
+                .setPackageName(getPackageName(packageOf))
                 .setLeftEncode(dialect.getLeftEscape())
                 .setRightEncode(dialect.getRightEscape())
                 .setShard(null);
@@ -281,8 +282,8 @@ public class MybatisDomainProcessor extends AbstractProcessor {
         Elements elementUtils = processingEnv.getElementUtils();
 
         PackageElement packageOf = elementUtils.getPackageOf(element);
-        String packageName = packageOf.toString();
-        String clazzName = element.toString();
+        String packageName = getPackageName(packageOf);
+        String clazzName = getPackageName(element);
 
         String queryName = (clazzName + "Query");
         String exampleName = (clazzName + "Example");
@@ -441,6 +442,12 @@ public class MybatisDomainProcessor extends AbstractProcessor {
         JDBC_TYPE_MAPPING.put("DATETIME", "TIMESTAMP");
     }
 
+
+    public String getPackageName(Element packageOf) {
+        String string = packageOf.toString();
+        String[] split = string.split("\\s");
+        return split.length == 1 ? split[0] : split[1];
+    }
 
     @Override
     public SourceVersion getSupportedSourceVersion() {
