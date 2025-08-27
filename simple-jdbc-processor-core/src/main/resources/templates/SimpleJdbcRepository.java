@@ -237,7 +237,7 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
                     .append(", ");
         }
         {{#metadata.primaryMetadata}}
-        List<Long> primaryKeys = insertBatch(sql.substring(0, sql.length() - 2), params);
+        List<{{metadata.primaryMetadata.javaType}}> primaryKeys = insertBatch(sql.substring(0, sql.length() - 2), params);
         for (int i = 0; i < primaryKeys.size(); i++) {
             {{metadata.primaryMetadata.javaType}} primaryKey = primaryKeys.get(i);
             if (primaryKey > 0) {
@@ -618,9 +618,8 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
         {{metadata.domainClazzName}} t = new {{metadata.domainClazzName}}();
         for (String column : columns) {
             {{#metadata.columnMetadataList}}
-            if ("{{columnName}}".equals(column)) {
-                {{javaType}} {{fieldName}} = rs.getObject(column, {{javaType}}.class);
-                t.set{{firstUpFieldName}}({{fieldName}});
+            if ("{{originColumnName}}".equals(column) || "{{columnName}}".equals(column) || "{{fieldName}}".equals(column)) {
+                t.set{{firstUpFieldName}}(rs.getObject("{{originColumnName}}", {{javaType}}.class));
             }
             {{/metadata.columnMetadataList}}
         }
@@ -631,8 +630,7 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
     protected {{metadata.domainClazzName}} handle(ResultSet rs) throws SQLException {
         {{metadata.domainClazzName}} t = new {{metadata.domainClazzName}}();
         {{#metadata.columnMetadataList}}
-        {{javaType}} {{fieldName}} = rs.getObject("{{originColumnName}}", {{javaType}}.class);
-        t.set{{firstUpFieldName}}({{fieldName}});
+        t.set{{firstUpFieldName}}(rs.getObject("{{originColumnName}}", {{javaType}}.class));
         {{/metadata.columnMetadataList}}
         return t;
     }

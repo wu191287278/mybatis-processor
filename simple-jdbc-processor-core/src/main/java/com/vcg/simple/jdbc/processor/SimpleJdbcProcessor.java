@@ -67,12 +67,7 @@ public class SimpleJdbcProcessor extends AbstractProcessor {
                         Mustache mustache = mf.compile(in, exampleName);
                         mustache.execute(writer, scopes);
                     }
-                    String repositoryName = tableMetadata.getDomainClazzSimpleName() + "SimpleExampleRepository";
-                    if (!example.repositoryName().equals("")) {
-                        repositoryName = example.repositoryName();
-                    }
-                    tableMetadata.setRepositoryClazzSimpleName(repositoryName);
-
+                    String repositoryName = tableMetadata.getRepositoryClazzName();
                     JavaFileObject repositoryjavaFileObject = filer.createSourceFile(repositoryName);
 
                     InputStream repositoryInputstream = classLoader.getResourceAsStream(dialect.getRepositoryTemplatePath());
@@ -124,7 +119,10 @@ public class SimpleJdbcProcessor extends AbstractProcessor {
                 .setSlaveDataSources(Arrays.asList(example.slaveDataSources()))
                 .setDataSource(example.dataSource() == null || example.dataSource().isEmpty() ? null : example.dataSource());
 
-        String repositoryName = exampleName + "." + tableMetadata.getExampleClazzSimpleName() + "Repository";
+        String repositoryName = clazzName + "SimpleJdbcRepository";
+        if (!example.repositoryName().equals("")) {
+            repositoryName = example.repositoryName();
+        }
         tableMetadata.setRepositoryClazzName(repositoryName)
                 .setTableName(table != null ? table.name() : String.join("_",
                         CamelUtils.split(tableMetadata.getDomainClazzSimpleName(), true)));

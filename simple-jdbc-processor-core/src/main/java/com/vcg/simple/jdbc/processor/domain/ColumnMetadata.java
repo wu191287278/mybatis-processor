@@ -79,6 +79,18 @@ public class ColumnMetadata {
         if (javaType.toLowerCase().contains("string")) {
             stringType = true;
         }
+        if(javaType.equalsIgnoreCase("int")){
+            this.javaType = "Integer";
+        }
+        if(javaType.equalsIgnoreCase("long")){
+            this.javaType = "Long";
+        }
+        if(javaType.equalsIgnoreCase("short")){
+            this.javaType = "Short";
+        }
+        if(javaType.equalsIgnoreCase("boolean")){
+            this.javaType = "Boolean";
+        }
         return this;
     }
 

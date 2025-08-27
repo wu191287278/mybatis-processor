@@ -126,83 +126,83 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
         return this;
     }
 
-    public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}EqualTo({{javaType}} {{fieldName}}) {
+    public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}EqualTo({{javaType}} value) {
         conditions.add("{{columnName}} = ?");
-        conditionValues.add({{fieldName}});
+        conditionValues.add(value);
         return this;
     }
 
-    public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}NotEqualTo({{javaType}} {{fieldName}}) {
+    public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}NotEqualTo({{javaType}} value) {
         conditions.add("{{columnName}} <> ?");
-        conditionValues.add({{fieldName}});
+        conditionValues.add(value);
         return this;
     }
 
-    public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}In(List<{{javaType}}> {{fieldName}}) {
-        String placeholder = appendPlaceholder({{fieldName}}.size());
+    public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}In(List<{{javaType}}> values) {
+        String placeholder = appendPlaceholder(values.size());
         conditions.add("{{columnName}} in " + placeholder);
-        conditionValues.addAll({{fieldName}});
+        conditionValues.addAll(values);
         return this;
     }
 
-    public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}In({{javaType}}... {{fieldName}}) {
-        and{{firstUpFieldName}}In(Arrays.asList({{fieldName}}));
+    public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}In({{javaType}}... values) {
+        and{{firstUpFieldName}}In(Arrays.asList(values));
         return this;
     }
 
-    public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}NotIn(List<{{javaType}}> {{fieldName}}) {
-        String placeholder = appendPlaceholder({{fieldName}}.size());
+    public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}NotIn(List<{{javaType}}> values) {
+        String placeholder = appendPlaceholder(values.size());
         conditions.add("{{columnName}} not in " + placeholder);
-        conditionValues.addAll({{fieldName}});
+        conditionValues.addAll(values);
         return this;
     }
 
-    public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}NotIn({{javaType}}... {{fieldName}}) {
-        and{{firstUpFieldName}}NotIn(Arrays.asList({{fieldName}}));
+    public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}NotIn({{javaType}}... values) {
+        and{{firstUpFieldName}}NotIn(Arrays.asList(values));
         return this;
     }
 
-    public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}Between({{javaType}} {{fieldName}}1, {{javaType}} {{fieldName}}2) {
+    public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}Between({{javaType}} value1, {{javaType}} value2) {
         conditions.add("{{columnName}} between ? and  ? ");
-        conditionValues.add({{fieldName}}1);
-        conditionValues.add({{fieldName}}2);
+        conditionValues.add(value1);
+        conditionValues.add(value2);
         return this;
     }
 
-    public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}NotBetween({{javaType}} {{fieldName}}1, {{javaType}} {{fieldName}}2) {
+    public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}NotBetween({{javaType}} value1, {{javaType}} value2) {
         conditions.add("{{columnName}} not between ? and ? ");
-        conditionValues.add({{fieldName}}1);
-        conditionValues.add({{fieldName}}2);
+        conditionValues.add(value1);
+        conditionValues.add(value2);
         return this;
     }
 
-    public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}GreaterThan({{javaType}} {{fieldName}}) {
+    public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}GreaterThan({{javaType}} value) {
         conditions.add("{{columnName}} > ?");
-        conditionValues.add({{fieldName}});
+        conditionValues.add(value);
         return this;
     }
 
-    public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}GreaterThanOrEqualTo({{javaType}} {{fieldName}}) {
+    public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}GreaterThanOrEqualTo({{javaType}} value) {
         conditions.add("{{columnName}} >= ?");
-        conditionValues.add({{fieldName}});
+        conditionValues.add(value);
         return this;
     }
 
-    public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}LessThan({{javaType}} {{fieldName}}) {
+    public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}LessThan({{javaType}} value) {
         conditions.add("{{columnName}} < ?");
-        conditionValues.add({{fieldName}});
+        conditionValues.add(value);
         return this;
     }
 
-    public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}LessThanOrEqualTo({{javaType}} {{fieldName}}) {
+    public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}LessThanOrEqualTo({{javaType}} value) {
         conditions.add("{{columnName}} <= ?");
-        conditionValues.add({{fieldName}});
+        conditionValues.add(value);
         return this;
     }
 
-    public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}Like(String {{fieldName}}) {
+    public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}Like(String value) {
         conditions.add("{{columnName}} like ?");
-        conditionValues.add({{fieldName}});
+        conditionValues.add(value);
         return this;
     }
 

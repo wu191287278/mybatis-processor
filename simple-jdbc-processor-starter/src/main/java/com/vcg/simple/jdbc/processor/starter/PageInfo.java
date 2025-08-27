@@ -1,4 +1,4 @@
-package com.vcg.mybatis.example.processor.domain;
+package com.vcg.simple.jdbc.processor.starter;
 
 import java.io.Serializable;
 import java.util.List;
