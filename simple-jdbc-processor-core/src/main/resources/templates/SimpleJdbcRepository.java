@@ -9,7 +9,6 @@ import java.sql.Date;
 import java.util.*;
 import java.util.function.Consumer;
 
-{{#metadata.useSpring}}@org.springframework.stereotype.Repository{{/metadata.useSpring}}
 @SuppressWarnings("unchecked")
 public abstract class {{metadata.repositoryClazzSimpleName}} {
 
@@ -24,6 +23,8 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
     private List<String> slaveDataSources  = new ArrayList<>();
 
     private Map<String, DataSource> dataSourceMap = new HashMap<>();
+
+    private {{metadata.domainClazzSimpleName}}DefaultTypeHandler defaultTypeHandler = new {{metadata.domainClazzSimpleName}}DefaultTypeHandler();
 
     private String tableName = "{{metadata.tableName}}";
 
@@ -78,9 +79,8 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
     public long updateByPrimaryKey({{metadata.domainClazzName}} t) {
         List<Object> params = new ArrayList<>();
         {{#metadata.columnMetadataList}}
-        params.add(t.get{{firstUpFieldName}}());
+        params.add(getDefaultTypeHandler().get{{firstUpFieldName}}(t.get{{firstUpFieldName}}()));
         {{/metadata.columnMetadataList}}
-        params.add(t.get{{metadata.primaryMetadata.firstUpFieldName}}());
         return update(updateByPrimaryKeySql, params);
     }
 
@@ -92,8 +92,8 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
         List<Object> params = new ArrayList<>();
         {{#metadata.columnMetadataList}}
         if (t.get{{firstUpFieldName}}() != null) {
+            params.add(getDefaultTypeHandler().get{{firstUpFieldName}}(t.get{{firstUpFieldName}}()));
             prefix.append("{{columnName}} = ?, ");
-            params.add(t.get{{firstUpFieldName}}());
         }
         {{/metadata.columnMetadataList}}
         params.add(t.get{{metadata.primaryMetadata.firstUpFieldName}}());
@@ -145,7 +145,7 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
         }
 
         {{#metadata.columnMetadataList}}
-        params.add(t.get{{firstUpFieldName}}());
+        params.add(defaultTypeHandler.get{{firstUpFieldName}}(t.get{{firstUpFieldName}}()));
         {{/metadata.columnMetadataList}}
         String condition = toConditionSql(example);
         String sql;
@@ -178,7 +178,7 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
         {{#metadata.columnMetadataList}}
         if (t.get{{firstUpFieldName}}() != null) {
             prefix.append("{{columnName}} = ?, ");
-            params.add(t.get{{firstUpFieldName}}());
+            params.add(getDefaultTypeHandler().get{{firstUpFieldName}}(t.get{{firstUpFieldName}}()));
         }
         {{/metadata.columnMetadataList}}
         params.addAll(example.getConditionValues());
@@ -211,7 +211,7 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
     public void insert({{metadata.domainClazzName}} t) {
         List<Object> params = new ArrayList<>(columns.size());
         {{#metadata.columnMetadataList}}
-        params.add(t.get{{firstUpFieldName}}());
+        params.add(getDefaultTypeHandler().get{{firstUpFieldName}}(t.get{{firstUpFieldName}}()));
         {{/metadata.columnMetadataList}}
         {{#metadata.primaryMetadata}}
         {{metadata.primaryMetadata.javaType}} primaryKey = insert(insertSql, params);
@@ -231,7 +231,7 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
 
         for ({{metadata.domainClazzName}} t : ts) {
             {{#metadata.columnMetadataList}}
-            params.add(t.get{{firstUpFieldName}}());
+            params.add(getDefaultTypeHandler().get{{firstUpFieldName}}(t.get{{firstUpFieldName}}()));
             {{/metadata.columnMetadataList}}
             sql.append(appendPlaceholder(columns.size()))
                     .append(", ");
@@ -258,7 +258,7 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
         {{#metadata.columnMetadataList}}
         if (t.get{{firstUpFieldName}}() != null) {
             prefix.append("{{columnName}}, ");
-            params.add(t.get{{firstUpFieldName}}());
+            params.add(getDefaultTypeHandler().get{{firstUpFieldName}}(t.get{{firstUpFieldName}}()));
         }
         {{/metadata.columnMetadataList}}
 
@@ -619,7 +619,7 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
         for (String column : columns) {
             {{#metadata.columnMetadataList}}
             if ("{{originColumnName}}".equals(column) || "{{columnName}}".equals(column) || "{{fieldName}}".equals(column)) {
-                t.set{{firstUpFieldName}}(rs.getObject("{{originColumnName}}", {{javaType}}.class));
+                defaultTypeHandler.set{{firstUpFieldName}}(rs, t, "{{originColumnName}}", {{javaType}}.class);
             }
             {{/metadata.columnMetadataList}}
         }
@@ -630,7 +630,7 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
     protected {{metadata.domainClazzName}} handle(ResultSet rs) throws SQLException {
         {{metadata.domainClazzName}} t = new {{metadata.domainClazzName}}();
         {{#metadata.columnMetadataList}}
-        t.set{{firstUpFieldName}}(rs.getObject("{{originColumnName}}", {{javaType}}.class));
+        defaultTypeHandler.set{{firstUpFieldName}}(rs, t, "{{originColumnName}}", {{javaType}}.class);
         {{/metadata.columnMetadataList}}
         return t;
     }
@@ -748,7 +748,7 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
         }
     }
 
-    public void multiCancel() {
+    public void multiRemove() {
         multiLocal.remove();
     }
 
@@ -816,4 +816,42 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
         return false;
     }
     {{/metadata.useSpring}}
+
+
+    public static class {{metadata.domainClazzSimpleName}}DefaultTypeHandler {
+
+        {{#metadata.columnMetadataList}}
+        public void set{{firstUpFieldName}}(ResultSet resultSet, {{metadata.domainClazzSimpleName}} t, String name, Class<{{javaType}}> type) throws SQLException {
+            {{#isEnums}}
+            String value = resultSet.getString(name);
+            if(value == null){
+                return;
+            }
+            t.set{{firstUpFieldName}}(Enum.valueOf(type, value));
+            {{/isEnums}}
+            {{^isEnums}}
+            {{javaType}} value = resultSet.getObject(name, type);
+            if(value == null){
+                return;
+            }
+            t.set{{firstUpFieldName}}(value);
+            {{/isEnums}}
+        }
+
+        public Object get{{firstUpFieldName}}({{javaType}} value) {
+            {{^isEnums}}return value;{{/isEnums}}{{#isEnums}}return value == null ? null: String.valueOf(value);{{/isEnums}}
+        }
+
+        public List get{{firstUpFieldName}}List(List<{{javaType}}> values) {
+            {{^isEnums}}return values;{{/isEnums}}
+            {{#isEnums}}return values.stream().map(String::valueOf).collect(java.util.stream.Collectors.toList());{{/isEnums}}
+        }
+
+        {{/metadata.columnMetadataList}}
+    }
+
+    public {{metadata.domainClazzSimpleName}}DefaultTypeHandler getDefaultTypeHandler() {
+        return defaultTypeHandler;
+    }
+
 }

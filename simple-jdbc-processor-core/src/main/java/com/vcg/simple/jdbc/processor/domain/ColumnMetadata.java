@@ -34,6 +34,8 @@ public class ColumnMetadata {
 
     private boolean encrypt = false;
 
+    private boolean isEnums = false;
+
     public String getFieldName() {
         return fieldName;
     }
@@ -197,5 +199,13 @@ public class ColumnMetadata {
 
     public void setEncrypt(boolean encrypt) {
         this.encrypt = encrypt;
+    }
+
+    public void setEnums(boolean enums) {
+        this.isEnums = enums;
+    }
+
+    public boolean isEnums() {
+        return isEnums;
     }
 }

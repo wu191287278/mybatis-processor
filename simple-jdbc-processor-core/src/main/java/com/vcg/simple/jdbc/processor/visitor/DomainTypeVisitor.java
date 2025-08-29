@@ -2,6 +2,8 @@ package com.vcg.simple.jdbc.processor.visitor;
 
 import com.vcg.simple.jdbc.processor.domain.ColumnMetadata;
 
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.*;
 
 public class DomainTypeVisitor implements TypeVisitor<DomainTypeVisitor, ColumnMetadata> {
@@ -37,6 +39,11 @@ public class DomainTypeVisitor implements TypeVisitor<DomainTypeVisitor, ColumnM
     @Override
     public DomainTypeVisitor visitDeclared(DeclaredType t, ColumnMetadata columnMetadata) {
         columnMetadata.setJavaType(t.toString());
+        TypeElement typeElement = (TypeElement) t.asElement();
+        if (typeElement != null) {
+            columnMetadata.setEnums(typeElement.getKind() == ElementKind.ENUM);
+        }
+
         return this;
     }
 

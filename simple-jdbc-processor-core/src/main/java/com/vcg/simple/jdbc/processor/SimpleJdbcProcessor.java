@@ -215,6 +215,10 @@ public class SimpleJdbcProcessor extends AbstractProcessor {
             tableMetadata.getColumnMetadataList().add(columnMetadata);
         }
 
+        if (tableMetadata.getPrimaryMetadata() == null && !tableMetadata.getColumnMetadataList().isEmpty()) {
+            tableMetadata.setPrimaryMetadata(tableMetadata.getColumnMetadataList().get(0));
+        }
+
         String columns = tableMetadata.getColumnMetadataList()
                 .stream()
                 .map(ColumnMetadata::getColumnName)
