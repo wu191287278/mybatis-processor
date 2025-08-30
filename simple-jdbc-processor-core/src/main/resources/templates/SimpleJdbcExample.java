@@ -1,13 +1,12 @@
 package {{metadata.packageName}};
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 
-public class {{metadata.exampleClazzSimpleName}} implements Serializable {
+public class {{metadata.exampleClazzSimpleName}} implements java.io.Serializable {
 
     private static final long serialVersionUID = 1000000L;
 
@@ -21,11 +20,7 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
 
     private final String table = "{{metadata.tableName}}";
 
-    private List<String> conditions = new ArrayList<>();
-
-    private List<List<String>> orConditions;
-
-    private List<Object> conditionValues = new ArrayList<>();
+    private List<List<Criteria>> orConditions;
 
     private List<String> columns;
 
@@ -33,6 +28,7 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
 
     private List<Object> updateSetValues;
 
+    private List<Criteria> criteries = new ArrayList<>();
 
     public {{metadata.exampleClazzSimpleName}}() {}
 
@@ -70,8 +66,8 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
         if (this.orConditions == null) {
             this.orConditions = new ArrayList<>();
         }
-        this.orConditions.add(this.conditions);
-        this.conditions = new ArrayList<>();
+        this.orConditions.add(this.criteries);
+        this.criteries = new ArrayList<>();
         return this;
     }
 
@@ -108,40 +104,33 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
      * @param value      ?
      */
     public {{metadata.exampleClazzSimpleName}} and(String expression, Object value) {
-        conditions.add(expression);
-        if (value != null) {
-            conditionValues.add(value);
-        }
+        criteries.add(new Criteria(null, expression, value));
         return this;
     }
 {{#metadata.columnMetadataList}}
 
     public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}IsNull() {
-        conditions.add("{{columnName}} is null");
+        criteries.add(new Criteria("{{columnName}}", " is null "));
         return this;
     }
 
     public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}IsNotNull() {
-        conditions.add("{{columnName}} is not null");
+        criteries.add(new Criteria("{{columnName}}", " is not null "));
         return this;
     }
 
     public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}EqualTo({{javaType}} value) {
-        conditions.add("{{columnName}} = ?");
-        conditionValues.add(value);
+        criteries.add(new Criteria("{{columnName}}", " = ", value));
         return this;
     }
 
     public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}NotEqualTo({{javaType}} value) {
-        conditions.add("{{columnName}} <> ?");
-        conditionValues.add(value);
+        criteries.add(new Criteria("{{columnName}}", " <> ", value));
         return this;
     }
 
     public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}In(List<{{javaType}}> values) {
-        String placeholder = appendPlaceholder(values.size());
-        conditions.add("{{columnName}} in " + placeholder);
-        conditionValues.addAll(values);
+        criteries.add(new Criteria("{{columnName}}", " in ", values));
         return this;
     }
 
@@ -151,9 +140,7 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
     }
 
     public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}NotIn(List<{{javaType}}> values) {
-        String placeholder = appendPlaceholder(values.size());
-        conditions.add("{{columnName}} not in " + placeholder);
-        conditionValues.addAll(values);
+        criteries.add(new Criteria("{{columnName}}", " not in ", values));
         return this;
     }
 
@@ -163,46 +150,37 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
     }
 
     public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}Between({{javaType}} value1, {{javaType}} value2) {
-        conditions.add("{{columnName}} between ? and  ? ");
-        conditionValues.add(value1);
-        conditionValues.add(value2);
+        criteries.add(new Criteria("{{columnName}}", " between ", value1, value2));
         return this;
     }
 
     public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}NotBetween({{javaType}} value1, {{javaType}} value2) {
-        conditions.add("{{columnName}} not between ? and ? ");
-        conditionValues.add(value1);
-        conditionValues.add(value2);
+        criteries.add(new Criteria("{{columnName}}", " not between ", value1, value2));
         return this;
     }
 
     public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}GreaterThan({{javaType}} value) {
-        conditions.add("{{columnName}} > ?");
-        conditionValues.add(value);
+        criteries.add(new Criteria("{{columnName}}", " > ", value));
         return this;
     }
 
     public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}GreaterThanOrEqualTo({{javaType}} value) {
-        conditions.add("{{columnName}} >= ?");
-        conditionValues.add(value);
+        criteries.add(new Criteria("{{columnName}}", " >= ", value));
         return this;
     }
 
     public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}LessThan({{javaType}} value) {
-        conditions.add("{{columnName}} < ?");
-        conditionValues.add(value);
+        criteries.add(new Criteria("{{columnName}}", " < ", value));
         return this;
     }
 
     public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}LessThanOrEqualTo({{javaType}} value) {
-        conditions.add("{{columnName}} <= ?");
-        conditionValues.add(value);
+        criteries.add(new Criteria("{{columnName}}", " <= ", value));
         return this;
     }
 
     public {{metadata.exampleClazzSimpleName}} and{{firstUpFieldName}}Like(String value) {
-        conditions.add("{{columnName}} like ?");
-        conditionValues.add(value);
+        criteries.add(new Criteria("{{columnName}}", " like ", value));
         return this;
     }
 
@@ -242,16 +220,12 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
     }
 
 
-    public List<List<String>> getOrConditions() {
-        return orConditions;
+    public List<List<Criteria>> getOrConditions() {
+        return this.orConditions;
     }
 
-    public List<String> getConditions() {
-        return conditions;
-    }
-
-    public List<Object> getConditionValues() {
-        return conditionValues;
+    public List<Criteria> getCriteries() {
+        return this.criteries;
     }
 
     public List<String> getColumns() {
@@ -316,4 +290,83 @@ public class {{metadata.exampleClazzSimpleName}} implements Serializable {
     public List<String> getUpdateExpression() {
         return updateExpression;
     }
+
+
+    public static class Criteria {
+
+        private String column;
+        private String condition;
+
+        private Object value;
+
+        private Object secondValue;
+
+        private List listValue;
+
+
+        public Criteria(String column, String condition) {
+            this.column = column;
+            this.condition = condition;
+        }
+
+        public Criteria(String column, String condition, Object value) {
+            this.column = column;
+            this.condition = condition;
+            this.value = value;
+        }
+
+        public Criteria(String column, String condition, Object value, Object secondValue) {
+            this.column = column;
+            this.condition = condition;
+            this.value = value;
+            this.secondValue = secondValue;
+        }
+
+        public Criteria(String column, String condition, List listValue) {
+            this.column = column;
+            this.condition = condition;
+            this.listValue = listValue;
+        }
+
+        public String getColumn() {
+            return column;
+        }
+
+        public void setColumn(String column) {
+            this.column = column;
+        }
+
+        public String getCondition() {
+            return condition;
+        }
+
+        public void setCondition(String condition) {
+            this.condition = condition;
+        }
+
+        public Object getValue() {
+            return value;
+        }
+
+        public void setValue(Object value) {
+            this.value = value;
+        }
+
+        public Object getSecondValue() {
+            return secondValue;
+        }
+
+        public void setSecondValue(Object secondValue) {
+            this.secondValue = secondValue;
+        }
+
+        public List getListValue() {
+            return listValue;
+        }
+
+        public void setListValue(List<Object> listValue) {
+            this.listValue = listValue;
+        }
+    }
+
 }

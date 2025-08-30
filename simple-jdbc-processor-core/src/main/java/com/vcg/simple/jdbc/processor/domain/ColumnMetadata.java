@@ -36,6 +36,8 @@ public class ColumnMetadata {
 
     private boolean isEnums = false;
 
+    private String defaultValue;
+
     public String getFieldName() {
         return fieldName;
     }
@@ -81,16 +83,19 @@ public class ColumnMetadata {
         if (javaType.toLowerCase().contains("string")) {
             stringType = true;
         }
-        if(javaType.equalsIgnoreCase("int")){
+        if(javaType.equalsIgnoreCase("int")||javaType.equalsIgnoreCase("java.lang.Integer")) {
             this.javaType = "Integer";
+            defaultValue = "0";
         }
-        if(javaType.equalsIgnoreCase("long")){
+        if(javaType.equalsIgnoreCase("long")||javaType.equalsIgnoreCase("java.lang.Long")) {
             this.javaType = "Long";
+            this.defaultValue = "0L";
         }
-        if(javaType.equalsIgnoreCase("short")){
+        if(javaType.equalsIgnoreCase("short")||javaType.equalsIgnoreCase("java.lang.Short")) {
             this.javaType = "Short";
+            this.defaultValue = "0";
         }
-        if(javaType.equalsIgnoreCase("boolean")){
+        if(javaType.equalsIgnoreCase("boolean")||javaType.equalsIgnoreCase("java.lang.Boolean")) {
             this.javaType = "Boolean";
         }
         return this;
@@ -207,5 +212,9 @@ public class ColumnMetadata {
 
     public boolean isEnums() {
         return isEnums;
+    }
+
+    public String getDefaultValue() {
+        return defaultValue;
     }
 }

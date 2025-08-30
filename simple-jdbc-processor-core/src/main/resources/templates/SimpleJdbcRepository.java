@@ -16,8 +16,6 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
 
     private final java.util.concurrent.atomic.AtomicLong counter = new java.util.concurrent.atomic.AtomicLong();
 
-    private final ThreadLocal<Map<String, List<List>>> multiLocal = new ThreadLocal<>();
-
     private DataSource dataSource;
 
     private List<String> slaveDataSources  = new ArrayList<>();
@@ -79,7 +77,7 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
     public long updateByPrimaryKey({{metadata.domainClazzName}} t) {
         List<Object> params = new ArrayList<>();
         {{#metadata.columnMetadataList}}
-        params.add(getDefaultTypeHandler().get{{firstUpFieldName}}(t.get{{firstUpFieldName}}()));
+        params.add(getDefaultTypeHandler().encode{{firstUpFieldName}}(t.get{{firstUpFieldName}}()));
         {{/metadata.columnMetadataList}}
         return update(updateByPrimaryKeySql, params);
     }
@@ -92,7 +90,7 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
         List<Object> params = new ArrayList<>();
         {{#metadata.columnMetadataList}}
         if (t.get{{firstUpFieldName}}() != null) {
-            params.add(getDefaultTypeHandler().get{{firstUpFieldName}}(t.get{{firstUpFieldName}}()));
+            params.add(getDefaultTypeHandler().encode{{firstUpFieldName}}(t.get{{firstUpFieldName}}()));
             prefix.append("{{columnName}} = ?, ");
         }
         {{/metadata.columnMetadataList}}
@@ -124,15 +122,15 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
         String sql = toSelectByExampleSql(example);
         List<String> columns = example.getColumns();
         if (columns == null || columns.isEmpty()) {
-            return selectList(sql, example.getConditionValues(), this::handle);
+            return selectList(sql, getConditionValues(example), this::handle);
         }
-        return selectList(sql, example.getConditionValues(), rs -> handle(rs, columns));
+        return selectList(sql, getConditionValues(example), rs -> handle(rs, columns));
     }
 
 
     public long countByExample({{metadata.exampleClazzName}} example) {
         String sql = toCountByExampleSql(example);
-        return selectOne(sql, example.getConditionValues(), rs -> rs.getLong(1));
+        return selectOne(sql, getConditionValues(example), rs -> rs.getLong(1));
     }
 
 
@@ -145,7 +143,7 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
         }
 
         {{#metadata.columnMetadataList}}
-        params.add(defaultTypeHandler.get{{firstUpFieldName}}(t.get{{firstUpFieldName}}()));
+        params.add(defaultTypeHandler.encode{{firstUpFieldName}}(t.get{{firstUpFieldName}}()));
         {{/metadata.columnMetadataList}}
         String condition = toConditionSql(example);
         String sql;
@@ -154,7 +152,7 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
         } else {
             sql = updateByExamplePrefix + condition;
         }
-        params.addAll(example.getConditionValues());
+        params.addAll(getConditionValues(example));
         return update(sql, params);
     }
 
@@ -178,10 +176,10 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
         {{#metadata.columnMetadataList}}
         if (t.get{{firstUpFieldName}}() != null) {
             prefix.append("{{columnName}} = ?, ");
-            params.add(getDefaultTypeHandler().get{{firstUpFieldName}}(t.get{{firstUpFieldName}}()));
+            params.add(getDefaultTypeHandler().encode{{firstUpFieldName}}(t.get{{firstUpFieldName}}()));
         }
         {{/metadata.columnMetadataList}}
-        params.addAll(example.getConditionValues());
+        params.addAll(getConditionValues(example));
         String sql = prefix.substring(0, prefix.length() - 2) + toConditionSql(example);
         return update(sql, params);
     }
@@ -203,7 +201,7 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
             prefix.append(String.join(", ", example.getUpdateExpression()));
         }
 
-        params.addAll(example.getConditionValues());
+        params.addAll(getConditionValues(example));
         String sql = prefix + toConditionSql(example);
         return update(sql, params);
     }
@@ -211,7 +209,7 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
     public void insert({{metadata.domainClazzName}} t) {
         List<Object> params = new ArrayList<>(columns.size());
         {{#metadata.columnMetadataList}}
-        params.add(getDefaultTypeHandler().get{{firstUpFieldName}}(t.get{{firstUpFieldName}}()));
+        params.add(getDefaultTypeHandler().encode{{firstUpFieldName}}(t.get{{firstUpFieldName}}()));
         {{/metadata.columnMetadataList}}
         {{#metadata.primaryMetadata}}
         {{metadata.primaryMetadata.javaType}} primaryKey = insert(insertSql, params);
@@ -231,7 +229,7 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
 
         for ({{metadata.domainClazzName}} t : ts) {
             {{#metadata.columnMetadataList}}
-            params.add(getDefaultTypeHandler().get{{firstUpFieldName}}(t.get{{firstUpFieldName}}()));
+            params.add(getDefaultTypeHandler().encode{{firstUpFieldName}}(t.get{{firstUpFieldName}}()));
             {{/metadata.columnMetadataList}}
             sql.append(appendPlaceholder(columns.size()))
                     .append(", ");
@@ -258,7 +256,7 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
         {{#metadata.columnMetadataList}}
         if (t.get{{firstUpFieldName}}() != null) {
             prefix.append("{{columnName}}, ");
-            params.add(getDefaultTypeHandler().get{{firstUpFieldName}}(t.get{{firstUpFieldName}}()));
+            params.add(getDefaultTypeHandler().encode{{firstUpFieldName}}(t.get{{firstUpFieldName}}()));
         }
         {{/metadata.columnMetadataList}}
 
@@ -273,9 +271,62 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
     }
 
 
+    public void replaceSelective({{metadata.domainClazzName}} t) {
+        List<Object> params = new ArrayList<>();
+
+        StringBuilder prefix = new StringBuilder()
+                .append("replace into ")
+                .append(getTableName())
+                .append(" (");
+
+        {{#metadata.columnMetadataList}}
+        if (t.get{{firstUpFieldName}}() != null) {
+            prefix.append("{{columnName}}, ");
+            params.add(getDefaultTypeHandler().encode{{firstUpFieldName}}(t.get{{firstUpFieldName}}()));
+        }
+        {{/metadata.columnMetadataList}}
+
+
+        String sql = prefix.substring(0, prefix.length() - 2) + ") values " + appendPlaceholder(params.size());
+        {{#metadata.primaryMetadata}}
+        {{metadata.primaryMetadata.javaType}} primaryKey = insert(sql, params);
+        if (primaryKey > 0) {
+            t.set{{metadata.primaryMetadata.firstUpFieldName}}(primaryKey);
+        }
+        {{/metadata.primaryMetadata}}
+    }
+
+
+    public {{metadata.primaryMetadata.javaType}} insertIgnoreSelective({{metadata.domainClazzName}} t) {
+        List<Object> params = new ArrayList<>();
+
+        StringBuilder prefix = new StringBuilder()
+                .append("insert ignore into ")
+                .append(getTableName())
+                .append(" (");
+
+        {{#metadata.columnMetadataList}}
+        if (t.get{{firstUpFieldName}}() != null) {
+            prefix.append("{{columnName}}, ");
+            params.add(getDefaultTypeHandler().encode{{firstUpFieldName}}(t.get{{firstUpFieldName}}()));
+        }
+        {{/metadata.columnMetadataList}}
+
+
+        String sql = prefix.substring(0, prefix.length() - 2) + ") values " + appendPlaceholder(params.size());
+        {{#metadata.primaryMetadata}}
+        {{metadata.primaryMetadata.javaType}} primaryKey = insert(sql, params);
+        if (primaryKey > 0) {
+            t.set{{metadata.primaryMetadata.firstUpFieldName}}(primaryKey);
+        }
+        {{/metadata.primaryMetadata}}
+        return primaryKey;
+    }
+
+
     public long deleteByExample({{metadata.exampleClazzName}} example) {
         String sql = deletePrefix + toConditionSql(example);
-        return delete(sql, example.getConditionValues());
+        return delete(sql, getConditionValues(example));
     }
 
     protected <T> List<T> selectList(String sql, List params, Handler<T> handler) {
@@ -309,10 +360,10 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
         String sql = toSelectByExampleSql(example);
         List<String> columns = example.getColumns();
         if (columns == null || columns.isEmpty()) {
-            consume(sql, example.getConditionValues(), this::handle,consume);
+            consume(sql, getConditionValues(example), this::handle,consume);
             return;
         }
-        consume(sql, example.getConditionValues(), rs -> handle(rs, columns),consume);
+        consume(sql, getConditionValues(example), rs -> handle(rs, columns),consume);
     }
 
 
@@ -351,7 +402,7 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
     }
 
 
-    protected <T> T selectOne(String sql, List<Object> params, Handler<T> handler) {
+    protected <T> T selectOne(String sql, List params, Handler<T> handler) {
         Connection connection = getConnection(true);
         if (log.isDebugEnabled()) {
             log.debug("Preparing:  {}", sql);
@@ -380,11 +431,6 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
     }
 
     protected long update(String sql, List params) {
-        Map<String, List<List>> valueMap = multiLocal.get();
-        if (valueMap != null) {
-            valueMap.computeIfAbsent(sql, k -> new ArrayList<>()).add(params);
-            return 0;
-        }
         Connection connection = getConnection();
 
         if (log.isDebugEnabled()) {
@@ -403,12 +449,30 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
         }
     }
 
-    protected long delete(String sql, List params) {
-        Map<String, List<List>> valueMap = multiLocal.get();
-        if (valueMap != null) {
-            valueMap.computeIfAbsent(sql, k -> new ArrayList<>()).add(params);
-            return 0;
+    protected int[] updateBatch(String sql, List<Object[]> batchParams) {
+        Connection connection = getConnection();
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            for (Object[] batchParam : batchParams) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Preparing:  {}", sql);
+                    log.debug("Parameters: {}", Arrays.toString(batchParam));
+                }
+                setParameters(statement, batchParam);
+                statement.addBatch();
+            }
+            int[] affects = statement.executeBatch();
+            if (log.isDebugEnabled()) {
+                for (int affect : affects) {
+                    log.debug("Total:      {}", affect);
+                }
+            }
+            return affects;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
+    }
+    protected long delete(String sql, List params) {
         Connection connection = getConnection();
         if (log.isDebugEnabled()) {
             log.debug("Preparing:  {}", sql);
@@ -427,11 +491,6 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
     }
 
     protected {{metadata.primaryMetadata.javaType}} insert(String sql, List params) {
-        Map<String, List<List>> valueMap = multiLocal.get();
-        if (valueMap != null) {
-            valueMap.computeIfAbsent(sql, k -> new ArrayList<>()).add(params);
-            return {{metadata.primaryMetadata.javaType}}.valueOf(0);
-        }
         Connection connection = getConnection();
         if (log.isDebugEnabled()) {
             log.debug("Preparing:  {}", sql);
@@ -453,7 +512,7 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
         } finally {
             closeCheckTx(connection);
         }
-        return {{metadata.primaryMetadata.javaType}}.valueOf(0);
+        return {{metadata.primaryMetadata.defaultValue}};
     }
 
 
@@ -514,6 +573,14 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
         }
     }
 
+    protected void setParameters(PreparedStatement ps, Object[] params) throws SQLException {
+        if (params != null && params.length > 0) {
+            for (int i = 0; i < params.length; i++) {
+                setParameter(ps, i + 1, params[i]);
+            }
+        }
+    }
+
     protected void setParameter(PreparedStatement ps, int paramIndex, Object param) throws SQLException {
         if (param == null) {
             ps.setNull(paramIndex, JDBCType.NULL.getVendorTypeNumber());
@@ -568,30 +635,103 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
         return sql.toString();
     }
 
+    protected List getConditionValues({{metadata.exampleClazzName}} example) {
+        List<Object> params = new ArrayList<>();
+        List<List<{{metadata.exampleClazzSimpleName}}.Criteria>> orConditions = example.getOrConditions();
+        if (orConditions != null && !orConditions.isEmpty()) {
+            for (List<{{metadata.exampleClazzSimpleName}}.Criteria> orCondition : orConditions) {
+                for ({{metadata.exampleClazzSimpleName}}.Criteria criteria : orCondition) {
+                    convertConditionParam(params, criteria);
+                }
+            }
+        } else {
+            for ({{metadata.exampleClazzSimpleName}}.Criteria criteria : example.getCriteries()) {
+                convertConditionParam(params, criteria);
+            }
+        }
+        return params;
+    }
 
-    protected String toConditionSql({{metadata.exampleClazzName}} example) {
-        List<List<String>> orConditions = example.getOrConditions();
-        List<String> conditions = example.getConditions();
+    private void convertConditionParam(List params, {{metadata.exampleClazzSimpleName}}.Criteria criteria){
+        String column = criteria.getColumn();
+        {{#metadata.columnMetadataList}}
+        if ("{{originColumnName}}".equals(column) || "{{columnName}}".equals(column) || "{{fieldName}}".equals(column)) {
+            if (criteria.getValue() != null) {
+                Object value = defaultTypeHandler.encode{{firstUpFieldName}}(({{javaType}}) criteria.getValue());
+                params.add(value);
+            }
+            if (criteria.getSecondValue() != null) {
+                Object value = defaultTypeHandler.encode{{firstUpFieldName}}(({{javaType}}) criteria.getSecondValue());
+                params.add(value);
+            }
+            if (criteria.getListValue() != null) {
+                List values = defaultTypeHandler.encode{{firstUpFieldName}}List((List<{{javaType}}>) criteria.getListValue());
+                params.addAll(values);
+            }
+        }
+        {{/metadata.columnMetadataList}}
+
+    }
+
+    protected String toConditionSql(com.example.domain.UserExample example) {
+        List<List<UserExample.Criteria>> orConditions = example.getOrConditions();
+
         String orderByClause = example.getOrderByClause();
         List<Integer> limit = example.getLimit();
         StringBuilder sql = new StringBuilder();
         if (orConditions != null && !orConditions.isEmpty()) {
             sql.append(" where ");
-
-            for (List<String> orCondition : orConditions) {
+            orConditions.add(example.getCriteries());
+            for (int j = 0; j < orConditions.size(); j++) {
+                if (j > 0 && j < orConditions.size() ) {
+                    sql.append(" or ");
+                }
+                List<UserExample.Criteria> criteris = orConditions.get(j);
                 sql.append("(");
-                sql.append(String.join(" and ", orCondition));
+                for (int i = 0; i < criteris.size(); i++) {
+                    if (i > 0 && i < criteris.size() ) {
+                        sql.append(" and ");
+                    }
+                    UserExample.Criteria criteria = criteris.get(i);
+                    if (criteria.getValue() != null && criteria.getSecondValue() != null) {
+                        sql.append(criteria.getColumn())
+                                .append(criteria.getCondition())
+                                .append("? and ?");
+                    } else if (criteria.getValue() != null) {
+                        sql.append(criteria.getColumn())
+                                .append(criteria.getCondition())
+                                .append("?");
+                    } else if (criteria.getListValue() != null) {
+                        sql.append(criteria.getColumn())
+                                .append(criteria.getCondition())
+                                .append(appendPlaceholder(criteria.getListValue().size()));
+                    }
+                }
                 sql.append(")");
-                sql.append(" or ");
             }
 
-            sql.append("(");
-            sql.append(String.join(" and ", conditions));
-            sql.append(")");
-
-        } else if (!conditions.isEmpty()) {
+        } else if (!example.getCriteries().isEmpty()) {
             sql.append(" where ");
-            sql.append(String.join(" and ", conditions));
+            List<UserExample.Criteria> criteris = example.getCriteries();
+            for (int i = 0; i < criteris.size(); i++) {
+                if (i > 0 && i < criteris.size() ) {
+                    sql.append(" and ");
+                }
+                UserExample.Criteria criteria = criteris.get(i);
+                if (criteria.getValue() != null && criteria.getSecondValue() != null) {
+                    sql.append(criteria.getColumn())
+                            .append(criteria.getCondition())
+                            .append("? and ?");
+                } else if (criteria.getValue() != null) {
+                    sql.append(criteria.getColumn())
+                            .append(criteria.getCondition())
+                            .append("?");
+                } else if (criteria.getListValue() != null) {
+                    sql.append(criteria.getColumn())
+                            .append(criteria.getCondition())
+                            .append(appendPlaceholder(criteria.getListValue().size()));
+                }
+            }
         }
 
         if (orderByClause != null && !orderByClause.trim().isEmpty()) {
@@ -614,12 +754,13 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
     }
 
 
+
     protected {{metadata.domainClazzName}} handle(ResultSet rs, List<String> columns) throws SQLException {
         {{metadata.domainClazzName}} t = new {{metadata.domainClazzName}}();
         for (String column : columns) {
             {{#metadata.columnMetadataList}}
             if ("{{originColumnName}}".equals(column) || "{{columnName}}".equals(column) || "{{fieldName}}".equals(column)) {
-                defaultTypeHandler.set{{firstUpFieldName}}(rs, t, "{{originColumnName}}", {{javaType}}.class);
+                defaultTypeHandler.decode{{firstUpFieldName}}(rs, t, "{{originColumnName}}", {{javaType}}.class);
             }
             {{/metadata.columnMetadataList}}
         }
@@ -630,7 +771,7 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
     protected {{metadata.domainClazzName}} handle(ResultSet rs) throws SQLException {
         {{metadata.domainClazzName}} t = new {{metadata.domainClazzName}}();
         {{#metadata.columnMetadataList}}
-        defaultTypeHandler.set{{firstUpFieldName}}(rs, t, "{{originColumnName}}", {{javaType}}.class);
+        defaultTypeHandler.decode{{firstUpFieldName}}(rs, t, "{{originColumnName}}", {{javaType}}.class);
         {{/metadata.columnMetadataList}}
         return t;
     }
@@ -741,70 +882,6 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
         return dataSource;
     }
 
-    public void multiStart() {
-        Map<String, List<List>> valueMap = multiLocal.get();
-        if (valueMap == null) {
-            multiLocal.set(new java.util.LinkedHashMap<>());
-        }
-    }
-
-    public void multiRemove() {
-        multiLocal.remove();
-    }
-
-    public long multiEnd() {
-        Map<String, List<List>> valueMap = multiLocal.get();
-        if (valueMap == null || valueMap.isEmpty()) {
-            return 0;
-        }
-        multiLocal.remove();
-
-        long count = 0;
-        Connection connection = getConnection();
-        boolean isAutoCommit = true;
-        try {
-            isAutoCommit = connection.getAutoCommit();
-            if (isAutoCommit) {
-                connection.setAutoCommit(false);
-            }
-            for (Map.Entry<String, List<List>> entry : valueMap.entrySet()) {
-                String sql = entry.getKey();
-                List<List> values = entry.getValue();
-                try (PreparedStatement statement = connection.prepareStatement(sql)) {
-                    for (List params : values) {
-                        if (log.isDebugEnabled()) {
-                            log.debug("Preparing:  {}", sql);
-                            log.debug("Parameters: {}", params);
-                        }
-                        setParameters(statement, params);
-                        statement.addBatch();
-                    }
-                    int[] ints = statement.executeBatch();
-                    for (int c : ints) {
-                        count += c;
-                        if (log.isDebugEnabled()) {
-                            log.debug("Total:      {}", c);
-                        }
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } finally {
-            if (isAutoCommit) {
-                try {
-                    connection.commit();
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                } finally {
-                    close(connection);
-                }
-            } else {
-                closeCheckTx(connection);
-            }
-        }
-        return count;
-    }
 
     {{#metadata.useSpring}}
     protected boolean isActualTransactionActive(){
@@ -821,7 +898,7 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
     public static class {{metadata.domainClazzSimpleName}}DefaultTypeHandler {
 
         {{#metadata.columnMetadataList}}
-        public void set{{firstUpFieldName}}(ResultSet resultSet, {{metadata.domainClazzSimpleName}} t, String name, Class<{{javaType}}> type) throws SQLException {
+        public void decode{{firstUpFieldName}}(ResultSet resultSet, {{metadata.domainClazzSimpleName}} t, String name, Class<{{javaType}}> type) throws SQLException {
             {{#isEnums}}
             String value = resultSet.getString(name);
             if(value == null){
@@ -838,11 +915,11 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
             {{/isEnums}}
         }
 
-        public Object get{{firstUpFieldName}}({{javaType}} value) {
+        public Object encode{{firstUpFieldName}}({{javaType}} value) {
             {{^isEnums}}return value;{{/isEnums}}{{#isEnums}}return value == null ? null: String.valueOf(value);{{/isEnums}}
         }
 
-        public List get{{firstUpFieldName}}List(List<{{javaType}}> values) {
+        public List encode{{firstUpFieldName}}List(List<{{javaType}}> values) {
             {{^isEnums}}return values;{{/isEnums}}
             {{#isEnums}}return values.stream().map(String::valueOf).collect(java.util.stream.Collectors.toList());{{/isEnums}}
         }
@@ -853,5 +930,11 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
     public {{metadata.domainClazzSimpleName}}DefaultTypeHandler getDefaultTypeHandler() {
         return defaultTypeHandler;
     }
+
+    {{#metadata.useSpring}}@org.springframework.beans.factory.annotation.Autowired(required = false){{/metadata.useSpring}}
+    public void setDefaultTypeHandler({{metadata.domainClazzSimpleName}}DefaultTypeHandler defaultTypeHandler) {
+        this.defaultTypeHandler = defaultTypeHandler;
+    }
+
 
 }

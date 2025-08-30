@@ -6,7 +6,7 @@ public class DialectMetadata {
 
     private String rightEscape = "";
 
-    private String exampleJavaTemplatePath = "templates/Example.java";
+    private String exampleJavaTemplatePath = "templates/SimpleJdbcExample.java";
 
     private String repositoryTemplatePath = "templates/SimpleJdbcRepository.java";
 
