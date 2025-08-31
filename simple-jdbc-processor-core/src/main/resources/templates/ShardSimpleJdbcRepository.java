@@ -1,4 +1,4 @@
-package com.example.repository;
+package {{metadata.packageName}};
 
 
 import javax.sql.DataSource;
@@ -13,7 +13,7 @@ public abstract class {{metadata.shardRepositoryClazzSimpleName}} {
 
     private final Map<String, {{metadata.repositoryClazzName}}> repositoryMap = new ConcurrentHashMap<>();
 
-    private {{metadata.repositoryClazzName}}.{{metadata.domainClazzSimpleName}}DefaultTypeHandler defaultTypeHandler = new {{metadata.repositoryClazzName}}.{{metadata.domainClazzSimpleName}}DefaultTypeHandler();
+    private {{metadata.typeHandlerClazzName}} defaultTypeHandler = new {{metadata.typeHandlerClazzName}}();
 
     private DataSource dataSource;
 
@@ -22,6 +22,11 @@ public abstract class {{metadata.shardRepositoryClazzSimpleName}} {
     public {{metadata.domainClazzName}} selectByPrimaryKey({{metadata.domainClazzName}} t) {
         {{metadata.repositoryClazzName}} repository = getRepository(t);
         return repository.selectByPrimaryKey(t.getId());
+    }
+
+    public {{metadata.domainClazzName}} selectByPrimaryKeyForUpdate({{metadata.domainClazzName}} t) {
+        {{metadata.repositoryClazzName}} repository = getRepository(t);
+        return repository.selectByPrimaryKeyForUpdate(t.getId());
     }
 
     public List<{{metadata.domainClazzName}}> selectByPrimaryKeys(List<{{metadata.domainClazzName}}> ts) {
@@ -94,13 +99,21 @@ public abstract class {{metadata.shardRepositoryClazzSimpleName}} {
     protected {{metadata.repositoryClazzName}} getRepository({{metadata.domainClazzName}} t) {
         String tableName = getTableName(t);
         return repositoryMap.computeIfAbsent(tableName, r -> {
-            {{metadata.repositoryClazzName}} repository = new {{metadata.repositoryClazzName}}(r, this.dataSource, this.dataSourceMap, this.defaultTypeHandler) {
+            {{metadata.repositoryClazzName}} repository = new {{metadata.repositoryClazzName}}(this.getClass(), r, getDataSource(t), getSlaveDataSourceMap(t), this.defaultTypeHandler) {
             };
             return repository;
         });
     }
 
     protected abstract String getTableName({{metadata.domainClazzName}} t);
+
+    protected Map<String, DataSource> getSlaveDataSourceMap({{metadata.domainClazzName}} t){
+        return this.dataSourceMap;
+    }
+
+    protected DataSource getDataSource({{metadata.domainClazzName}} t){
+        return this.dataSource;
+    }
 
     protected Map<{{metadata.repositoryClazzName}}, List<{{metadata.domainClazzName}}>> groupMap(List<{{metadata.domainClazzName}}> ts) {
         Map<{{metadata.repositoryClazzName}}, List<{{metadata.domainClazzName}}>> groupMap = new LinkedHashMap<>();
@@ -113,7 +126,7 @@ public abstract class {{metadata.shardRepositoryClazzSimpleName}} {
     }
 
     {{#metadata.useSpring}}@org.springframework.beans.factory.annotation.Autowired(required = false){{/metadata.useSpring}}
-    public void setDefaultTypeHandler({{metadata.repositoryClazzName}}.{{metadata.domainClazzSimpleName}}DefaultTypeHandler defaultTypeHandler) {
+    public void setDefaultTypeHandler({{metadata.typeHandlerClazzName}} defaultTypeHandler) {
         this.defaultTypeHandler = defaultTypeHandler;
     }
 
@@ -124,7 +137,7 @@ public abstract class {{metadata.shardRepositoryClazzSimpleName}} {
     }
 
     {{#metadata.useSpring}}@org.springframework.beans.factory.annotation.Autowired{{/metadata.useSpring}}
-    public void setDataSourceMap(Map<String, DataSource> dataSourceMap) {
+    public void setSlaveDataSourceMap(Map<String, DataSource> dataSourceMap) {
         this.dataSourceMap = dataSourceMap;
     }
 }

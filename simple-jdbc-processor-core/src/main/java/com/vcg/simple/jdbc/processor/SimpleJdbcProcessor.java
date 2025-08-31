@@ -60,6 +60,7 @@ public class SimpleJdbcProcessor extends AbstractProcessor {
                     scopes.put("metadata", tableMetadata);
 
                     SimpleJdbc example = element.getAnnotation(SimpleJdbc.class);
+                    tableMetadata.setShard(example.shardTable());
                     DialectMetadata dialect = example.dialect().getValue();
 
                     InputStream exampleInputStream = classLoader.getResourceAsStream(dialect.getExampleJavaTemplatePath());
@@ -76,7 +77,6 @@ public class SimpleJdbcProcessor extends AbstractProcessor {
                         mustache.execute(writer, scopes);
                     }
 
-
                     if (example.shardTable()) {
                         String shardRepositoryName = tableMetadata.getShardRepositoryClazzName();
                         JavaFileObject shardRepositoryjavaFileObject = filer.createSourceFile(shardRepositoryName);
@@ -86,6 +86,14 @@ public class SimpleJdbcProcessor extends AbstractProcessor {
                             Mustache mustache = mf.compile(in, shardRepositoryName);
                             mustache.execute(writer, scopes);
                         }
+                    }
+                    String typeHandlerClazzName = tableMetadata.getTypeHandlerClazzName();
+                    JavaFileObject typeHandlerJavaFileObject = filer.createSourceFile(typeHandlerClazzName);
+
+                    InputStream typeHandlerInputStream = classLoader.getResourceAsStream(dialect.getTypeHandlerTemplatePath());
+                    try (InputStreamReader in = new InputStreamReader(typeHandlerInputStream, StandardCharsets.UTF_8); Writer writer = typeHandlerJavaFileObject.openWriter()) {
+                        Mustache mustache = mf.compile(in, typeHandlerClazzName);
+                        mustache.execute(writer, scopes);
                     }
 
                 } catch (Exception e) {
@@ -127,14 +135,15 @@ public class SimpleJdbcProcessor extends AbstractProcessor {
                 .setLeftEncode(dialect.getLeftEscape())
                 .setRightEncode(dialect.getRightEscape())
                 .setUseSpring(example.useSpring())
-                .setShard(null)
                 .setSlaveDataSources(Arrays.asList(example.slaveDataSources()))
                 .setDataSource(example.dataSource() == null || example.dataSource().isEmpty() ? null : example.dataSource());
 
         String repositoryName = clazzName + "SimpleJdbcRepository";
         String shardRepositoryClassName = clazzName + "ShardSimpleJdbcRepository";
+        String simpleJdbcDefaultTypeHandler = clazzName + "SimpleJdbcDefaultTypeHandler";
 
         tableMetadata.setRepositoryClazzName(repositoryName)
+                .setTypeHandlerClazzName(simpleJdbcDefaultTypeHandler)
                 .setShardRepositoryClazzName(shardRepositoryClassName)
                 .setTableName(table != null ? table.name() : String.join("_",
                         CamelUtils.split(tableMetadata.getDomainClazzSimpleName(), true)));

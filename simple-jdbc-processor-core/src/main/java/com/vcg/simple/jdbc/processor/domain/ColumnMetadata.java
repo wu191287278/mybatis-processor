@@ -20,8 +20,6 @@ public class ColumnMetadata {
 
     private boolean stringType = false;
 
-    private boolean partitionKey = false;
-
     private String typeHandler;
 
     private String javaDoc;
@@ -32,11 +30,9 @@ public class ColumnMetadata {
 
     private boolean version = false;
 
-    private boolean encrypt = false;
-
     private boolean isEnums = false;
 
-    private String defaultValue;
+    private String defaultValue = "null";
 
     public String getFieldName() {
         return fieldName;
@@ -137,14 +133,6 @@ public class ColumnMetadata {
         this.stringType = stringType;
     }
 
-    public boolean isPartitionKey() {
-        return partitionKey;
-    }
-
-    public void setPartitionKey(boolean partitionKey) {
-        this.partitionKey = partitionKey;
-    }
-
     public String getTypeHandler() {
         return typeHandler;
     }
@@ -196,14 +184,6 @@ public class ColumnMetadata {
 
     public void setVersion(boolean version) {
         this.version = version;
-    }
-
-    public boolean isEncrypt() {
-        return encrypt;
-    }
-
-    public void setEncrypt(boolean encrypt) {
-        this.encrypt = encrypt;
     }
 
     public void setEnums(boolean enums) {

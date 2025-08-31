@@ -22,8 +22,6 @@ public class TableMetadata {
 
     private String exampleClazzSimpleName;
 
-    private boolean dynamicField = false;
-
     private ColumnMetadata primaryMetadata;
 
     private List<ColumnMetadata> columnMetadataList = new ArrayList<>();
@@ -33,10 +31,6 @@ public class TableMetadata {
     private String packageName;
 
     private ColumnMetadata partitionKey;
-
-    private Integer shard;
-
-    private List<String> shardTables;
 
     private Long randomId = new Random().nextLong();
 
@@ -53,6 +47,12 @@ public class TableMetadata {
     private String shardRepositoryClazzSimpleName;
 
     private String shardRepositoryClazzName;
+
+    private String typeHandlerClazzSimpleName;
+
+    private String typeHandlerClazzName;
+
+    private boolean shard;
 
 
     public String getTableName() {
@@ -100,15 +100,6 @@ public class TableMetadata {
             String[] split = exampleClazzName.split("[.]");
             this.exampleClazzSimpleName = split[split.length - 1];
         }
-        return this;
-    }
-
-    public boolean isDynamicField() {
-        return dynamicField;
-    }
-
-    public TableMetadata setDynamicField(boolean dynamicField) {
-        this.dynamicField = dynamicField;
         return this;
     }
 
@@ -175,22 +166,6 @@ public class TableMetadata {
         return this;
     }
 
-    public TableMetadata setShard(Integer shard) {
-        this.shard = shard;
-        if (shard != null) {
-            this.shardTables = new ArrayList<>();
-            for (int i = 0; i < shard; i++) {
-                this.shardTables.add(this.tableName + "_" + i);
-            }
-        }
-
-        return this;
-    }
-
-    public Integer getShard() {
-        return shard;
-    }
-
 
     public ColumnMetadata getPartitionKey() {
         return partitionKey;
@@ -198,15 +173,6 @@ public class TableMetadata {
 
     public TableMetadata setPartitionKey(ColumnMetadata partitionKey) {
         this.partitionKey = partitionKey;
-        return this;
-    }
-
-    public List<String> getShardTables() {
-        return shardTables;
-    }
-
-    public TableMetadata setShardTables(List<String> shardTables) {
-        this.shardTables = shardTables;
         return this;
     }
 
@@ -290,6 +256,36 @@ public class TableMetadata {
             String[] split = shardRepositoryClazzName.split("[.]");
             this.shardRepositoryClazzSimpleName = split[split.length - 1];
         }
+        return this;
+    }
+
+    public String getTypeHandlerClazzName() {
+        return typeHandlerClazzName;
+    }
+
+    public TableMetadata setTypeHandlerClazzName(String typeHandlerClazzName) {
+        this.typeHandlerClazzName = typeHandlerClazzName;
+        if (typeHandlerClazzName != null) {
+            String[] split = typeHandlerClazzName.split("[.]");
+            this.typeHandlerClazzSimpleName = split[split.length - 1];
+        }
+        return this;
+    }
+
+    public String getTypeHandlerClazzSimpleName() {
+        return typeHandlerClazzSimpleName;
+    }
+
+    public void setTypeHandlerClazzSimpleName(String typeHandlerClazzSimpleName) {
+        this.typeHandlerClazzSimpleName = typeHandlerClazzSimpleName;
+    }
+
+    public boolean isShard() {
+        return shard;
+    }
+
+    public TableMetadata setShard(boolean shard) {
+        this.shard = shard;
         return this;
     }
 }

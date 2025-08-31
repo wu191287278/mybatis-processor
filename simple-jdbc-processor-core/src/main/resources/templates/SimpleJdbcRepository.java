@@ -13,7 +13,7 @@ import java.util.function.Consumer;
 @SuppressWarnings("unchecked")
 public abstract class {{metadata.repositoryClazzSimpleName}} {
 
-    protected final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(this.getClass());
+    protected final org.slf4j.Logger log;
 
     private final java.util.concurrent.atomic.AtomicLong counter = new java.util.concurrent.atomic.AtomicLong();
 
@@ -23,7 +23,7 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
 
     private Map<String, DataSource> dataSourceMap = new HashMap<>();
 
-    private {{metadata.domainClazzSimpleName}}DefaultTypeHandler defaultTypeHandler = new {{metadata.domainClazzSimpleName}}DefaultTypeHandler();
+    private {{metadata.typeHandlerClazzName}} defaultTypeHandler = new {{metadata.typeHandlerClazzName}}();
 
     private String tableName = "{{metadata.tableName}}";
 
@@ -40,6 +40,8 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
     private String primaryKeyInCondition;
 
     private String selectByPrimaryKeySql;
+
+    private String selectByPrimaryKeyForUpdateSql;
 
     private String selectByPrimaryKeysSql;
 
@@ -63,21 +65,25 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
 
 
     public {{metadata.repositoryClazzSimpleName}}(){
+        this.log = org.slf4j.LoggerFactory.getLogger(this.getClass());
         init();
     }
-
-    public {{metadata.repositoryClazzSimpleName}}(String tableName, DataSource dataSource, Map<String, DataSource> dataSourceMap, {{metadata.domainClazzSimpleName}}DefaultTypeHandler defaultTypeHandler){
+{{#metadata.shard}}
+    public {{metadata.repositoryClazzSimpleName}}(Class<?> logClazz, String tableName, DataSource dataSource, Map<String, DataSource> dataSourceMap, {{metadata.typeHandlerClazzName}} defaultTypeHandler){
+        this.log = org.slf4j.LoggerFactory.getLogger(logClazz);
         this.tableName = tableName;
         this.dataSource = dataSource;
-        this.dataSourceMap = dataSourceMap;
         this.defaultTypeHandler = defaultTypeHandler;
+        setSlaveDataSourceMap(dataSourceMap);
         init();
     }
+{{/metadata.shard}}
 
     private void init() {
         this.primaryKeyCondition = " where " + primaryKeyStr + " = ?";
         this.primaryKeyInCondition = " where " + primaryKeyStr + " in ";
         this.selectByPrimaryKeySql = "select " + columnsStr + " from " + tableName + primaryKeyCondition;
+        this.selectByPrimaryKeyForUpdateSql = "select " + columnsStr + " from " + tableName + primaryKeyCondition + " for update";
         this.selectByPrimaryKeysSql = "select " + columnsStr + " from " + tableName + primaryKeyInCondition;
         this.updatePrefix = "update " + tableName;
         this.updateSuffix = " set " + String.join(" = ?, ", columnsStr.split(",")) + " = ?";
@@ -95,6 +101,10 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
 
     public {{metadata.domainClazzName}} selectByPrimaryKey({{metadata.primaryMetadata.javaType}} {{metadata.primaryMetadata.fieldName}}) {
         return selectOne(selectByPrimaryKeySql, Collections.singletonList({{metadata.primaryMetadata.fieldName}}), this::handle);
+    }
+
+    public {{metadata.domainClazzName}} selectByPrimaryKeyForUpdate({{metadata.primaryMetadata.javaType}} {{metadata.primaryMetadata.fieldName}}) {
+        return selectOne(selectByPrimaryKeyForUpdateSql, Collections.singletonList({{metadata.primaryMetadata.fieldName}}), this::handle);
     }
 
     public List<{{metadata.domainClazzName}}> selectByPrimaryKeys(List<{{metadata.primaryMetadata.javaType}}> {{metadata.primaryMetadata.fieldName}}s) {
@@ -360,9 +370,9 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
     protected <T> List<T> selectList(String sql, List params, Handler<T> handler) {
         List<T> list = new ArrayList<>();
         Connection connection = getConnection(true);
-        if (log.isDebugEnabled()) {
-            log.debug("Preparing:  {}", sql);
-            log.debug("Parameters: {}", params);
+        if (getLogger().isDebugEnabled()) {
+            getLogger().debug("Preparing:  {}", sql);
+            getLogger().debug("Parameters: {}", params);
         }
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             setParameters(statement, params);
@@ -377,8 +387,8 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
         } finally {
             closeCheckTx(connection);
         }
-        if (log.isDebugEnabled()) {
-            log.debug("Total:      {}", list.size());
+        if (getLogger().isDebugEnabled()) {
+            getLogger().debug("Total:      {}", list.size());
         }
         return list;
     }
@@ -398,9 +408,9 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
     protected <T> void consume(String sql, List params, Handler<T> handler, Consumer<T> consumer) {
         List<T> list = new ArrayList<>();
         Connection connection = getConnection(true);
-        if (log.isDebugEnabled()) {
-            log.debug("Preparing:  {}", sql);
-            log.debug("Parameters: {}", params);
+        if (getLogger().isDebugEnabled()) {
+            getLogger().debug("Preparing:  {}", sql);
+            getLogger().debug("Parameters: {}", params);
         }
         boolean autoCommit;
         try {
@@ -432,21 +442,21 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
 
     protected <T> T selectOne(String sql, List params, Handler<T> handler) {
         Connection connection = getConnection(true);
-        if (log.isDebugEnabled()) {
-            log.debug("Preparing:  {}", sql);
-            log.debug("Parameters: {}", params);
+        if (getLogger().isDebugEnabled()) {
+            getLogger().debug("Preparing:  {}", sql);
+            getLogger().debug("Parameters: {}", params);
         }
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             setParameters(statement, params);
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Total:      {}", 1);
+                    if (getLogger().isDebugEnabled()) {
+                        getLogger().debug("Total:      {}", 1);
                     }
                     return handler.handle(resultSet);
                 } else {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Total:      {}", 0);
+                    if (getLogger().isDebugEnabled()) {
+                        getLogger().debug("Total:      {}", 0);
                     }
                 }
             }
@@ -461,15 +471,15 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
     protected long update(String sql, List params) {
         Connection connection = getConnection();
 
-        if (log.isDebugEnabled()) {
-            log.debug("Preparing:  {}", sql);
-            log.debug("Parameters: {}", params);
+        if (getLogger().isDebugEnabled()) {
+            getLogger().debug("Preparing:  {}", sql);
+            getLogger().debug("Parameters: {}", params);
         }
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             setParameters(statement, params);
             int affect = statement.executeUpdate();
-            if (log.isDebugEnabled()) {
-                log.debug("Total:      {}", affect);
+            if (getLogger().isDebugEnabled()) {
+                getLogger().debug("Total:      {}", affect);
             }
             return affect;
         } catch (Exception e) {
@@ -482,17 +492,17 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             for (Object[] batchParam : batchParams) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Preparing:  {}", sql);
-                    log.debug("Parameters: {}", Arrays.toString(batchParam));
+                if (getLogger().isDebugEnabled()) {
+                    getLogger().debug("Preparing:  {}", sql);
+                    getLogger().debug("Parameters: {}", Arrays.toString(batchParam));
                 }
                 setParameters(statement, batchParam);
                 statement.addBatch();
             }
             int[] affects = statement.executeBatch();
-            if (log.isDebugEnabled()) {
+            if (getLogger().isDebugEnabled()) {
                 for (int affect : affects) {
-                    log.debug("Total:      {}", affect);
+                    getLogger().debug("Total:      {}", affect);
                 }
             }
             return affects;
@@ -502,15 +512,15 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
     }
     protected long delete(String sql, List params) {
         Connection connection = getConnection();
-        if (log.isDebugEnabled()) {
-            log.debug("Preparing:  {}", sql);
-            log.debug("Parameters: {}", params);
+        if (getLogger().isDebugEnabled()) {
+            getLogger().debug("Preparing:  {}", sql);
+            getLogger().debug("Parameters: {}", params);
         }
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             setParameters(statement, params);
             int affect = statement.executeUpdate();
-            if (log.isDebugEnabled()) {
-                log.debug("Total:      {}", affect);
+            if (getLogger().isDebugEnabled()) {
+                getLogger().debug("Total:      {}", affect);
             }
             return affect;
         } catch (Exception e) {
@@ -520,20 +530,21 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
 
     protected {{metadata.primaryMetadata.javaType}} insert(String sql, List params) {
         Connection connection = getConnection();
-        if (log.isDebugEnabled()) {
-            log.debug("Preparing:  {}", sql);
-            log.debug("Parameters: {}", params);
+        if (getLogger().isDebugEnabled()) {
+            getLogger().debug("Preparing:  {}", sql);
+            getLogger().debug("Parameters: {}", params);
         }
-        try (PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement statement = connection.prepareStatement(sql{{#metadata.primaryMetadata.useGeneratedKeys}}, Statement.RETURN_GENERATED_KEYS{{/metadata.primaryMetadata.useGeneratedKeys}})) {
             setParameters(statement, params);
             int affect = statement.executeUpdate();
+            {{#metadata.primaryMetadata.useGeneratedKeys}}
             ResultSet generatedKeys = statement.getGeneratedKeys();
             if (generatedKeys.next()) {
                 return generatedKeys.getObject(1, {{metadata.primaryMetadata.javaType}}.class);
             }
-
-            if (log.isDebugEnabled()) {
-                log.debug("Total:      {}", affect);
+            {{/metadata.primaryMetadata.useGeneratedKeys}}
+            if (getLogger().isDebugEnabled()) {
+                getLogger().debug("Total:      {}", affect);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -546,26 +557,28 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
 
     protected List<{{metadata.primaryMetadata.javaType}}> insertBatch(String sql, List<Object> params) {
         Connection connection = getConnection();
-        if (log.isDebugEnabled()) {
-            log.debug("Preparing:  {}", sql);
-            log.debug("Parameters: {}", params);
+        if (getLogger().isDebugEnabled()) {
+            getLogger().debug("Preparing:  {}", sql);
+            getLogger().debug("Parameters: {}", params);
         }
         List<{{metadata.primaryMetadata.javaType}}> ids = new ArrayList<>();
-        try (PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement statement = connection.prepareStatement(sql{{#metadata.primaryMetadata.useGeneratedKeys}}, Statement.RETURN_GENERATED_KEYS{{/metadata.primaryMetadata.useGeneratedKeys}})) {
             setParameters(statement, params);
             statement.executeUpdate();
+            {{#metadata.primaryMetadata.useGeneratedKeys}}
             ResultSet generatedKeys = statement.getGeneratedKeys();
             while (generatedKeys.next()) {
                 {{metadata.primaryMetadata.javaType}} primaryKey = generatedKeys.getObject(1, {{metadata.primaryMetadata.javaType}}.class);
                 ids.add(primaryKey);
             }
+            {{/metadata.primaryMetadata.useGeneratedKeys}}
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
             closeCheckTx(connection);
         }
-        if (log.isDebugEnabled()) {
-            log.debug("Total:      {}", ids.size());
+        if (getLogger().isDebugEnabled()) {
+            getLogger().debug("Total:      {}", ids.size());
         }
         return ids;
     }
@@ -663,6 +676,8 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
         } else if (param instanceof java.time.ZonedDateTime) {
             ps.setTimestamp(paramIndex, java.sql.Timestamp.from(((java.time.ZonedDateTime) param).toInstant()));
             return;
+        } else if (param instanceof java.util.Calendar){
+            ps.setTimestamp(paramIndex, java.sql.Timestamp.from(((java.util.Calendar) param).toInstant()));
         }
 
         if (param instanceof UUID) {
@@ -752,8 +767,8 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
 
     }
 
-    protected String toConditionSql(com.example.domain.UserExample example) {
-        List<List<UserExample.Criteria>> orConditions = example.getOrConditions();
+    protected String toConditionSql({{metadata.exampleClazzName}} example) {
+        List<List<{{metadata.exampleClazzName}}.Criteria>> orConditions = example.getOrConditions();
 
         String orderByClause = example.getOrderByClause();
         List<Integer> limit = example.getLimit();
@@ -765,13 +780,13 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
                 if (j > 0 && j < orConditions.size() ) {
                     sql.append(" or ");
                 }
-                List<UserExample.Criteria> criteris = orConditions.get(j);
+                List<{{metadata.exampleClazzName}}.Criteria> criteris = orConditions.get(j);
                 sql.append("(");
                 for (int i = 0; i < criteris.size(); i++) {
                     if (i > 0 && i < criteris.size() ) {
                         sql.append(" and ");
                     }
-                    UserExample.Criteria criteria = criteris.get(i);
+                    {{metadata.exampleClazzName}}.Criteria criteria = criteris.get(i);
                     if (criteria.getValue() != null && criteria.getSecondValue() != null) {
                         sql.append(criteria.getColumn())
                                 .append(criteria.getCondition())
@@ -791,12 +806,12 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
 
         } else if (!example.getCriteries().isEmpty()) {
             sql.append(" where ");
-            List<UserExample.Criteria> criteris = example.getCriteries();
+            List<{{metadata.exampleClazzName}}.Criteria> criteris = example.getCriteries();
             for (int i = 0; i < criteris.size(); i++) {
                 if (i > 0 && i < criteris.size() ) {
                     sql.append(" and ");
                 }
-                UserExample.Criteria criteria = criteris.get(i);
+                {{metadata.exampleClazzName}}.Criteria criteria = criteris.get(i);
                 if (criteria.getValue() != null && criteria.getSecondValue() != null) {
                     sql.append(criteria.getColumn())
                             .append(criteria.getCondition())
@@ -905,10 +920,6 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
         return tableName;
     }
 
-    protected synchronized void setTableName(String tableName) {
-        this.tableName = tableName;
-    }
-
     protected Connection getConnection() {
         return getConnection(false);
     }
@@ -923,8 +934,8 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
                } else {
                    name = slaveDataSources.get((int) (counter.incrementAndGet() % slaveDataSources.size()));
                }
-               if(log.isDebugEnabled()){
-                   log.debug("Use slave dataSource {}",name);
+               if(getLogger().isDebugEnabled()){
+                   getLogger().debug("Use slave dataSource {}",name);
                }
                Connection connection =  dataSourceMap.get(name).getConnection();
                connection.setReadOnly(true);
@@ -953,10 +964,10 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
     }
 
     {{#metadata.useSpring}}@org.springframework.beans.factory.annotation.Autowired{{/metadata.useSpring}}
-    public void setDataSourceMap(Map<String, DataSource> dataSourceMap) {
-        this.dataSourceMap = dataSourceMap;
+    public void setSlaveDataSourceMap(Map<String, DataSource> slaveDataSourceMap) {
+        this.dataSourceMap = slaveDataSourceMap;
         {{#metadata.slaveDataSources}}
-        if(dataSourceMap.get("{{.}}") != null){
+        if(slaveDataSourceMap.get("{{.}}") != null){
             slaveDataSources.add("{{.}}");
         }
         {{/metadata.slaveDataSources}}
@@ -979,46 +990,16 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
     {{/metadata.useSpring}}
 
 
-    public static class {{metadata.domainClazzSimpleName}}DefaultTypeHandler {
-
-        {{#metadata.columnMetadataList}}
-        public void decode{{firstUpFieldName}}(ResultSet resultSet, {{metadata.domainClazzSimpleName}} t, String name, Class<{{javaType}}> type) throws SQLException {
-            {{#isEnums}}
-            String value = resultSet.getString(name);
-            if(value == null){
-                return;
-            }
-            t.set{{firstUpFieldName}}(Enum.valueOf(type, value));
-            {{/isEnums}}
-            {{^isEnums}}
-            {{javaType}} value = resultSet.getObject(name, type);
-            if(value == null){
-                return;
-            }
-            t.set{{firstUpFieldName}}(value);
-            {{/isEnums}}
-        }
-
-        public Object encode{{firstUpFieldName}}({{javaType}} value) {
-            {{^isEnums}}return value;{{/isEnums}}{{#isEnums}}return value == null ? null: String.valueOf(value);{{/isEnums}}
-        }
-
-        public List encode{{firstUpFieldName}}List(List<{{javaType}}> values) {
-            {{^isEnums}}return values;{{/isEnums}}
-            {{#isEnums}}return values.stream().map(String::valueOf).collect(java.util.stream.Collectors.toList());{{/isEnums}}
-        }
-
-        {{/metadata.columnMetadataList}}
-    }
-
-    public {{metadata.domainClazzSimpleName}}DefaultTypeHandler getDefaultTypeHandler() {
+    public {{metadata.typeHandlerClazzName}} getDefaultTypeHandler() {
         return defaultTypeHandler;
     }
 
     {{#metadata.useSpring}}@org.springframework.beans.factory.annotation.Autowired(required = false){{/metadata.useSpring}}
-    public void setDefaultTypeHandler({{metadata.domainClazzSimpleName}}DefaultTypeHandler defaultTypeHandler) {
+    public void setDefaultTypeHandler({{metadata.typeHandlerClazzName}} defaultTypeHandler) {
         this.defaultTypeHandler = defaultTypeHandler;
     }
 
-
+    protected org.slf4j.Logger getLogger(){
+        return log;
+    }
 }

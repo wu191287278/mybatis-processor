@@ -12,6 +12,8 @@ public class DialectMetadata {
 
     private String shardRepositoryTemplatePath = "templates/ShardSimpleJdbcRepository.java";
 
+    private String typeHandlerTemplatePath = "templates/SimpleJdbcDefaultTypeHandler.java";
+
     public String getLeftEscape() {
         return leftEscape;
     }
@@ -53,5 +55,13 @@ public class DialectMetadata {
 
     public void setShardRepositoryTemplatePath(String shardRepositoryTemplatePath) {
         this.shardRepositoryTemplatePath = shardRepositoryTemplatePath;
+    }
+
+    public String getTypeHandlerTemplatePath() {
+        return typeHandlerTemplatePath;
+    }
+
+    public void setTypeHandlerTemplatePath(String typeHandlerTemplatePath) {
+        this.typeHandlerTemplatePath = typeHandlerTemplatePath;
     }
 }
