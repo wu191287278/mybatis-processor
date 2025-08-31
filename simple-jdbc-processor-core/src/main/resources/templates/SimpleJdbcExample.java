@@ -75,6 +75,7 @@ public class {{metadata.exampleClazzSimpleName}} implements java.io.Serializable
         set(expression,null);
         return this;
     }
+
     /**
      * update expression.
      *
@@ -97,6 +98,7 @@ public class {{metadata.exampleClazzSimpleName}} implements java.io.Serializable
         and(expression,null);
         return this;
     }
+
     /**
      * where expression
      *

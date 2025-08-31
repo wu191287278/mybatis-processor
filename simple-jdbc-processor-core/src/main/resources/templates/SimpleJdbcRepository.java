@@ -74,7 +74,8 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
         this.tableName = tableName;
         this.dataSource = dataSource;
         this.defaultTypeHandler = defaultTypeHandler;
-        setSlaveDataSourceMap(dataSourceMap);
+        this.dataSourceMap = dataSourceMap;
+        this.slaveDataSources = new ArrayList<>(dataSourceMap.keySet());
         init();
     }
 {{/metadata.shard}}
@@ -484,6 +485,8 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
             return affect;
         } catch (Exception e) {
             throw new RuntimeException(e);
+        } finally {
+            closeCheckTx(connection);
         }
     }
 
@@ -508,8 +511,11 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
             return affects;
         } catch (Exception e) {
             throw new RuntimeException(e);
+        } finally {
+            closeCheckTx(connection);
         }
     }
+
     protected long delete(String sql, List params) {
         Connection connection = getConnection();
         if (getLogger().isDebugEnabled()) {
@@ -525,6 +531,8 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
             return affect;
         } catch (Exception e) {
             throw new RuntimeException(e);
+        } finally {
+            closeCheckTx(connection);
         }
     }
 
@@ -957,6 +965,7 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
         }
     }
     {{/metadata.useSpring}}
+    {{^metadata.shard}}
     {{#metadata.useSpring}}@org.springframework.beans.factory.annotation.Autowired{{/metadata.useSpring}}
     {{#metadata.dataSource}}@org.springframework.beans.factory.annotation.Qualifier("{{metadata.dataSource}}"){{/metadata.dataSource}}
     public void setDataSource(DataSource dataSource) {
@@ -972,11 +981,11 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
         }
         {{/metadata.slaveDataSources}}
     }
+    {{/metadata.shard}}
 
     public DataSource getDataSource() {
         return dataSource;
     }
-
 
     {{#metadata.useSpring}}
     protected boolean isActualTransactionActive(){
