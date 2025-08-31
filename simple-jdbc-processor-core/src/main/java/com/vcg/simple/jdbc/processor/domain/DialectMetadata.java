@@ -10,6 +10,8 @@ public class DialectMetadata {
 
     private String repositoryTemplatePath = "templates/SimpleJdbcRepository.java";
 
+    private String shardRepositoryTemplatePath = "templates/ShardSimpleJdbcRepository.java";
+
     public String getLeftEscape() {
         return leftEscape;
     }
@@ -43,5 +45,13 @@ public class DialectMetadata {
 
     public void setRepositoryTemplatePath(String repositoryTemplatePath) {
         this.repositoryTemplatePath = repositoryTemplatePath;
+    }
+
+    public String getShardRepositoryTemplatePath() {
+        return shardRepositoryTemplatePath;
+    }
+
+    public void setShardRepositoryTemplatePath(String shardRepositoryTemplatePath) {
+        this.shardRepositoryTemplatePath = shardRepositoryTemplatePath;
     }
 }

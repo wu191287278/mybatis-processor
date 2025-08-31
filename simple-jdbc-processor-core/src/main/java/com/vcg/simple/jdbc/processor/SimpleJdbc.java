@@ -37,8 +37,8 @@ public @interface SimpleJdbc {
 
 
     /**
-     * default DomainName + SimpleExampleRepository
+     * 分表
      */
-    String repositoryName() default "";
+    boolean shardTable() default false;
 
 }

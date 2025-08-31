@@ -2,6 +2,7 @@ package {{metadata.packageName}};
 
 
 import javax.sql.DataSource;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.*;
@@ -26,41 +27,68 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
 
     private String tableName = "{{metadata.tableName}}";
 
-    private final String columnsStr = "{{metadata.columns}}";
+    private String columnsStr = "{{metadata.columns}}";
 
-    private final List<String> columns = Arrays.asList(columnsStr.split(", "));
+    private List<String> columns = Arrays.asList(columnsStr.split(", "));
 
-    {{#metadata.primaryMetadata}}
-    private final String primaryKeyStr = "{{metadata.primaryMetadata.columnName}}";
+    private String primaryKeyStr = "{{metadata.primaryMetadata.columnName}}";
 
-    private final Class<{{metadata.primaryMetadata.javaType}}> primaryKeyType = {{metadata.primaryMetadata.javaType}}.class;
+    private Class<{{metadata.primaryMetadata.javaType}}> primaryKeyType = {{metadata.primaryMetadata.javaType}}.class;
 
-    private final String primaryKeyCondition = " where " + primaryKeyStr + " = ?";
+    private String primaryKeyCondition;
 
-    private final String primaryKeyInCondition = " where " + primaryKeyStr + " in ";
-    {{/metadata.primaryMetadata}}
+    private String primaryKeyInCondition;
 
-    private final String selectByPrimaryKeySql = "select " + columnsStr + " from " + tableName + primaryKeyCondition;
+    private String selectByPrimaryKeySql;
 
-    private final String selectByPrimaryKeysSql = "select " + columnsStr + " from " + tableName + primaryKeyInCondition;
+    private String selectByPrimaryKeysSql;
 
-    private final String updatePrefix = "update " + tableName;
+    private String updatePrefix;
 
-    private final String updateSuffix = " set " + String.join(" = ?, ",columnsStr.split(",")) + " = ?";
+    private String updateSuffix;
 
-    private final String updateByExamplePrefix = updatePrefix + updateSuffix;
+    private String updateByExamplePrefix;
 
-    private final String updateByPrimaryKeySql = updatePrefix + updateSuffix + primaryKeyCondition;
+    private String updateByPrimaryKeySql;
 
-    private final String deletePrefix = "delete from " + tableName;
+    private String deletePrefix;
 
-    private final String deleteByPrimaryKeySql = deletePrefix + primaryKeyCondition;
+    private String deleteByPrimaryKeySql;
 
-    private final String deleteByPrimaryKeysSql = deletePrefix + primaryKeyInCondition;
+    private String deleteByPrimaryKeysSql;
 
-    private final String insertSqlPrefix = "insert into " + tableName + " (" + columnsStr + ") values ";
+    private String insertSqlPrefix;
 
-    private final String insertSql = insertSqlPrefix + appendPlaceholder(columns.size());
+    private String insertSql;
+
+
+    public {{metadata.repositoryClazzSimpleName}}(){
+        init();
+    }
+
+    public {{metadata.repositoryClazzSimpleName}}(String tableName, DataSource dataSource, Map<String, DataSource> dataSourceMap, {{metadata.domainClazzSimpleName}}DefaultTypeHandler defaultTypeHandler){
+        this.tableName = tableName;
+        this.dataSource = dataSource;
+        this.dataSourceMap = dataSourceMap;
+        this.defaultTypeHandler = defaultTypeHandler;
+        init();
+    }
+
+    private void init() {
+        this.primaryKeyCondition = " where " + primaryKeyStr + " = ?";
+        this.primaryKeyInCondition = " where " + primaryKeyStr + " in ";
+        this.selectByPrimaryKeySql = "select " + columnsStr + " from " + tableName + primaryKeyCondition;
+        this.selectByPrimaryKeysSql = "select " + columnsStr + " from " + tableName + primaryKeyInCondition;
+        this.updatePrefix = "update " + tableName;
+        this.updateSuffix = " set " + String.join(" = ?, ", columnsStr.split(",")) + " = ?";
+        this.updateByExamplePrefix = updatePrefix + updateSuffix;
+        this.updateByPrimaryKeySql = updatePrefix + updateSuffix + primaryKeyCondition;
+        this.deletePrefix = "delete from " + tableName;
+        this.deleteByPrimaryKeySql = deletePrefix + primaryKeyCondition;
+        this.deleteByPrimaryKeysSql = deletePrefix + primaryKeyInCondition;
+        this.insertSqlPrefix = "insert into " + tableName + " (" + columnsStr + ") values ";
+        this.insertSql = insertSqlPrefix + appendPlaceholder(columns.size());
+    }
 
     {{#metadata.primaryMetadata}}
 
@@ -75,7 +103,7 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
     }
 
     public long updateByPrimaryKey({{metadata.domainClazzName}} t) {
-        List<Object> params = new ArrayList<>();
+        List<Object> params = new ArrayList<>(columns.size());
         {{#metadata.columnMetadataList}}
         params.add(getDefaultTypeHandler().encode{{firstUpFieldName}}(t.get{{firstUpFieldName}}()));
         {{/metadata.columnMetadataList}}
@@ -87,7 +115,7 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
                 .append("update ")
                 .append(getTableName())
                 .append(" set ");
-        List<Object> params = new ArrayList<>();
+        List<Object> params = new ArrayList<>(columns.size());
         {{#metadata.columnMetadataList}}
         if (t.get{{firstUpFieldName}}() != null) {
             params.add(getDefaultTypeHandler().encode{{firstUpFieldName}}(t.get{{firstUpFieldName}}()));
@@ -139,11 +167,11 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
         if (example.getUpdateSetValues() != null) {
             params = new ArrayList<>(example.getUpdateSetValues());
         } else {
-            params = new ArrayList<>();
+            params = new ArrayList<>(columns.size());
         }
 
         {{#metadata.columnMetadataList}}
-        params.add(defaultTypeHandler.encode{{firstUpFieldName}}(t.get{{firstUpFieldName}}()));
+        params.add(getDefaultTypeHandler().encode{{firstUpFieldName}}(t.get{{firstUpFieldName}}()));
         {{/metadata.columnMetadataList}}
         String condition = toConditionSql(example);
         String sql;
@@ -166,7 +194,7 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
         if (example.getUpdateSetValues() != null) {
             params = new ArrayList<>(example.getUpdateSetValues());
         } else {
-            params = new ArrayList<>();
+            params = new ArrayList<>(columns.size());
         }
 
         if (example.getUpdateExpression() != null) {
@@ -194,7 +222,7 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
         if (example.getUpdateSetValues() != null) {
             params = new ArrayList<>(example.getUpdateSetValues());
         } else {
-            params = new ArrayList<>();
+            params = new ArrayList<>(columns.size());
         }
 
         if (example.getUpdateExpression() != null) {
@@ -246,7 +274,7 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
     }
 
     public void insertSelective({{metadata.domainClazzName}} t) {
-        List<Object> params = new ArrayList<>();
+        List<Object> params = new ArrayList<>(columns.size());
 
         StringBuilder prefix = new StringBuilder()
                 .append("insert into ")
@@ -272,7 +300,7 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
 
 
     public void replaceSelective({{metadata.domainClazzName}} t) {
-        List<Object> params = new ArrayList<>();
+        List<Object> params = new ArrayList<>(columns.size());
 
         StringBuilder prefix = new StringBuilder()
                 .append("replace into ")
@@ -298,7 +326,7 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
 
 
     public {{metadata.primaryMetadata.javaType}} insertIgnoreSelective({{metadata.domainClazzName}} t) {
-        List<Object> params = new ArrayList<>();
+        List<Object> params = new ArrayList<>(columns.size());
 
         StringBuilder prefix = new StringBuilder()
                 .append("insert ignore into ")
@@ -585,35 +613,86 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
         if (param == null) {
             ps.setNull(paramIndex, JDBCType.NULL.getVendorTypeNumber());
             return;
-        } else if (param instanceof java.util.Date) {
-            if (param instanceof Date) {
-                ps.setDate(paramIndex, (Date) param);
-            } else if (param instanceof Time) {
-                ps.setTime(paramIndex, (Time) param);
+        }
+
+        if (param instanceof Boolean) {
+            ps.setBoolean(paramIndex, (Boolean) param);
+            return;
+        }
+
+        if (param instanceof CharSequence) {
+            String str = param.toString();
+            if (str.length() > 40000) {
+                ps.setClob(paramIndex, new java.io.StringReader(str));
             } else {
-                ps.setTimestamp(paramIndex, new Timestamp(((java.util.Date) param).getTime()));
+                ps.setString(paramIndex, str);
             }
             return;
         }
+
+        if (param instanceof byte[]) {
+            ps.setBytes(paramIndex, (byte[]) param);
+            return;
+        }
+
         if (param instanceof Enum) {
-            ps.setString(paramIndex, String.valueOf(param));
-            return;
-        } else if (param instanceof Number) {
-            if (param instanceof BigDecimal) {
-                ps.setBigDecimal(paramIndex, (BigDecimal) param);
-                return;
-            }
-            if (param instanceof BigInteger) {
-                ps.setBigDecimal(paramIndex, new BigDecimal((BigInteger) param));
-                return;
-            }
-        } else if (param instanceof Enum) {
-            ps.setObject(paramIndex, param.toString());
+            ps.setString(paramIndex, ((Enum<?>) param).name());
             return;
         }
+
+        if (param instanceof java.util.Date) {
+            if (param instanceof java.sql.Date) {
+                ps.setDate(paramIndex, (java.sql.Date) param);
+            } else if (param instanceof java.sql.Time) {
+                ps.setTime(paramIndex, (java.sql.Time) param);
+            } else {
+                ps.setTimestamp(paramIndex, new java.sql.Timestamp(((java.util.Date) param).getTime()));
+            }
+            return;
+        }
+
+        if (param instanceof java.time.LocalDate) {
+            ps.setDate(paramIndex, java.sql.Date.valueOf((java.time.LocalDate) param));
+            return;
+        } else if (param instanceof java.time.LocalTime) {
+            ps.setTime(paramIndex, java.sql.Time.valueOf((java.time.LocalTime) param));
+            return;
+        } else if (param instanceof java.time.LocalDateTime) {
+            ps.setTimestamp(paramIndex, java.sql.Timestamp.valueOf((java.time.LocalDateTime) param));
+            return;
+        } else if (param instanceof java.time.ZonedDateTime) {
+            ps.setTimestamp(paramIndex, java.sql.Timestamp.from(((java.time.ZonedDateTime) param).toInstant()));
+            return;
+        }
+
+        if (param instanceof UUID) {
+            ps.setString(paramIndex, ((UUID) param).toString());
+            return;
+        }
+
+        if (param instanceof Number) {
+            if (param instanceof Byte) {
+                ps.setByte(paramIndex, (Byte) param);
+            } else if (param instanceof Short) {
+                ps.setShort(paramIndex, (Short) param);
+            } else if (param instanceof Integer) {
+                ps.setInt(paramIndex, (Integer) param);
+            } else if (param instanceof Long) {
+                ps.setLong(paramIndex, (Long) param);
+            } else if (param instanceof Float) {
+                ps.setFloat(paramIndex, (Float) param);
+            } else if (param instanceof Double) {
+                ps.setDouble(paramIndex, (Double) param);
+            } else if (param instanceof BigDecimal) {
+                ps.setBigDecimal(paramIndex, (BigDecimal) param);
+            } else if (param instanceof BigInteger) {
+                ps.setBigDecimal(paramIndex, new BigDecimal((BigInteger) param));
+            }
+            return;
+        }
+
         ps.setObject(paramIndex, param);
     }
-
 
     protected interface Handler<R> {
         R handle(ResultSet rs) throws SQLException;
@@ -657,15 +736,15 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
         {{#metadata.columnMetadataList}}
         if ("{{originColumnName}}".equals(column) || "{{columnName}}".equals(column) || "{{fieldName}}".equals(column)) {
             if (criteria.getValue() != null) {
-                Object value = defaultTypeHandler.encode{{firstUpFieldName}}(({{javaType}}) criteria.getValue());
+                Object value = getDefaultTypeHandler().encode{{firstUpFieldName}}(({{javaType}}) criteria.getValue());
                 params.add(value);
             }
             if (criteria.getSecondValue() != null) {
-                Object value = defaultTypeHandler.encode{{firstUpFieldName}}(({{javaType}}) criteria.getSecondValue());
+                Object value = getDefaultTypeHandler().encode{{firstUpFieldName}}(({{javaType}}) criteria.getSecondValue());
                 params.add(value);
             }
             if (criteria.getListValue() != null) {
-                List values = defaultTypeHandler.encode{{firstUpFieldName}}List((List<{{javaType}}>) criteria.getListValue());
+                List values = getDefaultTypeHandler().encode{{firstUpFieldName}}List((List<{{javaType}}>) criteria.getListValue());
                 params.addAll(values);
             }
         }
@@ -760,7 +839,7 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
         for (String column : columns) {
             {{#metadata.columnMetadataList}}
             if ("{{originColumnName}}".equals(column) || "{{columnName}}".equals(column) || "{{fieldName}}".equals(column)) {
-                defaultTypeHandler.decode{{firstUpFieldName}}(rs, t, "{{originColumnName}}", {{javaType}}.class);
+                getDefaultTypeHandler().decode{{firstUpFieldName}}(rs, t, "{{originColumnName}}", {{javaType}}.class);
             }
             {{/metadata.columnMetadataList}}
         }
@@ -771,7 +850,7 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
     protected {{metadata.domainClazzName}} handle(ResultSet rs) throws SQLException {
         {{metadata.domainClazzName}} t = new {{metadata.domainClazzName}}();
         {{#metadata.columnMetadataList}}
-        defaultTypeHandler.decode{{firstUpFieldName}}(rs, t, "{{originColumnName}}", {{javaType}}.class);
+        getDefaultTypeHandler().decode{{firstUpFieldName}}(rs, t, "{{originColumnName}}", {{javaType}}.class);
         {{/metadata.columnMetadataList}}
         return t;
     }
@@ -780,7 +859,7 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
     protected String toSelectByExampleSql({{metadata.exampleClazzName}} example) {
         boolean distinct = example.isDistinct();
         List<String> selectColumns = example.getColumns();
-        String table = example.getTable() == null ? getTableName() : example.getTable();
+        String table = getTableName();
         StringBuilder sql = new StringBuilder();
 
         sql.append("select ");
@@ -802,7 +881,7 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
     protected String toCountByExampleSql({{metadata.exampleClazzName}} example) {
         boolean distinct = example.isDistinct();
         List<String> selectColumns = example.getColumns();
-        String table = example.getTable() == null ? getTableName() : example.getTable();
+        String table = getTableName();
         StringBuilder sql = new StringBuilder();
 
         sql.append("select ");
@@ -838,8 +917,13 @@ public abstract class {{metadata.repositoryClazzSimpleName}} {
     protected Connection getConnection(boolean isSelect) {
         if(isSelect && !slaveDataSources.isEmpty() && !isActualTransactionActive()){
             try {
-               String name = slaveDataSources.get((int) (counter.incrementAndGet() % slaveDataSources.size()));
-                if(log.isDebugEnabled()){
+               String name;
+               if(slaveDataSources.size() == 1){
+                   name = slaveDataSources.get(0);
+               } else {
+                   name = slaveDataSources.get((int) (counter.incrementAndGet() % slaveDataSources.size()));
+               }
+               if(log.isDebugEnabled()){
                    log.debug("Use slave dataSource {}",name);
                }
                Connection connection =  dataSourceMap.get(name).getConnection();

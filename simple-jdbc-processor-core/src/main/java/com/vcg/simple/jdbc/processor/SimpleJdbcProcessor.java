@@ -72,8 +72,20 @@ public class SimpleJdbcProcessor extends AbstractProcessor {
 
                     InputStream repositoryInputstream = classLoader.getResourceAsStream(dialect.getRepositoryTemplatePath());
                     try (InputStreamReader in = new InputStreamReader(repositoryInputstream, StandardCharsets.UTF_8); Writer writer = repositoryjavaFileObject.openWriter()) {
-                        Mustache mustache = mf.compile(in, exampleName);
+                        Mustache mustache = mf.compile(in, repositoryName);
                         mustache.execute(writer, scopes);
+                    }
+
+
+                    if (example.shardTable()) {
+                        String shardRepositoryName = tableMetadata.getShardRepositoryClazzName();
+                        JavaFileObject shardRepositoryjavaFileObject = filer.createSourceFile(shardRepositoryName);
+
+                        InputStream shardRepositoryInputstream = classLoader.getResourceAsStream(dialect.getShardRepositoryTemplatePath());
+                        try (InputStreamReader in = new InputStreamReader(shardRepositoryInputstream, StandardCharsets.UTF_8); Writer writer = shardRepositoryjavaFileObject.openWriter()) {
+                            Mustache mustache = mf.compile(in, shardRepositoryName);
+                            mustache.execute(writer, scopes);
+                        }
                     }
 
                 } catch (Exception e) {
@@ -120,10 +132,10 @@ public class SimpleJdbcProcessor extends AbstractProcessor {
                 .setDataSource(example.dataSource() == null || example.dataSource().isEmpty() ? null : example.dataSource());
 
         String repositoryName = clazzName + "SimpleJdbcRepository";
-        if (!example.repositoryName().equals("")) {
-            repositoryName = example.repositoryName();
-        }
+        String shardRepositoryClassName = clazzName + "ShardSimpleJdbcRepository";
+
         tableMetadata.setRepositoryClazzName(repositoryName)
+                .setShardRepositoryClazzName(shardRepositoryClassName)
                 .setTableName(table != null ? table.name() : String.join("_",
                         CamelUtils.split(tableMetadata.getDomainClazzSimpleName(), true)));
         tableMetadata.setOriginTableName(tableMetadata.getTableName());

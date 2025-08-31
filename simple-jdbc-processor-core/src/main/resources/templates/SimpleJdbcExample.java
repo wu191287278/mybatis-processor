@@ -244,11 +244,6 @@ public class {{metadata.exampleClazzSimpleName}} implements java.io.Serializable
         return distinct;
     }
 
-    public String getTable() {
-        return this.table;
-    }
-
-
     public static interface Column {
     {{#metadata.columnMetadataList}}
         public static final String {{fieldName}} = "{{columnName}}";
@@ -267,21 +262,6 @@ public class {{metadata.exampleClazzSimpleName}} implements java.io.Serializable
         COLUMNS.add("{{columnName}}");
         {{/metadata.columnMetadataList}}
     }
-
-    private static String appendPlaceholder(int size) {
-        StringBuilder sql = new StringBuilder();
-        sql.append("(");
-        for (int i = 0; i < size; i++) {
-            if (i == 0) {
-                sql.append("?");
-            } else {
-                sql.append(", ?");
-            }
-        }
-        sql.append(")");
-        return sql.toString();
-    }
-
 
     public List<Object> getUpdateSetValues() {
         return updateSetValues;

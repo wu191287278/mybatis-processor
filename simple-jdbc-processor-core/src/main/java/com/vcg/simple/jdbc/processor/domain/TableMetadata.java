@@ -50,6 +50,11 @@ public class TableMetadata {
 
     private List<String> slaveDataSources;
 
+    private String shardRepositoryClazzSimpleName;
+
+    private String shardRepositoryClazzName;
+
+
     public String getTableName() {
         return tableName;
     }
@@ -264,6 +269,27 @@ public class TableMetadata {
 
     public TableMetadata setSlaveDataSources(List<String> slaveDataSources) {
         this.slaveDataSources = slaveDataSources;
+        return this;
+    }
+
+    public String getShardRepositoryClazzSimpleName() {
+        return shardRepositoryClazzSimpleName;
+    }
+
+    public void setShardRepositoryClazzSimpleName(String shardRepositoryClazzSimpleName) {
+        this.shardRepositoryClazzSimpleName = shardRepositoryClazzSimpleName;
+    }
+
+    public String getShardRepositoryClazzName() {
+        return shardRepositoryClazzName;
+    }
+
+    public TableMetadata setShardRepositoryClazzName(String shardRepositoryClazzName) {
+        this.shardRepositoryClazzName = shardRepositoryClazzName;
+        if (shardRepositoryClazzName != null) {
+            String[] split = shardRepositoryClazzName.split("[.]");
+            this.shardRepositoryClazzSimpleName = split[split.length - 1];
+        }
         return this;
     }
 }
